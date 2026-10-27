@@ -1,0 +1,23 @@
+{
+  "name": "abuja-city-life-ai-city-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Original hackathon testbed for validated AI decisions in a simulated neighbourhood.",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "demo": "tsx scripts/demo.ts",
+    "probe:meta": "tsx scripts/probe-meta.ts",
+    "meta:check": "tsx scripts/check-meta.ts"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}
