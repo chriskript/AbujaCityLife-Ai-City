@@ -29,6 +29,12 @@ function shortestPath(start: string, end: string, blocked: ReadonlySet<string>):
   return null;
 }
 
+// General node routing for inhabitants; existing taxi destination routing is unchanged.
+export function pathToNode(start: string, end: string, blocked: ReadonlySet<string>): Omit<Route, 'id' | 'destinationId'> | null {
+  if (![start, end].every(id => nodes.some(node => node.id === id))) return null;
+  return shortestPath(start, end, blocked);
+}
+
 export function routeCandidates(start: string, blocked: ReadonlySet<string>): Route[] {
   if (!nodes.some(node => node.id === start)) throw new Error('Unknown start node');
   const routes: Route[] = [];

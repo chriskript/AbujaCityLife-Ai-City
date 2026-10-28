@@ -14,6 +14,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc --project client/tsconfig.json",
     "demo": "tsx scripts/demo.ts",
+    "demo:neighbourhood": "tsx scripts/demo-neighbourhood.ts",
     "probe:meta": "tsx scripts/probe-meta.ts",
     "meta:check": "tsx scripts/check-meta.ts"
   },

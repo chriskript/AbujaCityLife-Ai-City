@@ -6,9 +6,9 @@ Built for the **Meta Global AI Developer Hackathon 2026** — Indie Developer tr
 
 ## Overview
 
-Abuja City Life: AI City Lab is building a compact, fictional 3D neighbourhood inspired by Abuja, Nigeria. Its goal is to connect Meta's AI models to virtual characters that interpret natural-language instructions, choose reachable destinations, and adapt when conditions change.
+Abuja City Life: AI City Lab is building a compact, fictional 3D neighbourhood inspired by Abuja, Nigeria. Its goal is to connect Meta's AI models to inhabitants with personal priorities, local knowledge, natural conversations, and decisions that affect their shared world.
 
-Every model-proposed action must pass through a deterministic validation and execution layer. The intended demonstration follows a taxi driver from a request for a lake view through a visible journey and a blocked-route detour.
+Every model-proposed action must pass through a deterministic validation and execution layer. The neighbourhood is designed to demonstrate autonomous activities, cooperation, and adaptation with observable consequences.
 
 ## Capabilities and status
 
@@ -16,7 +16,9 @@ Every model-proposed action must pass through a deterministic validation and exe
 
 The browser currently uses a **scripted mock provider**, with no inference charges. One controlled server-side Muse Spark 1.3 test has returned a valid destination-selection decision. This verifies the API foundation; it does not enable live Meta gameplay in the browser.
 
-**Next:** connect the browser to a secure, budget-controlled backend for live Meta decisions, then evaluate complete live journeys and adaptation.
+A separate headless neighbourhood foundation now models Musa, Amina, and Zainab with independent goals, limited knowledge, event-driven activities, transport cooperation, inventory consequences, and persistent structured memories. It is not yet connected to the browser scene.
+
+**Next:** bring the three-inhabitant foundation into the existing browser scene, then connect a secure, budget-controlled backend for live Meta decisions and evaluate complete interactions.
 
 ## Technology
 
@@ -47,7 +49,13 @@ Run the headless simulation:
 npm run demo
 ```
 
-This runs all three scenarios and prints JSON event traces. No API key or inference calls are required.
+Run the shared neighbourhood scenario with three inhabitants:
+
+```bash
+npm run demo:neighbourhood
+```
+
+The original demo runs three taxi scenarios; the neighbourhood demo runs a cooperative restocking fixture. Both print event traces without API keys or inference calls.
 
 Run tests and static checks:
 
@@ -64,6 +72,7 @@ For server-side API setup and an offline configuration check, see the [Meta API 
 ## Documentation
 
 - [Simulation architecture](docs/architecture.md)
+- [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)
 - [Browser verification and limitations](docs/browser-verification.md)
 - [Meta API setup and verification](docs/meta-api.md)
 - [Project provenance and third-party attribution](docs/provenance.md)
