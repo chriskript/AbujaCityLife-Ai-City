@@ -8,16 +8,24 @@
     "node": ">=22.12"
   },
   "scripts": {
+    "dev": "vite --config vite.config.ts",
+    "build": "npm run typecheck && vite build --config vite.config.ts",
+    "preview": "vite preview --config vite.config.ts --host 127.0.0.1",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --project client/tsconfig.json",
     "demo": "tsx scripts/demo.ts",
     "probe:meta": "tsx scripts/probe-meta.ts",
     "meta:check": "tsx scripts/check-meta.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
+    "@types/three": "0.186.0",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
+    "vite": "8.3.5",
     "vitest": "5.0.5"
+  },
+  "dependencies": {
+    "three": "0.186.1"
   }
 }

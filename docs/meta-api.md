@@ -1,6 +1,6 @@
 # Meta API setup and verification
 
-The current Meta integration is a **standalone server-side contract probe**, not live gameplay or a public inference endpoint. Routine tests and demonstrations use a scripted mock provider and make no Meta requests.
+The current Meta integration is a **standalone server-side contract probe**, not live gameplay or a public inference endpoint. One approved live Spark 1.3 destination-selection request returned a decision accepted by both validators. Browser gameplay, routine tests, and demonstrations use a scripted mock provider and make no Meta requests.
 
 ## Offline foundation check
 

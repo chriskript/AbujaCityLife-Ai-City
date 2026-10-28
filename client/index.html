@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f2e9" />
+    <meta name="description" content="Explore a miniature Abuja-inspired neighbourhood and watch a taxi turn validated agent decisions into action." />
+    <title>Abuja City Life · AI City Lab</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%231d4940'/%3E%3Cpath d='M8 28 20 9 32 28M13 22h14' fill='none' stroke='%23f3ca62' stroke-width='3'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Abuja City Life home"><span class="brand-mark">A<span>·</span></span><span>Abuja City Life<small>AI CITY LAB</small></span></a>
+        <div class="header-note">A little city. A new way to think.</div>
+        <span class="mode-pill" title="Scripted local decisions. No model API calls."><i></i> Mock mode <span class="desktop-only">/ offline</span></span>
+      </header>
+      <main id="experience">
+        <div id="world" aria-label="Interactive 3D neighbourhood with a taxi, roads, landmarks and a lake"></div>
+        <div id="labels" aria-hidden="true"></div>
+        <div class="scene-caption"><span class="eyebrow">WELCOME TO THE NEIGHBOURHOOD</span><h1>Small city.<br />Real possibilities.</h1><p>Explore, give a direction, watch it happen.</p></div>
+        <section class="mission-panel" aria-label="Taxi instructions">
+          <div class="panel-heading"><span class="taxi-icon" aria-hidden="true">↗</span><div><h2>Where are we going?</h2><p>Your neighbourhood taxi is ready.</p></div></div>
+          <form id="goal-form">
+            <label for="goal">Give your driver a destination</label>
+            <textarea id="goal" rows="2" maxlength="500" required>Take me to the nearest public place with a good view of the lake.</textarea>
+            <button type="submit" class="primary" id="submit">Let’s go <span aria-hidden="true">↗</span></button>
+          </form>
+          <div class="suggestion-label">OR TRY A LITTLE EXPERIMENT</div>
+          <div class="scenarios" role="group" aria-label="Demonstration scenarios">
+            <button data-scenario="A"><span>A</span> Find a lake view <b>↗</b></button>
+            <button data-scenario="B"><span>B</span> Visit the market <b>↗</b></button>
+            <button data-scenario="C"><span>C</span> Take a detour <b>↝</b></button>
+          </div>
+          <p class="mock-note">Local mock decisions. Live Meta gameplay is not enabled.</p>
+        </section>
+        <div class="view-controls" role="group" aria-label="Camera controls">
+          <button id="camera" aria-pressed="false" title="Switch between neighbourhood and follow camera">◎ Follow taxi</button>
+          <button id="pause" aria-pressed="false" title="Pause or resume the journey">Ⅱ Pause</button>
+        </div>
+        <div class="compass" aria-hidden="true"><span>↑</span>N</div>
+        <section class="trip-bar" aria-label="Journey progress">
+          <div class="trip-status"><span class="status-dot"></span><div><span class="eyebrow">YOUR JOURNEY</span><strong id="status" role="status" aria-live="polite">Ready when you are</strong></div></div>
+          <div class="destination"><span class="eyebrow">DESTINATION</span><strong id="destination">Choose your next stop</strong></div>
+          <div class="trip-actions"><button id="close-road">⚑ Close lake shortcut</button><button id="reset" title="Reset the taxi, journey and road closures">↻ Reset</button></div>
+        </section>
+        <details class="timeline-panel" id="timeline-panel"><summary>Journey notes <span id="event-count">0 events</span></summary><p>Mock decisions · validated local execution</p><ol id="timeline"></ol></details>
+        <div id="notice" role="status" aria-live="polite">Try a lake view, a market trip, or a surprise detour.</div>
+      </main>
+      <footer><span>ABUJA INSPIRED · ORIGINALLY BUILT</span><span>Meta Global AI Developer Hackathon 2026 <span class="footer-dot">·</span> <span id="fps">Preparing the neighbourhood</span></span></footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

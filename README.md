@@ -12,17 +12,16 @@ Every model-proposed action must pass through a deterministic validation and exe
 
 ## Capabilities and status
 
-**Implemented:** a headless TypeScript simulation with an original road network, destination and route selection, action validation, deterministic travel, interruption feedback, and bounded replanning. Three reproducible scenarios cover a lake-view request, a market trip, and a road closure. Event traces expose decisions, validation results, executed actions, and outcomes.
+**Implemented:** a playable Three.js neighbourhood with a taxi stand, market, community centre, lake viewpoints, and an original connected road network. Give a mock instruction and watch the taxi follow a validated route, arrive, or stop and take a detour when the lake shortcut closes. Smooth taxi movement, follow and overview cameras, pause/reset controls, and expandable journey notes make the agent's actions visible.
 
-The local demonstration currently uses a **scripted mock provider**. A server-side Meta API contract probe is available, but live model behaviour has not yet been verified.
+The browser currently uses a **scripted mock provider**, with no inference charges. One controlled server-side Muse Spark 1.3 test has returned a valid destination-selection decision. This verifies the API foundation; it does not enable live Meta gameplay in the browser.
 
-**Planned:** the interactive Three.js neighbourhood, browser controls, an agent-debug panel, and verified Meta-powered gameplay. There is no browser interface yet.
+**Next:** connect the browser to a secure, budget-controlled backend for live Meta decisions, then evaluate complete live journeys and adaptation.
 
 ## Technology
 
-- **Current:** TypeScript, Node.js, Vitest, and tsx.
+- **Current:** TypeScript, Three.js, Vite, Node.js, Vitest, and tsx.
 - **Integration foundation:** Meta Model API, with Muse Spark and Muse Wonder as runtime candidates.
-- **Planned frontend:** Three.js and Vite.
 
 ## Getting started
 
@@ -34,7 +33,15 @@ cd AbujaCityLife-Ai-City
 npm ci
 ```
 
-Run the current simulation:
+Start the browser application:
+
+```bash
+npm run dev
+```
+
+Open **http://127.0.0.1:5173/**. Try **Find a lake view**, **Visit the market**, or **Take a detour**. You can also enter a market or lake request, switch cameras, pause, close the shortcut, and reset. Mock mode recognises these fixture goals; arbitrary natural-language understanding requires the planned live provider.
+
+Run the headless simulation:
 
 ```bash
 npm run demo
@@ -47,13 +54,17 @@ Run tests and static checks:
 ```bash
 npm test
 npm run typecheck
+npm run build
 ```
+
+To inspect the production build locally, run `npm run preview` and open the URL printed in the terminal. A recent browser with WebGL 2 is required for the 3D scene.
 
 For server-side API setup and an offline configuration check, see the [Meta API guide](docs/meta-api.md). Keep credentials in local backend configuration; never put them in browser code or Git.
 
 ## Documentation
 
 - [Simulation architecture](docs/architecture.md)
+- [Browser verification and limitations](docs/browser-verification.md)
 - [Meta API setup and verification](docs/meta-api.md)
 - [Project provenance and third-party attribution](docs/provenance.md)
 

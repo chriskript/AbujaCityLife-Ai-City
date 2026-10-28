@@ -6,3 +6,5 @@ coverage/
 !.env.example
 runtime/
 *.tsbuildinfo
+output/
+.playwright-cli/

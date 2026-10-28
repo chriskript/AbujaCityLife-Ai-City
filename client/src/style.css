@@ -1,0 +1,780 @@
+:root{
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+  color:#233e35;
+  background:#f4f2e9;
+  font-synthesis:none;
+  font-weight:400;
+  font-size:14px}
+  *{
+    box-sizing:border-box}
+    body{
+      margin:0}
+      button,textarea{
+        font:inherit}
+        button{
+          cursor:pointer;
+          transition:background .18s,transform .18s}
+          button:disabled{
+            cursor:default;
+            opacity:.5}
+            button:focus-visible,a:focus-visible,summary:focus-visible{
+              outline:3px solid #bb8630;
+              outline-offset:4px}
+              button:hover:not(:disabled){
+                transform:translateY(-1px)}
+                #app{
+                  height:100dvh;
+                  min-height:670px;
+                  display:flex;
+                  flex-direction:column;
+                  overflow:hidden}
+                  .topbar{
+                    height:88px;
+                    flex-shrink:0;
+                    display:flex;
+                    align-items:center;
+                    justify-content:space-between;
+                    padding:0 40px;
+                    border-bottom:1px solid #d9dfce;
+                    background:#f7f5ed;
+                    z-index:5}
+                    .brand{
+                      display:flex;
+                      gap:13px;
+                      align-items:center;
+                      text-decoration:none;
+                      color:#25483c;
+                      font-size:19px;
+                      font-weight:650;
+                      letter-spacing:-.6px}
+                      .brand-mark{
+                        display:grid;
+                        place-items:center;
+                        width:44px;
+                        height:44px;
+                        border-radius:13px;
+                        background:#234e3f;
+                        color:#f4d580;
+                        font-family:Georgia,serif;
+                        font-size:34px;
+                        position:relative}
+                        .brand-mark span{
+                          position:absolute;
+                          right:6px;
+                          bottom:0;
+                          font-size:28px}
+                          .brand small{
+                            display:block;
+                            font-size:9px;
+                            letter-spacing:3px;
+                            font-weight:600;
+                            margin-top:5px}
+                            .header-note{
+                              color:#7a8576;
+                              font-size:12px}
+                              .mode-pill{
+                                display:flex;
+                                align-items:center;
+                                gap:8px;
+                                border:1px solid #d9dfce;
+                                border-radius:22px;
+                                padding:10px 14px;
+                                font-size:11px;
+                                font-weight:650;
+                                background:#eeeee2}
+                                .mode-pill i,.status-dot{
+                                  width:7px;
+                                  height:7px;
+                                  border-radius:50%;
+                                  background:#80965e}
+                                  .mode-pill span{
+                                    color:#7e8979;
+                                    font-weight:400}
+                                    #experience{
+                                      position:relative;
+                                      flex:1;
+                                      min-height:0;
+                                      background:#dce5d3}
+                                      #world,#labels{
+                                        position:absolute;
+                                        inset:0;
+                                        overflow:hidden}
+                                        #world canvas{
+                                          display:block;
+                                          width:100%;
+                                          height:100%}
+                                          #labels{
+                                            pointer-events:none}
+                                            .scene-caption{
+                                              position:absolute;
+                                              left:40px;
+                                              top:28px;
+                                              pointer-events:none}
+                                              .eyebrow{
+                                                display:block;
+                                                font-size:9px;
+                                                font-weight:700;
+                                                letter-spacing:1.6px;
+                                                color:#788571}
+                                                .scene-caption h1{
+                                                  font-family:Georgia,"Times New Roman",serif;
+                                                  font-weight:400;
+                                                  line-height:1.04;
+                                                  font-size:40px;
+                                                  letter-spacing:-1.8px;
+                                                  margin:10px 0;
+                                                  color:#244b3a}
+                                                  .scene-caption p{
+                                                    font-size:11px;
+                                                    color:#677a63;
+                                                    margin:0}
+                                                    .mission-panel{
+                                                      position:absolute;
+                                                      left:40px;
+                                                      top:202px;
+                                                      width:306px;
+                                                      padding:22px;
+                                                      background:#fbfaf2f5;
+                                                      border:1px solid #ffffffbf;
+                                                      box-shadow:0 14px 45px #30473213;
+                                                      border-radius:18px;
+                                                      backdrop-filter:blur(12px)}
+                                                      .panel-heading{
+                                                        display:flex;
+                                                        align-items:center;
+                                                        gap:11px;
+                                                        margin-bottom:20px}
+                                                        .taxi-icon{
+                                                          width:36px;
+                                                          height:36px;
+                                                          background:#f0d58c;
+                                                          border-radius:11px;
+                                                          display:grid;
+                                                          place-items:center;
+                                                          font-size:22px}
+                                                          .panel-heading h2{
+                                                            font-size:16px;
+                                                            margin:0 0 5px;
+                                                            letter-spacing:-.4px}
+                                                            .panel-heading p{
+                                                              margin:0;
+                                                              font-size:10px;
+                                                              color:#7c8474}
+                                                              label{
+                                                                font-size:10px;
+                                                                font-weight:600;
+                                                                display:block;
+                                                                margin-bottom:8px}
+                                                                textarea{
+                                                                  width:100%;
+                                                                  height:77px;
+                                                                  resize:vertical;
+                                                                  max-height:125px;
+                                                                  border:1px solid #dcded0;
+                                                                  border-radius:10px;
+                                                                  padding:12px;
+                                                                  font-size:12px;
+                                                                  line-height:1.6;
+                                                                  background:#f2f2e7;
+                                                                  color:#40503c;
+                                                                  outline:none}
+                                                                  textarea:focus{
+                                                                    border-color:#729d78;
+                                                                    box-shadow:0 0 0 3px #729d781c}
+                                                                    .primary{
+                                                                      border:0;
+                                                                      width:100%;
+                                                                      padding:12px 14px;
+                                                                      border-radius:9px;
+                                                                      background:#28523f;
+                                                                      color:#fff8dc;
+                                                                      font-size:12px;
+                                                                      font-weight:600;
+                                                                      display:flex;
+                                                                      justify-content:space-between;
+                                                                      align-items:center;
+                                                                      margin-top:9px}
+                                                                      .primary:hover:not(:disabled){
+                                                                        background:#386c51}
+                                                                        .primary span{
+                                                                          font-size:19px;
+                                                                          line-height:1}
+                                                                          .suggestion-label{
+                                                                            font-size:8px;
+                                                                            letter-spacing:1.4px;
+                                                                            color:#8c927e;
+                                                                            font-weight:600;
+                                                                            margin:21px 0 9px}
+                                                                            .scenarios{
+                                                                              display:grid;
+                                                                              gap:6px}
+                                                                              .scenarios button{
+                                                                                display:flex;
+                                                                                align-items:center;
+                                                                                gap:10px;
+                                                                                border:1px solid #e5e5d7;
+                                                                                border-radius:9px;
+                                                                                background:#fffdf5;
+                                                                                text-align:left;
+                                                                                color:#4b5c46;
+                                                                                font-size:11px;
+                                                                                padding:9px 11px}
+                                                                                .scenarios button span{
+                                                                                  display:grid;
+                                                                                  place-items:center;
+                                                                                  background:#eceedd;
+                                                                                  width:21px;
+                                                                                  height:21px;
+                                                                                  border-radius:6px;
+                                                                                  font-size:9px;
+                                                                                  font-weight:700}
+                                                                                  .scenarios button b{
+                                                                                    margin-left:auto;
+                                                                                    font-size:14px;
+                                                                                    font-weight:400}
+                                                                                    .scenarios button.active{
+                                                                                      border-color:#79926a;
+                                                                                      background:#edf0df}
+                                                                                      .mock-note{
+                                                                                        font-size:9px;
+                                                                                        line-height:1.5;
+                                                                                        color:#8b927e;
+                                                                                        margin:14px 0 0}
+                                                                                        .view-controls{
+                                                                                          position:absolute;
+                                                                                          right:28px;
+                                                                                          top:24px;
+                                                                                          display:flex;
+                                                                                          gap:8px}
+                                                                                          .view-controls button{
+                                                                                            background:#f8f7edf0;
+                                                                                            border:1px solid #d7deca;
+                                                                                            border-radius:9px;
+                                                                                            padding:10px 13px;
+                                                                                            color:#486049;
+                                                                                            font-size:11px}
+                                                                                            .view-controls button[aria-pressed=true]{
+                                                                                              background:#294e3d;
+                                                                                              color:#fff5d7}
+                                                                                              .compass{
+                                                                                                position:absolute;
+                                                                                                right:38px;
+                                                                                                top:90px;
+                                                                                                font-size:9px;
+                                                                                                color:#647b5c;
+                                                                                                display:grid;
+                                                                                                justify-items:center;
+                                                                                                gap:4px}
+                                                                                                .compass span{
+                                                                                                  font-size:25px}
+                                                                                                  .trip-bar{
+                                                                                                    position:absolute;
+                                                                                                    left:40px;
+                                                                                                    right:40px;
+                                                                                                    bottom:30px;
+                                                                                                    min-height:82px;
+                                                                                                    display:flex;
+                                                                                                    align-items:center;
+                                                                                                    gap:26px;
+                                                                                                    padding:16px 22px;
+                                                                                                    border:1px solid #ffffffab;
+                                                                                                    border-radius:14px;
+                                                                                                    background:#fbfaf2f5;
+                                                                                                    box-shadow:0 12px 40px #30473212;
+                                                                                                    backdrop-filter:blur(12px)}
+                                                                                                    .trip-status{
+                                                                                                      display:flex;
+                                                                                                      align-items:center;
+                                                                                                      gap:13px;
+                                                                                                      min-width:220px}
+                                                                                                      .status-dot{
+                                                                                                        width:10px;
+                                                                                                        height:10px;
+                                                                                                        box-shadow:0 0 0 5px #e8eddc}
+                                                                                                        .trip-bar strong{
+                                                                                                          display:block;
+                                                                                                          font-size:13px;
+                                                                                                          font-weight:600;
+                                                                                                          margin-top:6px}
+                                                                                                          .destination{
+                                                                                                            padding-left:26px;
+                                                                                                            border-left:1px solid #dfe1d2;
+                                                                                                            flex:1}
+                                                                                                            .trip-actions{
+                                                                                                              display:flex;
+                                                                                                              gap:10px}
+                                                                                                              .trip-actions button{
+                                                                                                                background:transparent;
+                                                                                                                border:1px solid #d8dec9;
+                                                                                                                border-radius:8px;
+                                                                                                                padding:11px;
+                                                                                                                color:#526249;
+                                                                                                                font-size:10px}
+                                                                                                                .trip-actions button:first-child{
+                                                                                                                  background:#f2e6c9;
+                                                                                                                  border-color:#e4d2aa;
+                                                                                                                  color:#796333}
+                                                                                                                  .timeline-panel{
+                                                                                                                    position:absolute;
+                                                                                                                    right:40px;
+                                                                                                                    bottom:126px;
+                                                                                                                    width:310px;
+                                                                                                                    background:#fcfbf3f5;
+                                                                                                                    backdrop-filter:blur(12px);
+                                                                                                                    border:1px solid #d9dfce;
+                                                                                                                    border-radius:11px;
+                                                                                                                    z-index:3;
+                                                                                                                    box-shadow:0 5px 25px #314b3210}
+                                                                                                                    .timeline-panel summary{
+                                                                                                                      padding:12px 15px;
+                                                                                                                      cursor:pointer;
+                                                                                                                      font-size:11px;
+                                                                                                                      font-weight:600}
+                                                                                                                      .timeline-panel summary span{
+                                                                                                                        float:right;
+                                                                                                                        font-size:9px;
+                                                                                                                        color:#87917b;
+                                                                                                                        font-weight:400}
+                                                                                                                        .timeline-panel p{
+                                                                                                                          padding:0 15px;
+                                                                                                                          color:#89917c;
+                                                                                                                          font-size:9px}
+                                                                                                                          .timeline-panel ol{
+                                                                                                                            max-height:240px;
+                                                                                                                            overflow:auto;
+                                                                                                                            padding:0 15px 0 34px;
+                                                                                                                            font-size:10px;
+                                                                                                                            line-height:1.6;
+                                                                                                                            color:#66765a}
+                                                                                                                            .timeline-panel li{
+                                                                                                                              padding:5px 0 7px 5px;
+                                                                                                                              border-bottom:1px solid #ebedde}
+                                                                                                                              .timeline-panel li strong{
+                                                                                                                                display:block;
+                                                                                                                                font-size:10px;
+                                                                                                                                color:#3d5b43}
+                                                                                                                                .landmark{
+                                                                                                                                  position:absolute;
+                                                                                                                                  left:0;
+                                                                                                                                  top:0;
+                                                                                                                                  white-space:nowrap;
+                                                                                                                                  background:#fcfaf0ec;
+                                                                                                                                  border:1px solid #fdfcf1;
+                                                                                                                                  border-radius:6px;
+                                                                                                                                  padding:5px 9px;
+                                                                                                                                  box-shadow:0 3px 8px #30513212;
+                                                                                                                                  font-size:10px;
+                                                                                                                                  font-weight:600;
+                                                                                                                                  color:#3d5b46}
+                                                                                                                                  .landmark-taxi{
+                                                                                                                                    background:#f3d581;
+                                                                                                                                    color:#665331;
+                                                                                                                                    font-size:8px;
+                                                                                                                                    letter-spacing:1px}
+                                                                                                                                    .landmark-lake{
+                                                                                                                                      color:#3c7475}
+                                                                                                                                      .landmark-garden{
+                                                                                                                                        background:#e8eedb}
+                                                                                                                                        #notice{
+                                                                                                                                          position:absolute;
+                                                                                                                                          bottom:7px;
+                                                                                                                                          left:50%;
+                                                                                                                                          transform:translateX(-50%);
+                                                                                                                                          font-size:9px;
+                                                                                                                                          color:#607755;
+                                                                                                                                          white-space:nowrap;
+                                                                                                                                          max-width:95%;
+                                                                                                                                          overflow:hidden;
+                                                                                                                                          text-overflow:ellipsis}
+                                                                                                                                          footer{
+                                                                                                                                            height:38px;
+                                                                                                                                            flex-shrink:0;
+                                                                                                                                            display:flex;
+                                                                                                                                            align-items:center;
+                                                                                                                                            justify-content:space-between;
+                                                                                                                                            gap:12px;
+                                                                                                                                            padding:0 40px;
+                                                                                                                                            color:#8b917e;
+                                                                                                                                            font-size:8px;
+                                                                                                                                            letter-spacing:.6px;
+                                                                                                                                            background:#f7f5ed}
+                                                                                                                                            .footer-dot{
+                                                                                                                                              padding:0 8px}
+                                                                                                                                              .error-card{
+                                                                                                                                                position:absolute;
+                                                                                                                                                inset:25%;
+                                                                                                                                                background:#fff8e8;
+                                                                                                                                                padding:28px;
+                                                                                                                                                border-radius:16px;
+                                                                                                                                                z-index:6}
+                                                                                                                                                .error-card h2{
+                                                                                                                                                  font:28px Georgia,serif}
+                                                                                                                                                  .error-card p{
+                                                                                                                                                    line-height:1.6}
+                                                                                                                                                    @media(min-height:850px){
+                                                                                                                                                      .mission-panel{
+                                                                                                                                                        top:220px}
+                                                                                                                                                        .scene-caption{
+                                                                                                                                                          top:40px}
+                                                                                                                                                          .scene-caption h1{
+                                                                                                                                                            font-size:46px}
+                                                                                                                                                          }
+                                                                                                                                                          @media(max-height:780px) and (min-width:901px){
+                                                                                                                                                            .scene-caption h1{
+                                                                                                                                                              font-size:31px}
+                                                                                                                                                              .scene-caption{
+                                                                                                                                                                top:20px}
+                                                                                                                                                                .mission-panel{
+                                                                                                                                                                  top:164px;
+                                                                                                                                                                  padding:17px}
+                                                                                                                                                                  .panel-heading{
+                                                                                                                                                                    margin-bottom:12px}
+                                                                                                                                                                    .suggestion-label{
+                                                                                                                                                                      margin-top:13px}
+                                                                                                                                                                      .scenarios button{
+                                                                                                                                                                        padding:6px 10px}
+                                                                                                                                                                        .mock-note{
+                                                                                                                                                                          margin-top:9px}
+                                                                                                                                                                          .trip-bar{
+                                                                                                                                                                            bottom:25px}
+                                                                                                                                                                            .timeline-panel{
+                                                                                                                                                                              bottom:118px}
+                                                                                                                                                                            }
+                                                                                                                                                                            @media(max-width:1100px){
+                                                                                                                                                                              .header-note{
+                                                                                                                                                                                display:none}
+                                                                                                                                                                                .topbar{
+                                                                                                                                                                                  padding:0 25px}
+                                                                                                                                                                                  .scene-caption,.mission-panel{
+                                                                                                                                                                                    left:25px}
+                                                                                                                                                                                    .trip-bar{
+                                                                                                                                                                                      left:25px;
+                                                                                                                                                                                      right:25px;
+                                                                                                                                                                                      gap:15px}
+                                                                                                                                                                                      .trip-status{
+                                                                                                                                                                                        min-width:190px}
+                                                                                                                                                                                        .destination{
+                                                                                                                                                                                          padding-left:15px}
+                                                                                                                                                                                          .trip-actions{
+                                                                                                                                                                                            gap:6px}
+                                                                                                                                                                                            .trip-actions button{
+                                                                                                                                                                                              padding:10px 8px}
+                                                                                                                                                                                              .timeline-panel{
+                                                                                                                                                                                                right:25px}
+                                                                                                                                                                                                footer{
+                                                                                                                                                                                                  padding:0 25px}
+                                                                                                                                                                                                }
+                                                                                                                                                                                                @media(max-width:900px){
+                                                                                                                                                                                                  #app{
+                                                                                                                                                                                                    min-height:740px}
+                                                                                                                                                                                                    .topbar{
+                                                                                                                                                                                                      height:72px;
+                                                                                                                                                                                                      padding:0 20px}
+                                                                                                                                                                                                      .brand{
+                                                                                                                                                                                                        font-size:17px}
+                                                                                                                                                                                                        .brand-mark{
+                                                                                                                                                                                                          width:38px;
+                                                                                                                                                                                                          height:38px;
+                                                                                                                                                                                                          font-size:29px}
+                                                                                                                                                                                                          .scene-caption{
+                                                                                                                                                                                                            top:22px;
+                                                                                                                                                                                                            left:20px}
+                                                                                                                                                                                                            .scene-caption h1{
+                                                                                                                                                                                                              font-size:31px}
+                                                                                                                                                                                                              .scene-caption p{
+                                                                                                                                                                                                                display:none}
+                                                                                                                                                                                                                .scene-caption .eyebrow{
+                                                                                                                                                                                                                  font-size:7px}
+                                                                                                                                                                                                                  .mission-panel{
+                                                                                                                                                                                                                    top:auto;
+                                                                                                                                                                                                                    bottom:108px;
+                                                                                                                                                                                                                    left:20px;
+                                                                                                                                                                                                                    width:270px;
+                                                                                                                                                                                                                    padding:16px}
+                                                                                                                                                                                                                    .panel-heading{
+                                                                                                                                                                                                                      margin-bottom:12px}
+                                                                                                                                                                                                                      .panel-heading h2{
+                                                                                                                                                                                                                        font-size:14px}
+                                                                                                                                                                                                                        .panel-heading p{
+                                                                                                                                                                                                                          font-size:9px}
+                                                                                                                                                                                                                          .suggestion-label{
+                                                                                                                                                                                                                            margin:12px 0 8px}
+                                                                                                                                                                                                                            .scenarios{
+                                                                                                                                                                                                                              grid-template-columns:repeat(3,1fr);
+                                                                                                                                                                                                                              gap:5px}
+                                                                                                                                                                                                                              .scenarios button{
+                                                                                                                                                                                                                                padding:8px 4px;
+                                                                                                                                                                                                                                font-size:9px;
+                                                                                                                                                                                                                                display:flex;
+                                                                                                                                                                                                                                flex-direction:column;
+                                                                                                                                                                                                                                text-align:center;
+                                                                                                                                                                                                                                gap:6px}
+                                                                                                                                                                                                                                .scenarios button b{
+                                                                                                                                                                                                                                  display:none}
+                                                                                                                                                                                                                                  .mock-note{
+                                                                                                                                                                                                                                    font-size:8px}
+                                                                                                                                                                                                                                    .trip-bar{
+                                                                                                                                                                                                                                      left:20px;
+                                                                                                                                                                                                                                      right:20px;
+                                                                                                                                                                                                                                      bottom:25px;
+                                                                                                                                                                                                                                      padding:13px;
+                                                                                                                                                                                                                                      min-height:70px;
+                                                                                                                                                                                                                                      gap:14px}
+                                                                                                                                                                                                                                      .trip-status{
+                                                                                                                                                                                                                                        min-width:150px}
+                                                                                                                                                                                                                                        .trip-bar strong{
+                                                                                                                                                                                                                                          font-size:11px}
+                                                                                                                                                                                                                                          .trip-actions button:first-child{
+                                                                                                                                                                                                                                            max-width:120px}
+                                                                                                                                                                                                                                            .timeline-panel{
+                                                                                                                                                                                                                                              right:20px;
+                                                                                                                                                                                                                                              bottom:108px;
+                                                                                                                                                                                                                                              width:240px}
+                                                                                                                                                                                                                                              .view-controls{
+                                                                                                                                                                                                                                                right:20px;
+                                                                                                                                                                                                                                                top:20px}
+                                                                                                                                                                                                                                                .compass{
+                                                                                                                                                                                                                                                  right:30px;
+                                                                                                                                                                                                                                                  top:72px}
+                                                                                                                                                                                                                                                  footer{
+                                                                                                                                                                                                                                                    padding:0 20px;
+                                                                                                                                                                                                                                                    font-size:7px}
+                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                                                  @media(max-width:600px){
+                                                                                                                                                                                                                                                    #app{
+                                                                                                                                                                                                                                                      height:auto;
+                                                                                                                                                                                                                                                      min-height:100dvh;
+                                                                                                                                                                                                                                                      overflow:visible}
+                                                                                                                                                                                                                                                      .topbar{
+                                                                                                                                                                                                                                                        height:66px;
+                                                                                                                                                                                                                                                        padding:0 16px}
+                                                                                                                                                                                                                                                        .brand{
+                                                                                                                                                                                                                                                          font-size:15px;
+                                                                                                                                                                                                                                                          gap:9px}
+                                                                                                                                                                                                                                                          .brand small{
+                                                                                                                                                                                                                                                            font-size:7px;
+                                                                                                                                                                                                                                                            letter-spacing:2px}
+                                                                                                                                                                                                                                                            .brand-mark{
+                                                                                                                                                                                                                                                              width:34px;
+                                                                                                                                                                                                                                                              height:34px;
+                                                                                                                                                                                                                                                              border-radius:10px}
+                                                                                                                                                                                                                                                              .mode-pill{
+                                                                                                                                                                                                                                                                padding:8px 10px;
+                                                                                                                                                                                                                                                                font-size:9px}
+                                                                                                                                                                                                                                                                .desktop-only{
+                                                                                                                                                                                                                                                                  display:none!important}
+                                                                                                                                                                                                                                                                  #experience{
+                                                                                                                                                                                                                                                                    flex:none;
+                                                                                                                                                                                                                                                                    height:calc(100dvh - 98px);
+                                                                                                                                                                                                                                                                    min-height:745px}
+                                                                                                                                                                                                                                                                    .scene-caption{
+                                                                                                                                                                                                                                                                      top:20px;
+                                                                                                                                                                                                                                                                      left:18px}
+                                                                                                                                                                                                                                                                      .scene-caption h1{
+                                                                                                                                                                                                                                                                        font-size:29px}
+                                                                                                                                                                                                                                                                        .view-controls{
+                                                                                                                                                                                                                                                                          top:20px;
+                                                                                                                                                                                                                                                                          right:14px;
+                                                                                                                                                                                                                                                                          flex-direction:column;
+                                                                                                                                                                                                                                                                          gap:5px}
+                                                                                                                                                                                                                                                                          .view-controls button{
+                                                                                                                                                                                                                                                                            padding:8px 10px;
+                                                                                                                                                                                                                                                                            font-size:9px}
+                                                                                                                                                                                                                                                                            .compass{
+                                                                                                                                                                                                                                                                              top:98px;
+                                                                                                                                                                                                                                                                              right:32px}
+                                                                                                                                                                                                                                                                              .mission-panel{
+                                                                                                                                                                                                                                                                                bottom:173px;
+                                                                                                                                                                                                                                                                                left:14px;
+                                                                                                                                                                                                                                                                                right:14px;
+                                                                                                                                                                                                                                                                                width:auto;
+                                                                                                                                                                                                                                                                                padding:15px}
+                                                                                                                                                                                                                                                                                .panel-heading{
+                                                                                                                                                                                                                                                                                  margin-bottom:12px}
+                                                                                                                                                                                                                                                                                  .panel-heading p{
+                                                                                                                                                                                                                                                                                    display:none}
+                                                                                                                                                                                                                                                                                    label{
+                                                                                                                                                                                                                                                                                      font-size:9px}
+                                                                                                                                                                                                                                                                                      #goal-form{
+                                                                                                                                                                                                                                                                                        display:grid;
+                                                                                                                                                                                                                                                                                        grid-template-columns:1fr 83px;
+                                                                                                                                                                                                                                                                                        column-gap:8px}
+                                                                                                                                                                                                                                                                                        #goal-form label{
+                                                                                                                                                                                                                                                                                          grid-column:1 / -1}
+                                                                                                                                                                                                                                                                                          textarea{
+                                                                                                                                                                                                                                                                                            height:64px;
+                                                                                                                                                                                                                                                                                            resize:none;
+                                                                                                                                                                                                                                                                                            font-size:11px;
+                                                                                                                                                                                                                                                                                            padding:9px}
+                                                                                                                                                                                                                                                                                            .primary{
+                                                                                                                                                                                                                                                                                              height:64px;
+                                                                                                                                                                                                                                                                                              margin:0;
+                                                                                                                                                                                                                                                                                              padding:10px;
+                                                                                                                                                                                                                                                                                              font-size:10px}
+                                                                                                                                                                                                                                                                                              .primary span{
+                                                                                                                                                                                                                                                                                                font-size:16px}
+                                                                                                                                                                                                                                                                                                .suggestion-label{
+                                                                                                                                                                                                                                                                                                  margin:12px 0 7px}
+                                                                                                                                                                                                                                                                                                  .scenarios button{
+                                                                                                                                                                                                                                                                                                    flex-direction:row;
+                                                                                                                                                                                                                                                                                                    font-size:9px;
+                                                                                                                                                                                                                                                                                                    padding:8px;
+                                                                                                                                                                                                                                                                                                    gap:7px}
+                                                                                                                                                                                                                                                                                                    .scenarios button span{
+                                                                                                                                                                                                                                                                                                      width:18px;
+                                                                                                                                                                                                                                                                                                      height:18px;
+                                                                                                                                                                                                                                                                                                      flex-shrink:0}
+                                                                                                                                                                                                                                                                                                      .mock-note{
+                                                                                                                                                                                                                                                                                                        margin-top:10px}
+                                                                                                                                                                                                                                                                                                        .trip-bar{
+                                                                                                                                                                                                                                                                                                          left:14px;
+                                                                                                                                                                                                                                                                                                          right:14px;
+                                                                                                                                                                                                                                                                                                          bottom:23px;
+                                                                                                                                                                                                                                                                                                          display:grid;
+                                                                                                                                                                                                                                                                                                          grid-template-columns:1fr 1fr;
+                                                                                                                                                                                                                                                                                                          gap:12px;
+                                                                                                                                                                                                                                                                                                          padding:14px;
+                                                                                                                                                                                                                                                                                                          min-height:137px}
+                                                                                                                                                                                                                                                                                                          .trip-status{
+                                                                                                                                                                                                                                                                                                            min-width:0;
+                                                                                                                                                                                                                                                                                                            gap:10px}
+                                                                                                                                                                                                                                                                                                            .destination{
+                                                                                                                                                                                                                                                                                                              padding-left:12px}
+                                                                                                                                                                                                                                                                                                              .trip-actions{
+                                                                                                                                                                                                                                                                                                                grid-column:1/-1}
+                                                                                                                                                                                                                                                                                                                .trip-actions button:first-child{
+                                                                                                                                                                                                                                                                                                                  flex:1;
+                                                                                                                                                                                                                                                                                                                  max-width:none}
+                                                                                                                                                                                                                                                                                                                  .trip-actions button:last-child{
+                                                                                                                                                                                                                                                                                                                    min-width:85px}
+                                                                                                                                                                                                                                                                                                                    .timeline-panel{
+                                                                                                                                                                                                                                                                                                                      bottom:421px;
+                                                                                                                                                                                                                                                                                                                      right:14px;
+                                                                                                                                                                                                                                                                                                                      width:210px}
+                                                                                                                                                                                                                                                                                                                      .timeline-panel[open]{
+                                                                                                                                                                                                                                                                                                                        width:calc(100% - 28px)}
+                                                                                                                                                                                                                                                                                                                        .timeline-panel ol{
+                                                                                                                                                                                                                                                                                                                          max-height:130px}
+                                                                                                                                                                                                                                                                                                                          .timeline-panel summary{
+                                                                                                                                                                                                                                                                                                                            padding:10px 12px;
+                                                                                                                                                                                                                                                                                                                            font-size:10px}
+                                                                                                                                                                                                                                                                                                                            .timeline-panel p{
+                                                                                                                                                                                                                                                                                                                              font-size:8px}
+                                                                                                                                                                                                                                                                                                                              #notice{
+                                                                                                                                                                                                                                                                                                                                font-size:8px;
+                                                                                                                                                                                                                                                                                                                                bottom:6px}
+                                                                                                                                                                                                                                                                                                                                footer{
+                                                                                                                                                                                                                                                                                                                                  height:32px;
+                                                                                                                                                                                                                                                                                                                                  padding:0 14px;
+                                                                                                                                                                                                                                                                                                                                  font-size:6px;
+                                                                                                                                                                                                                                                                                                                                  letter-spacing:0}
+                                                                                                                                                                                                                                                                                                                                  footer>span:first-child{
+                                                                                                                                                                                                                                                                                                                                    display:none}
+                                                                                                                                                                                                                                                                                                                                    .landmark{
+                                                                                                                                                                                                                                                                                                                                      font-size:8px;
+                                                                                                                                                                                                                                                                                                                                      padding:4px 6px}
+                                                                                                                                                                                                                                                                                                                                      .landmark-taxi{
+                                                                                                                                                                                                                                                                                                                                        font-size:7px}
+                                                                                                                                                                                                                                                                                                                                        .error-card{
+                                                                                                                                                                                                                                                                                                                                          inset:10% 5% 45%}
+                                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                                        @media(prefers-reduced-motion:reduce){
+                                                                                                                                                                                                                                                                                                                                          button{
+                                                                                                                                                                                                                                                                                                                                            transition:none}
+                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                                          .taxi-marker{
+                                                                                                                                                                                                                                                                                                                                            background:#e9bd49;
+                                                                                                                                                                                                                                                                                                                                            color:#4d4b29;
+                                                                                                                                                                                                                                                                                                                                            border-color:#f9df94;
+                                                                                                                                                                                                                                                                                                                                            font-size:8px;
+                                                                                                                                                                                                                                                                                                                                            letter-spacing:.7px;
+                                                                                                                                                                                                                                                                                                                                            box-shadow:0 2px 7px #303e2930}
+                                                                                                                                                                                                                                                                                                                                            .timeline-panel pre{
+                                                                                                                                                                                                                                                                                                                                              max-width:100%;
+                                                                                                                                                                                                                                                                                                                                              overflow:auto;
+                                                                                                                                                                                                                                                                                                                                              max-height:180px;
+                                                                                                                                                                                                                                                                                                                                              font-size:9px;
+                                                                                                                                                                                                                                                                                                                                              line-height:1.5;
+                                                                                                                                                                                                                                                                                                                                              white-space:pre-wrap;
+                                                                                                                                                                                                                                                                                                                                              overflow-wrap:anywhere}
+                                                                                                                                                                                                                                                                                                                                              .timeline-panel li details summary{
+                                                                                                                                                                                                                                                                                                                                                padding:4px 0;
+                                                                                                                                                                                                                                                                                                                                                font-size:9px;
+                                                                                                                                                                                                                                                                                                                                                color:#7c8a6c}
+                                                                                                                                                                                                                                                                                                                                                @media(max-width:600px){
+                                                                                                                                                                                                                                                                                                                                                  #experience{
+                                                                                                                                                                                                                                                                                                                                                    height:auto;
+                                                                                                                                                                                                                                                                                                                                                    min-height:0;
+                                                                                                                                                                                                                                                                                                                                                    padding-bottom:8px}
+                                                                                                                                                                                                                                                                                                                                                    #world,#labels{
+                                                                                                                                                                                                                                                                                                                                                      height:365px;
+                                                                                                                                                                                                                                                                                                                                                      bottom:auto}
+                                                                                                                                                                                                                                                                                                                                                      .mission-panel{
+                                                                                                                                                                                                                                                                                                                                                        position:relative;
+                                                                                                                                                                                                                                                                                                                                                        left:auto;
+                                                                                                                                                                                                                                                                                                                                                        right:auto;
+                                                                                                                                                                                                                                                                                                                                                        bottom:auto;
+                                                                                                                                                                                                                                                                                                                                                        margin:365px 14px 0;
+                                                                                                                                                                                                                                                                                                                                                        width:auto}
+                                                                                                                                                                                                                                                                                                                                                        .trip-bar{
+                                                                                                                                                                                                                                                                                                                                                          position:relative;
+                                                                                                                                                                                                                                                                                                                                                          left:auto;
+                                                                                                                                                                                                                                                                                                                                                          right:auto;
+                                                                                                                                                                                                                                                                                                                                                          bottom:auto;
+                                                                                                                                                                                                                                                                                                                                                          margin:14px 14px 0}
+                                                                                                                                                                                                                                                                                                                                                          .timeline-panel{
+                                                                                                                                                                                                                                                                                                                                                            position:relative;
+                                                                                                                                                                                                                                                                                                                                                            right:auto;
+                                                                                                                                                                                                                                                                                                                                                            bottom:auto;
+                                                                                                                                                                                                                                                                                                                                                            width:auto;
+                                                                                                                                                                                                                                                                                                                                                            margin:12px 14px 0}
+                                                                                                                                                                                                                                                                                                                                                            .timeline-panel[open]{
+                                                                                                                                                                                                                                                                                                                                                              width:auto}
+                                                                                                                                                                                                                                                                                                                                                              #notice{
+                                                                                                                                                                                                                                                                                                                                                                position:relative;
+                                                                                                                                                                                                                                                                                                                                                                left:auto;
+                                                                                                                                                                                                                                                                                                                                                                bottom:auto;
+                                                                                                                                                                                                                                                                                                                                                                transform:none;
+                                                                                                                                                                                                                                                                                                                                                                max-width:none;
+                                                                                                                                                                                                                                                                                                                                                                text-align:center;
+                                                                                                                                                                                                                                                                                                                                                                padding:10px 14px 0;
+                                                                                                                                                                                                                                                                                                                                                                white-space:normal}
+                                                                                                                                                                                                                                                                                                                                                                .scenarios button{
+                                                                                                                                                                                                                                                                                                                                                                  min-height:38px}
+                                                                                                                                                                                                                                                                                                                                                                  .trip-actions button{
+                                                                                                                                                                                                                                                                                                                                                                    min-height:40px}
+                                                                                                                                                                                                                                                                                                                                                                    footer{
+                                                                                                                                                                                                                                                                                                                                                                      min-height:32px}
+                                                                                                                                                                                                                                                                                                                                                                      .landmark{
+                                                                                                                                                                                                                                                                                                                                                                        font-size:7px}
+                                                                                                                                                                                                                                                                                                                                                                        .view-controls button{
+                                                                                                                                                                                                                                                                                                                                                                          min-height:34px}
+                                                                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                                                                        @media(max-height:780px) and (min-width:901px){
+                                                                                                                                                                                                                                                                                                                                                                          .mission-panel{
+                                                                                                                                                                                                                                                                                                                                                                            top:132px;
+                                                                                                                                                                                                                                                                                                                                                                            padding:14px}
+                                                                                                                                                                                                                                                                                                                                                                            .mission-panel textarea{
+                                                                                                                                                                                                                                                                                                                                                                              height:54px}
+                                                                                                                                                                                                                                                                                                                                                                              .mission-panel .primary{
+                                                                                                                                                                                                                                                                                                                                                                                padding:9px 12px}
+                                                                                                                                                                                                                                                                                                                                                                                .mission-panel .panel-heading{
+                                                                                                                                                                                                                                                                                                                                                                                  margin-bottom:10px}
+                                                                                                                                                                                                                                                                                                                                                                                  .mission-panel .suggestion-label{
+                                                                                                                                                                                                                                                                                                                                                                                    margin:10px 0 6px}
+                                                                                                                                                                                                                                                                                                                                                                                    .mission-panel .scenarios{
+                                                                                                                                                                                                                                                                                                                                                                                      gap:4px}
+                                                                                                                                                                                                                                                                                                                                                                                      .mission-panel .scenarios button{
+                                                                                                                                                                                                                                                                                                                                                                                        padding:4px 9px}
+                                                                                                                                                                                                                                                                                                                                                                                        .mission-panel .scenarios button span{
+                                                                                                                                                                                                                                                                                                                                                                                          height:18px;
+                                                                                                                                                                                                                                                                                                                                                                                          width:18px}
+                                                                                                                                                                                                                                                                                                                                                                                          .mission-panel .mock-note{
+                                                                                                                                                                                                                                                                                                                                                                                            display:none}
+                                                                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                                                                                          @media(max-height:740px) and (min-width:901px){
+                                                                                                                                                                                                                                                                                                                                                                                            .scene-caption{
+                                                                                                                                                                                                                                                                                                                                                                                              display:none}
+                                                                                                                                                                                                                                                                                                                                                                                              .mission-panel{
+                                                                                                                                                                                                                                                                                                                                                                                                top:24px}
+                                                                                                                                                                                                                                                                                                                                                                                              }

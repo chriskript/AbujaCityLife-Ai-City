@@ -1,6 +1,6 @@
 # Simulation architecture
 
-The current implementation is a headless taxi-agent testbed. Rendering, a public HTTP backend, and live gameplay are later milestones.
+The current implementation combines the headless taxi-agent testbed with a browser-based Three.js neighbourhood. A public inference backend and live gameplay remain later milestones.
 
 ## Decision and execution loop
 
@@ -10,13 +10,27 @@ The current implementation is a headless taxi-agent testbed. Rendering, a public
 4. The executor performs valid road transitions deterministically.
 5. Outcomes and relevant changes become feedback for the next decision.
 
-The provider cannot manipulate arbitrary engine state. The scripted mock and the standalone Meta contract probe share the decision contract, but only the mock is currently connected to the scenario runner. The probe validates a returned decision without executing it.
+The provider cannot manipulate arbitrary engine state. The scripted mock and the standalone Meta contract probe share the decision contract, but only the mock is connected to the headless scenario runner and browser. The probe validates a returned decision without executing it. One controlled live Spark 1.3 destination-selection request has passed schema and semantic validation.
 
 ## World and navigation
 
 The original fictional neighbourhood has eight road nodes, ten bidirectional edges, and four destinations. Dijkstra computes a primary route and at most one alternative per reachable destination. The provider selects from offered routes rather than generating coordinates.
 
-The validator checks schema, destination identifiers, public access, offered routes, continuity, route distance, closures, and observation freshness. The executor checks the next road before every node transition. A later renderer can interpolate travel locally without inference per frame.
+The validator checks schema, destination identifiers, public access, offered routes, continuity, route distance, closures, and observation freshness. The executor checks the next road before every node transition.
+
+## Browser execution
+
+`TaxiJourney` interpolates along the agent's next validated edge and calls the existing `advance()` only after reaching its endpoint. The agent's current node remains the last completed waypoint during movement. No model calls occur per frame. Frame deltas are capped at 50 ms, and simulation pauses while the tab is hidden or WebGL is unavailable. The taxi rotates toward the road direction; the camera eases between overview and follow views.
+
+The shortcut closure is introduced before edge entry. If the taxi already occupies the shortcut, manual closure is disabled until it leaves. This avoids introducing undefined mid-edge road removal. Scenario C uses the same fixed closure trigger as the headless scenario. A short stationary wait makes interruption visible before the existing `replan()` is called.
+
+Static geometry is batched by material; repeated primitives and materials are reused. Reset preserves the scene and clears journey state, closures, and route overlays. Teardown stops the animation loop, disconnects the resize observer, removes listeners and labels, and disposes geometries, materials, shadows, and the renderer. WebGL context loss suspends movement until restoration.
+
+## Browser/server boundary
+
+The shared mock policy lives in `shared/agent/mock-provider.ts`; the original server import re-exports it for compatibility. `client/src/providers.ts` is the seam for a future same-origin backend provider. Selecting `live-meta` currently throws rather than silently using fixtures. No live adapter or credential code is imported into the client.
+
+Vite uses `client/` as its root with environment-file loading disabled. Development filesystem access is limited to client, shared modules, and dependencies; server code, runtime records, Git metadata, and environment files are explicitly denied. No public directory is served. The dev server binds to localhost.
 
 ## State and feedback
 
@@ -44,7 +58,11 @@ World setup and closure timing are fixed, so no random seed is needed. Tests rep
 | `server/controls/` | Persistent probe spending reservations |
 | `scripts/` | Local demo and API verification commands |
 | `tests/` | Scenario, validation, accounting, and fake-transport tests |
+| `client/src/simulation/` | Timed interpolation over validated agent edges |
+| `client/src/rendering/` | Original scenery, taxi, cameras, labels, and graphics cleanup |
+| `client/src/main.ts` | Browser controls, status, action timeline, and lifecycle |
+| `client/src/providers.ts` | Mock default and future backend integration seam |
 
 ## Next implementation stage
 
-Add the compact Three.js neighbourhood, local taxi interpolation, controls, and a visible event timeline around the simulation core. Before public paid inference, implement the backend endpoint, application-wide budgets, rate limiting, deduplication, and caching. Keep live, mock, and replay states distinguishable.
+Before public paid inference, implement the backend endpoint, application-wide budgets, rate limiting, deduplication, and caching. Then evaluate live task completion and replanning through the browser. Keep live, mock, and replay states distinguishable. No additional live inference was authorized for the 3D milestone.
