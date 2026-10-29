@@ -3,6 +3,9 @@ import { createWorld, landmarkLabels } from './world.js';
 import type { TaxiPose } from '../simulation/taxi-journey.js';
 import type { Route } from '../../../shared/navigation/routes.js';
 import { nodes } from '../../../shared/world/neighbourhood.js';
+import { createInhabitants } from './inhabitants.js';
+import type { NeighbourhoodView } from '../../../shared/neighbourhood/presentation.js';
+import { npcIds, type NpcId } from '../../../shared/neighbourhood/types.js';
 
 export class NeighbourhoodScene {
   readonly renderer: THREE.WebGLRenderer;
@@ -22,6 +25,10 @@ export class NeighbourhoodScene {
   private follow = false;
   private disposed = false;
   private contextLost = false;
+  private population: ReturnType<typeof createInhabitants> | null = null;
+  private readonly actorLabels = new Map<NpcId, HTMLButtonElement>();
+  private populationListeners: AbortController | null = null;
+  private populationPlaced = false;
 
   constructor(private readonly container: HTMLElement, private readonly labels: HTMLElement, onContextChange: (lost: boolean) => void) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -69,10 +76,80 @@ export class NeighbourhoodScene {
     this.renderer.shadowMap.enabled = width >= 900;
     this.renderer.setSize(width, height);
     this.camera.aspect = width / Math.max(1, height);
-    this.camera.fov = width < 700 ? 53 : 40;
+    this.camera.fov = width < 700 ? this.population ? 60 : 53 : 40;
     this.camera.updateProjectionMatrix();
   }
   setFollow(follow: boolean): void { this.follow = follow; }
+  enableInhabitants(onSelect: (id: NpcId) => void): void {
+    if (this.population) return;
+    this.population = createInhabitants(); this.scene.add(this.population.group);
+    this.world.taxi.add(this.population.cargo); this.population.cargo.position.set(-0.8, 2.8, -0.8); this.population.cargo.scale.setScalar(0.45);
+    this.world.taxi.userData.npcId = 'musa';
+    this.populationListeners = new AbortController();
+    const overlay = document.querySelector<HTMLElement>('#inhabitant-labels')!;
+    for (const id of npcIds) {
+      const button = document.createElement('button'); button.className = `npc-marker npc-${id}`;
+      button.dataset.npc = id; button.addEventListener('click', () => onSelect(id), { signal: this.populationListeners.signal });
+      overlay.append(button); this.actorLabels.set(id, button);
+    }
+    const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
+    this.renderer.domElement.addEventListener('pointerup', event => {
+      if (!this.population) return;
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
+      raycaster.setFromCamera(pointer, this.camera);
+      const hits = raycaster.intersectObjects([this.world.taxi, ...npcIds.map(id => this.population!.models[id].group)], true);
+      for (const hit of hits) {
+        let object: THREE.Object3D | null = hit.object;
+        while (object && !object.userData.npcId) object = object.parent;
+        if (object && npcIds.includes(object.userData.npcId as NpcId)) { onSelect(object.userData.npcId as NpcId); return; }
+      }
+    }, { signal: this.populationListeners.signal });
+    this.resize();
+  }
+
+  renderInhabitants(view: NeighbourhoodView, selected: NpcId, seconds: number): void {
+    const population = this.population; if (!population) return;
+    const ease = this.populationPlaced ? 1 - Math.exp(-Math.min(seconds, 0.05) * 14) : 1;
+    for (const actor of view.actors) {
+      const model = population.models[actor.id];
+      const standing = actor.id === 'musa' ? { x: -5, z: -5 } : actor.id === 'amina' ? { x: 5, z: 8 } : { x: -7, z: 7 };
+      const x = actor.pose.x + (actor.moving ? actor.id === 'musa' ? 0 : Math.cos(actor.pose.heading) * 4.4 : standing.x);
+      const z = actor.pose.z + (actor.moving ? actor.id === 'musa' ? 0 : -Math.sin(actor.pose.heading) * 4.4 : standing.z);
+      model.group.position.x += (x - model.group.position.x) * ease;
+      model.group.position.z += (z - model.group.position.z) * ease;
+      const difference = Math.atan2(Math.sin(actor.pose.heading - model.group.rotation.y), Math.cos(actor.pose.heading - model.group.rotation.y));
+      model.group.rotation.y += difference * ease;
+      model.body.visible = !(actor.id === 'musa' && actor.moving);
+      model.body.position.y = actor.moving ? Math.abs(Math.sin(view.time * 7)) * 0.16 : Math.sin(view.time * 2) * 0.025;
+      model.limbs.forEach((limb, index) => { limb.rotation.x = actor.moving ? Math.sin(view.time * 7 + index * Math.PI) * 0.38 : 0; });
+      model.parcel.visible = actor.goods > 0 && actor.id !== 'musa'; model.ring.visible = actor.id === selected;
+      const marker = this.actorLabels.get(actor.id)!;
+      const caption = actor.name;
+      if (marker.textContent !== caption) marker.textContent = caption;
+      marker.setAttribute('aria-label', `Select ${actor.name}, ${actor.occupation}`); marker.setAttribute('aria-pressed', String(actor.id === selected));
+      marker.title = actor.activity;
+    }
+    population.stock.children.forEach((crate, index) => { crate.visible = index < view.resources.marketGoods; });
+    population.supplies.children.forEach((crate, index) => { crate.visible = index < view.resources.supplierGoods; });
+    const musa = view.actors.find(actor => actor.id === 'musa')!;
+    population.cargo.children.forEach((crate, index) => { crate.visible = index < musa.goods; });
+    const focused = view.actors.find(actor => actor.id === selected)!;
+    this.render(musa.pose, seconds, focused.pose);
+    this.taxiLabel.hidden = true;
+    for (const actor of view.actors) {
+      const position = population.models[actor.id].group.position;
+      this.projection.set(position.x, 8, position.z).project(this.camera);
+      const marker = this.actorLabels.get(actor.id)!;
+      const labelOffset = actor.id === 'musa' ? -15 : actor.id === 'amina' ? -5 : 12;
+      const crowded = view.actors.some(other => other.id !== actor.id && Math.hypot(other.pose.x - actor.pose.x, other.pose.z - actor.pose.z) < 18);
+      const horizontalOffset = crowded ? actor.id === 'amina' ? 27 : actor.id === 'zainab' ? -20 : 0 : 0;
+      marker.style.transform = `translate(${(this.projection.x + 1) * this.container.clientWidth / 2 + horizontalOffset}px, ${(1 - this.projection.y) * this.container.clientHeight / 2 + labelOffset}px) translate(-50%, -100%)`;
+      marker.hidden = this.projection.z > 1 || Math.abs(this.projection.x) > 1 || Math.abs(this.projection.y) > 1;
+    }
+    this.populationPlaced = true;
+  }
+  resetPresentation(): void { this.populationPlaced = false; }
   setClosure(closed: boolean): void { this.world.closure.visible = closed; }
   setRoute(route: Route | null): void {
     if ((route?.id ?? null) === this.routeId) return;
@@ -84,15 +161,15 @@ export class NeighbourhoodScene {
     this.route.renderOrder = 2; this.scene.add(this.route);
   }
 
-  render(pose: TaxiPose, seconds: number): void {
+  render(pose: TaxiPose, seconds: number, cameraPose: TaxiPose = pose): void {
     if (this.disposed || this.contextLost) return;
     this.world.taxi.position.set(pose.x, 0.1, pose.z); this.world.taxi.rotation.y = pose.heading;
     if (this.follow) {
-      this.desiredTarget.set(pose.x, 0, pose.z);
-      this.desiredPosition.set(pose.x + 65, 80, pose.z + 80);
+      this.desiredTarget.set(cameraPose.x, 0, cameraPose.z);
+      this.desiredPosition.set(cameraPose.x + 65, 80, cameraPose.z + 80);
     } else {
       // Move the city to the right of the desktop instruction card.
-      this.desiredTarget.set(window.innerWidth >= 900 ? 50 : 73, 0, window.innerWidth >= 900 ? 40 : 35);
+      this.desiredTarget.set(window.innerWidth >= 900 ? 50 : 73, 0, window.innerWidth >= 900 ? 40 : window.innerWidth < 600 && this.population ? 0 : 35);
       this.desiredPosition.copy(this.overview);
     }
     const ease = 1 - Math.exp(-Math.min(seconds, 0.05) * 3);
@@ -122,6 +199,7 @@ export class NeighbourhoodScene {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true; this.renderer.setAnimationLoop(null);
+    this.populationListeners?.abort(); this.actorLabels.forEach(label => label.remove()); this.actorLabels.clear();
     this.resizeObserver.disconnect(); this.removeContextListeners();
     const geometries = new Set<THREE.BufferGeometry>(); const materials = new Set<THREE.Material>();
     this.scene.traverse(object => {

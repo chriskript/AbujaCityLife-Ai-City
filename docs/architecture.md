@@ -2,7 +2,7 @@
 
 The current implementation combines the headless taxi-agent testbed with a browser-based Three.js neighbourhood. A public inference backend and live gameplay remain later milestones.
 
-The additional [shared neighbourhood foundation](neighbourhood-foundation.md) runs separately in headless mode. It owns three NPCs, scoped observations, autonomous scheduling, validated cooperation, inventory, and checkpointed memories. The browser still uses the original taxi demonstration; no new visuals or live inference are enabled by this foundation.
+The [shared neighbourhood foundation](neighbourhood-foundation.md) owns three NPCs, scoped observations, autonomous scheduling, validated cooperation, inventory, and checkpointed memories. The default browser experience now presents this core through the [observer session contract](visible-inhabitants.md). The original taxi demonstration remains available at `/?experience=taxi`; neither browser experience uses live inference.
 
 ## Decision and execution loop
 

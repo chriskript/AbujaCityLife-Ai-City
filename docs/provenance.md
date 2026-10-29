@@ -4,6 +4,7 @@
 - All custom source in this repository was newly authored for this entry.
 - The fictional eight-node neighbourhood and ten road edges were defined from original numeric coordinates. No OpenStreetMap data, game assets, or original Abuja City Life source was used.
 - No external visual assets have been added. The 3D neighbourhood, taxi, lake, buildings, trees, market stalls, and road details use original procedural geometry and reusable materials. Typography uses system fonts.
+- Musa, Amina, and Zainab use newly authored procedural character models, basic limb motion, and resource crates. No external character assets, rigs, or animation libraries are used.
 - The development assistant is OpenAI Codex. The intended runtime intelligence provider is Meta Model API; these responsibilities are separate.
 - Browser and headless scenario reasoning use clearly labelled mock fixtures. One approved live Meta API contract test passed; live browser gameplay is not yet implemented.
 - No implementation commits existed at project start. Keep incremental commits during the event; do not fabricate or backdate history.

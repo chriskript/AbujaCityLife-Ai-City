@@ -12,13 +12,13 @@ Every model-proposed action must pass through a deterministic validation and exe
 
 ## Capabilities and status
 
-**Implemented:** a playable Three.js neighbourhood with a taxi stand, market, community centre, lake viewpoints, and an original connected road network. Give a mock instruction and watch the taxi follow a validated route, arrive, or stop and take a detour when the lake shortcut closes. Smooth taxi movement, follow and overview cameras, pause/reset controls, and expandable journey notes make the agent's actions visible.
+**Implemented:** a playable Three.js neighbourhood where Musa, Amina, and Zainab pursue activities without player instructions. Select an inhabitant, follow their movements, and watch validated cooperation change cargo, stall stock, and purchases. Character cards, an activity feed, pause/reset controls, and alternative mock policies make their shared day observable.
 
 The browser currently uses a **scripted mock provider**, with no inference charges. One controlled server-side Muse Spark 1.3 test has returned a valid destination-selection decision. This verifies the API foundation; it does not enable live Meta gameplay in the browser.
 
-A separate headless neighbourhood foundation now models Musa, Amina, and Zainab with independent goals, limited knowledge, event-driven activities, transport cooperation, inventory consequences, and persistent structured memories. It is not yet connected to the browser scene.
+The same headless foundation powers the browser: independent goals, limited knowledge, event-driven activities, inventory consequences, and structured memories. The original instruction-driven taxi demonstrations remain available in **Taxi lab**. Natural conversations are visibly unavailable until a live dialogue provider is connected.
 
-**Next:** bring the three-inhabitant foundation into the existing browser scene, then connect a secure, budget-controlled backend for live Meta decisions and evaluate complete interactions.
+**Next:** connect a secure, budget-controlled backend for live Meta decisions and grounded conversation, then evaluate complete interactions.
 
 ## Technology
 
@@ -41,7 +41,9 @@ Start the browser application:
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/**. Try **Find a lake view**, **Visit the market**, or **Take a detour**. You can also enter a market or lake request, switch cameras, pause, close the shortcut, and reset. Mock mode recognises these fixture goals; arbitrary natural-language understanding requires the planned live provider.
+Open **http://127.0.0.1:5173/** and observe the neighbourhood. Select characters in the scene or the character card. Use focus, pause, and time controls to inspect their activities; **Neighbourhood experiments** offers alternative mock policies that take effect on reset. The default clock runs at 2× speed.
+
+For the original journeys, open **Taxi lab** in the navigation (or `/?experience=taxi`). Try **Find a lake view**, **Visit the market**, or **Take a detour**. Its text input recognises market/lake fixtures; it is not general natural-language understanding.
 
 Run the headless simulation:
 
@@ -73,6 +75,7 @@ For server-side API setup and an offline configuration check, see the [Meta API 
 
 - [Simulation architecture](docs/architecture.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)
+- [Visible inhabitants and session contract](docs/visible-inhabitants.md)
 - [Browser verification and limitations](docs/browser-verification.md)
 - [Meta API setup and verification](docs/meta-api.md)
 - [Project provenance and third-party attribution](docs/provenance.md)

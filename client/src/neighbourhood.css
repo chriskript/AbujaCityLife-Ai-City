@@ -1,0 +1,537 @@
+.experience-nav{
+  display:flex;
+  gap:6px;
+  background:#e9edde;
+  padding:4px;
+  border-radius:24px}
+  .experience-nav a{
+    color:#718069;
+    text-decoration:none;
+    padding:8px 17px;
+    border-radius:20px;
+    font-size:11px}
+    .experience-nav a[aria-current]{
+      background:#faf9f0;
+      color:#2d5340;
+      box-shadow:0 2px 8px #3853320c}
+      .sr-only{
+        position:absolute;
+        width:1px;
+        height:1px;
+        padding:0;
+        overflow:hidden;
+        clip:rect(0,0,0,0);
+        white-space:nowrap;
+        border:0}
+        body[data-experience=neighbourhood] .scene-caption h1{
+          font-size:43px}
+          body[data-experience=neighbourhood] .scene-caption p{
+            font-size:11px}
+            #inhabitant-labels{
+              position:absolute;
+              inset:0;
+              pointer-events:none;
+              overflow:hidden}
+              .npc-marker{
+                position:absolute;
+                left:0;
+                top:0;
+                pointer-events:auto;
+                white-space:nowrap;
+                border:1px solid #fff8e6;
+                border-radius:20px;
+                padding:9px 12px;
+                color:#244e3d;
+                font-size:10px;
+                box-shadow:0 4px 15px #2c4a3926;
+                background:#fff9e8ed;
+                min-height:34px}
+                .npc-marker[aria-pressed=true]{
+                  background:#f3d47b;
+                  border-color:#e8bd50;
+                  z-index:2}
+                  .npc-marker.npc-musa{
+                    border-left:4px solid #5b8194}
+                    .npc-marker.npc-amina{
+                      border-left:4px solid #bd794b}
+                      .npc-marker.npc-zainab{
+                        border-left:4px solid #628d74}
+                        .inhabitant-panel{
+                          position:absolute;
+                          top:212px;
+                          left:40px;
+                          width:306px;
+                          border-radius:18px;
+                          background:#fbfaf2f5;
+                          border:1px solid #fff9;
+                          box-shadow:0 14px 45px #30473213;
+                          backdrop-filter:blur(12px);
+                          padding:18px}
+                          .people{
+                            display:flex;
+                            gap:5px;
+                            border-bottom:1px solid #e2e5d7;
+                            padding-bottom:14px;
+                            margin-bottom:18px}
+                            .people button{
+                              display:flex;
+                              flex-direction:column;
+                              align-items:center;
+                              gap:6px;
+                              flex:1;
+                              background:transparent;
+                              border:1px solid transparent;
+                              border-radius:10px;
+                              padding:8px 5px;
+                              font-size:10px;
+                              color:#74816a}
+                              .people button[aria-pressed=true]{
+                                background:#edf0e0;
+                                border-color:#dae1c9;
+                                color:#31553f}
+                                .portrait{
+                                  width:29px;
+                                  height:29px;
+                                  display:grid;
+                                  place-items:center;
+                                  border-radius:50%;
+                                  font-family:Georgia,serif;
+                                  font-size:17px;
+                                  background:#dfb389;
+                                  color:#69442e}
+                                  .portrait.musa{
+                                    background:#a1bec7;
+                                    color:#355565}
+                                    .portrait.zainab{
+                                      background:#adc4a7;
+                                      color:#3c614c}
+                                      .portrait.large{
+                                        width:43px;
+                                        height:43px;
+                                        font-size:24px;
+                                        flex-shrink:0}
+                                        .person-heading{
+                                          display:flex;
+                                          gap:11px;
+                                          align-items:center}
+                                          .person-heading h2{
+                                            font:600 21px Georgia,serif;
+                                            margin:0 0 4px}
+                                            .person-heading p{
+                                              font-size:10px;
+                                              color:#7f8974;
+                                              margin:0}
+                                              .local-tag{
+                                                font-size:7px;
+                                                letter-spacing:1px;
+                                                margin-left:auto;
+                                                color:#8c977f}
+                                                .activity-line{
+                                                  display:flex;
+                                                  align-items:center;
+                                                  gap:8px;
+                                                  margin-top:18px;
+                                                  font-size:12px;
+                                                  line-height:1.5}
+                                                  .activity-line span{
+                                                    width:6px;
+                                                    height:6px;
+                                                    border-radius:50%;
+                                                    background:#7b9565;
+                                                    flex-shrink:0}
+                                                    .activity-line strong{
+                                                      font-weight:600}
+                                                      .intention{
+                                                        color:#8a927c;
+                                                        font-size:10px;
+                                                        line-height:1.7;
+                                                        margin:6px 0 14px}
+                                                        .person-facts{
+                                                          display:flex;
+                                                          gap:5px;
+                                                          flex-wrap:wrap}
+                                                          .person-facts span{
+                                                            border:1px solid #e2e6d6;
+                                                            border-radius:5px;
+                                                            font-size:9px;
+                                                            padding:5px 7px;
+                                                            color:#78866c;
+                                                            background:#f3f4e8}
+                                                            .recent-heading{
+                                                              font-size:8px;
+                                                              color:#929a84;
+                                                              font-weight:600;
+                                                              letter-spacing:1.2px;
+                                                              margin-top:21px}
+                                                              .person-recent{
+                                                                padding-left:14px;
+                                                                color:#73816b;
+                                                                font-size:10px;
+                                                                line-height:1.6;
+                                                                margin:10px 0 15px}
+                                                                .person-recent li{
+                                                                  padding-bottom:5px}
+                                                                  .conversation,.experiments{
+                                                                    border-top:1px solid #e4e7d8;
+                                                                    font-size:10px}
+                                                                    .conversation summary,.experiments summary{
+                                                                      padding:12px 0;
+                                                                      color:#526b4f;
+                                                                      cursor:pointer;
+                                                                      font-weight:600}
+                                                                      .coming-soon{
+                                                                        font-size:6px;
+                                                                        letter-spacing:.7px;
+                                                                        color:#9ba18c;
+                                                                        float:right;
+                                                                        padding-top:3px}
+                                                                        .conversation textarea{
+                                                                          font-size:10px;
+                                                                          height:62px;
+                                                                          margin-bottom:5px}
+                                                                          .conversation button{
+                                                                            width:100%;
+                                                                            border:0;
+                                                                            border-radius:7px;
+                                                                            padding:8px;
+                                                                            background:#e0e6d1;
+                                                                            color:#869276}
+                                                                            .conversation p,.experiments p{
+                                                                              font-size:9px;
+                                                                              line-height:1.6;
+                                                                              color:#8f9881}
+                                                                              .experiments label{
+                                                                                font-size:9px}
+                                                                                .experiments select{
+                                                                                  width:100%;
+                                                                                  border:1px solid #dce2cf;
+                                                                                  border-radius:6px;
+                                                                                  padding:9px;
+                                                                                  background:#f7f8ed;
+                                                                                  color:#576f4e;
+                                                                                  font:inherit}
+                                                                                  .experiments[open]{
+                                                                                    max-height:190px;
+                                                                                    overflow:auto}
+                                                                                    .activity-feed{
+                                                                                      position:absolute;
+                                                                                      right:40px;
+                                                                                      bottom:134px;
+                                                                                      width:290px;
+                                                                                      background:#fbfaf1eb;
+                                                                                      border:1px solid #fdfcf0;
+                                                                                      border-radius:13px;
+                                                                                      padding:15px;
+                                                                                      backdrop-filter:blur(12px);
+                                                                                      box-shadow:0 6px 24px #324c3410}
+                                                                                      .feed-heading{
+                                                                                        display:flex;
+                                                                                        justify-content:space-between;
+                                                                                        align-items:center}
+                                                                                        .feed-heading .eyebrow{
+                                                                                          font-size:7px;
+                                                                                          letter-spacing:1.2px}
+                                                                                          .feed-heading>span:last-child{
+                                                                                            font-size:7px;
+                                                                                            color:#98a186;
+                                                                                            letter-spacing:1px}
+                                                                                            .activity-feed ol{
+                                                                                              padding:0;
+                                                                                              list-style:none;
+                                                                                              margin:12px 0 0;
+                                                                                              max-height:150px;
+                                                                                              overflow:auto}
+                                                                                              .activity-feed li{
+                                                                                                display:flex;
+                                                                                                gap:10px;
+                                                                                                color:#607557;
+                                                                                                font-size:10px;
+                                                                                                line-height:1.6;
+                                                                                                padding:6px 0;
+                                                                                                border-bottom:1px solid #e6e9da}
+                                                                                                .activity-feed time{
+                                                                                                  font-size:8px;
+                                                                                                  color:#9aa38d;
+                                                                                                  min-width:27px;
+                                                                                                  padding-top:2px}
+                                                                                                  .activity-feed details{
+                                                                                                    font-size:8px;
+                                                                                                    color:#919c83;
+                                                                                                    margin-top:11px}
+                                                                                                    .activity-feed summary{
+                                                                                                      cursor:pointer}
+                                                                                                      .activity-feed pre{
+                                                                                                        font-size:8px;
+                                                                                                        line-height:1.5;
+                                                                                                        white-space:pre-wrap;
+                                                                                                        overflow-wrap:anywhere;
+                                                                                                        max-height:160px;
+                                                                                                        overflow:auto}
+                                                                                                        .neighbourhood-bar{
+                                                                                                          position:absolute;
+                                                                                                          left:40px;
+                                                                                                          right:40px;
+                                                                                                          bottom:30px;
+                                                                                                          min-height:80px;
+                                                                                                          display:flex;
+                                                                                                          align-items:center;
+                                                                                                          gap:25px;
+                                                                                                          padding:16px 21px;
+                                                                                                          background:#fbfaf2f5;
+                                                                                                          border:1px solid #fff9;
+                                                                                                          border-radius:14px;
+                                                                                                          box-shadow:0 12px 40px #30473212;
+                                                                                                          backdrop-filter:blur(12px)}
+                                                                                                          .neighbourhood-bar strong{
+                                                                                                            font-size:12px;
+                                                                                                            display:block;
+                                                                                                            margin-top:6px;
+                                                                                                            font-weight:600}
+                                                                                                            .neighbourhood-bar>div+div{
+                                                                                                              border-left:1px solid #dfe4d2;
+                                                                                                              padding-left:25px}
+                                                                                                              .cooperation-status{
+                                                                                                                flex:1}
+                                                                                                                .clock-controls{
+                                                                                                                  display:flex;
+                                                                                                                  gap:8px;
+                                                                                                                  align-items:center}
+                                                                                                                  .clock-controls>span{
+                                                                                                                    font-size:11px;
+                                                                                                                    color:#879478;
+                                                                                                                    min-width:32px;
+                                                                                                                    white-space:nowrap}
+                                                                                                                    .clock-controls select,.clock-controls button{
+                                                                                                                      border:1px solid #dce2cd;
+                                                                                                                      border-radius:7px;
+                                                                                                                      background:#f7f7ed;
+                                                                                                                      color:#6c7c5b;
+                                                                                                                      padding:10px;
+                                                                                                                      font:inherit;
+                                                                                                                      font-size:9px}
+                                                                                                                      @media(max-width:1100px){
+                                                                                                                        .inhabitant-panel{
+                                                                                                                          left:25px;
+                                                                                                                          width:285px}
+                                                                                                                          .activity-feed{
+                                                                                                                            right:25px;
+                                                                                                                            width:260px}
+                                                                                                                            .neighbourhood-bar{
+                                                                                                                              left:25px;
+                                                                                                                              right:25px;
+                                                                                                                              gap:14px}
+                                                                                                                              .neighbourhood-bar>div+div{
+                                                                                                                                padding-left:14px}
+                                                                                                                                .neighbourhood-bar strong{
+                                                                                                                                  font-size:10px}
+                                                                                                                                  .neighbourhood-bar .eyebrow{
+                                                                                                                                    font-size:7px;
+                                                                                                                                    letter-spacing:1px}
+                                                                                                                                    .clock-controls{
+                                                                                                                                      gap:5px}
+                                                                                                                                      .clock-controls select,.clock-controls button{
+                                                                                                                                        padding:9px 7px}
+                                                                                                                                      }
+                                                                                                                                      @media(max-height:820px) and (min-width:901px){
+                                                                                                                                        body[data-experience=neighbourhood] .scene-caption{
+                                                                                                                                          top:20px}
+                                                                                                                                          body[data-experience=neighbourhood] .scene-caption h1{
+                                                                                                                                            font-size:31px}
+                                                                                                                                            body[data-experience=neighbourhood] .inhabitant-panel{
+                                                                                                                                              top:155px;
+                                                                                                                                              padding:14px}
+                                                                                                                                              .people{
+                                                                                                                                                margin-bottom:12px;
+                                                                                                                                                padding-bottom:9px}
+                                                                                                                                                .people button{
+                                                                                                                                                  padding:5px}
+                                                                                                                                                  .activity-line{
+                                                                                                                                                    margin-top:13px}
+                                                                                                                                                    .recent-heading{
+                                                                                                                                                      margin-top:14px}
+                                                                                                                                                      .person-recent{
+                                                                                                                                                        margin-bottom:9px}
+                                                                                                                                                        .person-recent li{
+                                                                                                                                                          padding-bottom:3px}
+                                                                                                                                                          .intention{
+                                                                                                                                                            margin-bottom:9px}
+                                                                                                                                                            .activity-feed{
+                                                                                                                                                              bottom:124px}
+                                                                                                                                                              body[data-experience=neighbourhood] .scene-caption p{
+                                                                                                                                                                display:none}
+                                                                                                                                                              }
+                                                                                                                                                              @media(max-height:740px) and (min-width:901px){
+                                                                                                                                                                body[data-experience=neighbourhood] .inhabitant-panel{
+                                                                                                                                                                  top:20px}
+                                                                                                                                                                  .person-recent{
+                                                                                                                                                                    max-height:70px;
+                                                                                                                                                                    overflow:auto}
+                                                                                                                                                                  }
+                                                                                                                                                                  @media(max-width:900px) and (min-width:601px){
+                                                                                                                                                                    .inhabitant-panel{
+                                                                                                                                                                      top:auto;
+                                                                                                                                                                      bottom:130px;
+                                                                                                                                                                      width:260px;
+                                                                                                                                                                      left:20px;
+                                                                                                                                                                      padding:14px}
+                                                                                                                                                                      .people{
+                                                                                                                                                                        margin-bottom:12px;
+                                                                                                                                                                        padding-bottom:10px}
+                                                                                                                                                                        .activity-feed{
+                                                                                                                                                                          right:20px;
+                                                                                                                                                                          bottom:130px;
+                                                                                                                                                                          width:235px}
+                                                                                                                                                                          .neighbourhood-bar{
+                                                                                                                                                                            left:20px;
+                                                                                                                                                                            right:20px;
+                                                                                                                                                                            bottom:25px;
+                                                                                                                                                                            flex-wrap:wrap;
+                                                                                                                                                                            gap:12px}
+                                                                                                                                                                            .neighbourhood-bar .cooperation-status{
+                                                                                                                                                                              display:none}
+                                                                                                                                                                              .clock-controls{
+                                                                                                                                                                                margin-left:auto}
+                                                                                                                                                                                .neighbourhood-bar .clock-controls{
+                                                                                                                                                                                  padding-left:0;
+                                                                                                                                                                                  border:0}
+                                                                                                                                                                                  .person-recent{
+                                                                                                                                                                                    max-height:65px;
+                                                                                                                                                                                    overflow:auto}
+                                                                                                                                                                                    .conversation summary,.experiments summary{
+                                                                                                                                                                                      padding:10px 0}
+                                                                                                                                                                                      .experience-nav a{
+                                                                                                                                                                                        padding:7px 10px}
+                                                                                                                                                                                      }
+                                                                                                                                                                                      @media(max-width:600px){
+                                                                                                                                                                                        body[data-experience=neighbourhood] #experience{
+                                                                                                                                                                                          height:auto;
+                                                                                                                                                                                          min-height:0;
+                                                                                                                                                                                          padding-bottom:10px}
+                                                                                                                                                                                          body[data-experience=neighbourhood] #world,body[data-experience=neighbourhood] #labels,#inhabitant-labels{
+                                                                                                                                                                                            height:385px;
+                                                                                                                                                                                            bottom:auto}
+                                                                                                                                                                                            body[data-experience=neighbourhood] .scene-caption h1{
+                                                                                                                                                                                              font-size:29px}
+                                                                                                                                                                                              body[data-experience=neighbourhood] .scene-caption p{
+                                                                                                                                                                                                display:none}
+                                                                                                                                                                                                .inhabitant-panel{
+                                                                                                                                                                                                  position:relative;
+                                                                                                                                                                                                  top:auto;
+                                                                                                                                                                                                  bottom:auto;
+                                                                                                                                                                                                  left:auto;
+                                                                                                                                                                                                  width:auto;
+                                                                                                                                                                                                  margin:385px 14px 0;
+                                                                                                                                                                                                  padding:16px}
+                                                                                                                                                                                                  .people{
+                                                                                                                                                                                                    flex-direction:row;
+                                                                                                                                                                                                    margin-bottom:14px;
+                                                                                                                                                                                                    padding-bottom:12px}
+                                                                                                                                                                                                    .people button{
+                                                                                                                                                                                                      flex-direction:row;
+                                                                                                                                                                                                      justify-content:center;
+                                                                                                                                                                                                      gap:7px;
+                                                                                                                                                                                                      min-height:44px}
+                                                                                                                                                                                                      .portrait{
+                                                                                                                                                                                                        width:26px;
+                                                                                                                                                                                                        height:26px}
+                                                                                                                                                                                                        .person-heading h2{
+                                                                                                                                                                                                          font-size:23px}
+                                                                                                                                                                                                          .activity-line{
+                                                                                                                                                                                                            margin-top:14px}
+                                                                                                                                                                                                            .intention{
+                                                                                                                                                                                                              margin-bottom:10px}
+                                                                                                                                                                                                              .recent-heading{
+                                                                                                                                                                                                                margin-top:15px}
+                                                                                                                                                                                                                .person-recent{
+                                                                                                                                                                                                                  margin-bottom:10px}
+                                                                                                                                                                                                                  .conversation textarea{
+                                                                                                                                                                                                                    width:100%}
+                                                                                                                                                                                                                    .activity-feed{
+                                                                                                                                                                                                                      position:relative;
+                                                                                                                                                                                                                      right:auto;
+                                                                                                                                                                                                                      bottom:auto;
+                                                                                                                                                                                                                      width:auto;
+                                                                                                                                                                                                                      margin:12px 14px 0;
+                                                                                                                                                                                                                      padding:14px}
+                                                                                                                                                                                                                      .activity-feed ol{
+                                                                                                                                                                                                                        max-height:150px}
+                                                                                                                                                                                                                        .neighbourhood-bar{
+                                                                                                                                                                                                                          position:relative;
+                                                                                                                                                                                                                          left:auto;
+                                                                                                                                                                                                                          right:auto;
+                                                                                                                                                                                                                          bottom:auto;
+                                                                                                                                                                                                                          margin:12px 14px 0;
+                                                                                                                                                                                                                          display:grid;
+                                                                                                                                                                                                                          grid-template-columns:1fr 1fr;
+                                                                                                                                                                                                                          gap:15px;
+                                                                                                                                                                                                                          padding:15px}
+                                                                                                                                                                                                                          .neighbourhood-bar>div+div{
+                                                                                                                                                                                                                            padding-left:10px}
+                                                                                                                                                                                                                            .neighbourhood-bar .cooperation-status{
+                                                                                                                                                                                                                              grid-column:1/-1;
+                                                                                                                                                                                                                              border-left:0;
+                                                                                                                                                                                                                              padding-left:0}
+                                                                                                                                                                                                                              .clock-controls{
+                                                                                                                                                                                                                                grid-column:1/-1;
+                                                                                                                                                                                                                                justify-content:space-between}
+                                                                                                                                                                                                                                .neighbourhood-bar .clock-controls{
+                                                                                                                                                                                                                                  padding-left:0;
+                                                                                                                                                                                                                                  border:0}
+                                                                                                                                                                                                                                  .clock-controls button,.clock-controls select{
+                                                                                                                                                                                                                                    min-height:40px}
+                                                                                                                                                                                                                                    .clock-controls button{
+                                                                                                                                                                                                                                      flex:1}
+                                                                                                                                                                                                                                      .neighbourhood-bar strong{
+                                                                                                                                                                                                                                        font-size:12px}
+                                                                                                                                                                                                                                        .npc-marker{
+                                                                                                                                                                                                                                          font-size:8px;
+                                                                                                                                                                                                                                          padding:8px 9px;
+                                                                                                                                                                                                                                          min-height:32px}
+                                                                                                                                                                                                                                          body[data-experience=neighbourhood] .header-note{
+                                                                                                                                                                                                                                            display:block;
+                                                                                                                                                                                                                                            position:absolute;
+                                                                                                                                                                                                                                            top:68px;
+                                                                                                                                                                                                                                            left:14px;
+                                                                                                                                                                                                                                            z-index:6}
+                                                                                                                                                                                                                                            body[data-experience=neighbourhood] .experience-nav{
+                                                                                                                                                                                                                                              background:#e3e9d5cc;
+                                                                                                                                                                                                                                              backdrop-filter:blur(8px)}
+                                                                                                                                                                                                                                              body[data-experience=neighbourhood] .experience-nav a{
+                                                                                                                                                                                                                                                font-size:8px;
+                                                                                                                                                                                                                                                padding:6px 10px}
+                                                                                                                                                                                                                                                body[data-experience=neighbourhood] .scene-caption{
+                                                                                                                                                                                                                                                  top:49px}
+                                                                                                                                                                                                                                                  .view-controls{
+                                                                                                                                                                                                                                                    top:49px!important}
+                                                                                                                                                                                                                                                    .compass{
+                                                                                                                                                                                                                                                      top:130px!important}
+                                                                                                                                                                                                                                                      body[data-experience=taxi] .header-note{
+                                                                                                                                                                                                                                                        display:block;
+                                                                                                                                                                                                                                                        position:absolute;
+                                                                                                                                                                                                                                                        right:14px;
+                                                                                                                                                                                                                                                        top:67px;
+                                                                                                                                                                                                                                                        z-index:6}
+                                                                                                                                                                                                                                                        body[data-experience=taxi] .experience-nav a{
+                                                                                                                                                                                                                                                          padding:5px 7px;
+                                                                                                                                                                                                                                                          font-size:8px}
+                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                        body[data-experience=neighbourhood] .inhabitant-panel{
+                                                                                                                                                                                                                                                          max-height:calc(100% - 340px);
+                                                                                                                                                                                                                                                          overflow:auto}
+                                                                                                                                                                                                                                                          @media(max-height:820px) and (min-width:901px){
+                                                                                                                                                                                                                                                            body[data-experience=neighbourhood] .inhabitant-panel{
+                                                                                                                                                                                                                                                              max-height:calc(100% - 280px)}
+                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                            @media(max-height:740px) and (min-width:901px){
+                                                                                                                                                                                                                                                              body[data-experience=neighbourhood] .inhabitant-panel{
+                                                                                                                                                                                                                                                                max-height:calc(100% - 145px)}
+                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                              @media(max-width:900px) and (min-width:601px){
+                                                                                                                                                                                                                                                                body[data-experience=neighbourhood] .inhabitant-panel{
+                                                                                                                                                                                                                                                                  max-height:calc(100% - 250px)}
+                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                @media(max-width:600px){
+                                                                                                                                                                                                                                                                  body[data-experience=neighbourhood] .inhabitant-panel{
+                                                                                                                                                                                                                                                                    max-height:none;
+                                                                                                                                                                                                                                                                    overflow:visible}
+                                                                                                                                                                                                                                                                  }

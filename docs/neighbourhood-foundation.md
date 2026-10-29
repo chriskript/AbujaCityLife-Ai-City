@@ -1,6 +1,6 @@
 # Shared neighbourhood foundation
 
-This headless foundation adds an authoritative, isolated neighbourhood with Musa (taxi driver), Amina (market trader), and Zainab (resident). It runs alongside the existing taxi demonstration. It is not connected to the browser, a hosted world, or live Meta inference.
+This headless foundation adds an authoritative, isolated neighbourhood with Musa (taxi driver), Amina (market trader), and Zainab (resident). The [visible inhabitants experience](visible-inhabitants.md) now consumes this same core through a local session adapter. It is not connected to a hosted world or live Meta inference.
 
 ## Run
 
@@ -62,4 +62,4 @@ These are local simulation scheduling limits, not a replacement for persistent i
 
 The scripted provider can independently choose driver refusal and trader cooperation, self-collection, waiting, or reduced sales. Tests exercise each outcome. A strict JSON Schema and provider interface are prepared for later Meta integration; no live adapter is connected to this contract, and its API compatibility has not been live-tested.
 
-The next milestone can connect this state to the existing miniature scene and character selection. Natural conversation, additional visuals, browser integration, backend hosting, and paid inference are deliberately outside this milestone.
+The visible-inhabitants milestone connects this state to the miniature scene and character selection without duplicating the simulation. Natural conversation, backend hosting, and paid inference remain separate work.
