@@ -4,6 +4,7 @@ import { initialState, places } from './initial-state.js';
 import { isNpcDecision } from './decision-schema.js';
 import { npcIds, type Action, type DecisionOutcome, type MemoryKind, type NpcDecisionRequest, type NpcId, type NpcObservation, type TransportTask, type WorldEvent, type WorldState } from './types.js';
 import { assertSnapshot } from './snapshot.js';
+import { projectPlaceKnowledge } from './knowledge.js';
 
 let worldSequence = 0;
 const copy = <T>(value: T): T => structuredClone(value);
@@ -72,7 +73,7 @@ export class Neighbourhood {
     const visible = npc.knowledge.resources;
     if (npc.node === 'market' && (visible.marketGoods !== this.state.resources.marketGoods || visible.salesOpen !== this.state.resources.salesOpen)) {
       visible.marketGoods = this.state.resources.marketGoods; visible.salesOpen = this.state.resources.salesOpen;
-      this.record('stock-observed', id, [id], 'market', `Observed ${visible.marketGoods} goods at the stall`, { quantity: visible.marketGoods }, 'observed');
+      this.record('stock-observed', id, [id], 'market', `Observed ${visible.marketGoods} goods at the stall`, { quantity: visible.marketGoods, salesOpen: visible.salesOpen }, 'observed');
       if (id === 'amina') {
         const before = npc.needs.stock; npc.needs.stock = visible.marketGoods < 2 ? 0.8 : 0.1;
         if (before < 0.5 && npc.needs.stock >= 0.5) this.trigger(id, 'stock-low');
@@ -105,6 +106,10 @@ export class Neighbourhood {
     return copy({
       actor: npc, time: this.state.time,
       places: places.filter(place => npc.knowledge.places.includes(place.id)),
+      placeKnowledge: projectPlaceKnowledge(npc, this.state.events, this.state.time),
+      memoryEvidence: npc.memories.map(memory => ({ id: memory.id, interpretation:
+        this.state.events.find(event => event.id === memory.eventId)?.type === 'conversation' && memory.source === id ? 'speech-only' :
+        memory.kind === 'fact' ? 'established-fact' : memory.kind === 'reported' ? 'unverified-report' : memory.kind === 'belief' ? 'uncertain-belief' : memory.kind === 'commitment' ? 'commitment' : memory.kind === 'outcome' ? 'verified-outcome' : 'observed-world-event' })),
       nearbyPeople: npcIds.filter(other => npc.knowledge.people.includes(other) && this.nearby(id, other)).map(other => ({
         id: other, name: this.state.npcs[other].name, occupation: this.state.npcs[other].occupation, activity: this.state.npcs[other].activity.kind,
       })),
@@ -202,8 +207,8 @@ export class Neighbourhood {
       if (action.type === 'respond-transport') {
         if (task.status !== 'proposed' || this.state.time >= task.expiresAt) return 'offer-not-open';
         if (!this.nearby(id, task.requester)) return 'requester-not-nearby';
-        if (action.accept && Object.values(this.state.tasks).some(other => other.recipient === id && ['accepted', 'collected'].includes(other.status))) return 'existing-commitment';
-        if (action.accept && this.availableSupplies() < task.quantity) return 'insufficient-supplies';
+        if (action.accept === true && Object.values(this.state.tasks).some(other => other.recipient === id && ['accepted', 'collected'].includes(other.status))) return 'existing-commitment';
+        if (action.accept === true && this.availableSupplies() < task.quantity) return 'insufficient-supplies';
       } else {
         if (!['accepted', 'collected'].includes(task.status)) return 'task-not-active';
         if (task.status === 'collected' && npc.inventory.goods < task.quantity) return 'missing-cargo';
@@ -247,6 +252,11 @@ export class Neighbourhood {
       this.trigger(task.recipient, 'transport-request'); this.trigger(id, 'offer-proposed');
     } else if (action.type === 'respond-transport') {
       const task = this.state.tasks[action.taskId]!;
+      if (action.accept === 'clarify') {
+        task.revision++;
+        this.record('transport-clarification-requested', id, [id, task.requester], task.id, action.question, {}, 'reported', id, true);
+        this.trigger(task.requester, 'clarification-requested'); return;
+      }
       task.status = action.accept ? 'accepted' : 'declined'; task.revision++;
       task.reserved = action.accept ? task.quantity : 0;
       for (const participant of [id, task.requester]) this.state.npcs[participant].knowledge.tasks[task.id] = task.status;

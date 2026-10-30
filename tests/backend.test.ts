@@ -179,7 +179,7 @@ describe('Meta neighbourhood contract without paid requests', () => {
   }
   const output = (value: unknown, model = 'muse-spark-1.3') => ({ model, status: 'completed', output: [{ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: JSON.stringify(value) }] }], usage: { input_tokens: 400, output_tokens: 100 } });
   it('uses the verified endpoint, bounded Responses request and original persistent reservations', async () => {
-    const { provider: p, fetcher, ledgerPath } = await provider(output({ reply: 'I know Market Square.', evidenceIds: ['market'], uncertain: false, proposedDecision: null }));
+    const { provider: p, fetcher, ledgerPath } = await provider(output({ reply: 'I know Market Square.', evidenceIds: ['market'], uncertain: false, proposedDecision: null, claims: [] }));
     await p.converse(context()); expect(fetcher).toHaveBeenCalledTimes(2);
     expect(fetcher.mock.calls[0]![0]).toBe('https://api.meta.ai/v1/responses/input_tokens'); expect(fetcher.mock.calls[1]![0]).toBe('https://api.meta.ai/v1/responses');
     const body = JSON.parse(fetcher.mock.calls[1]![1]!.body as string); expect(body.model).toBe('muse-spark-1.3'); expect(body.max_output_tokens).toBe(2048); expect(body.store).toBe(false); expect(body.text.format.strict).toBe(true);

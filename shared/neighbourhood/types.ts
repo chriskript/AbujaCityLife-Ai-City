@@ -1,3 +1,4 @@
+import type { PlaceFacts, PlaceKnowledge } from './knowledge.js';
 export const npcIds = ['musa', 'amina', 'zainab'] as const;
 export type NpcId = typeof npcIds[number];
 export type MemoryKind = 'fact' | 'observed' | 'reported' | 'belief' | 'commitment' | 'outcome';
@@ -19,6 +20,7 @@ export interface Inhabitant {
   activity: Activity; inventory: { goods: number; rewards: number };
   knowledge: {
     places: string[]; people: NpcId[]; blockedEdges: string[];
+    placeFacts?: Record<string, PlaceFacts>;
     tasks: Record<string, TaskStatus>;
     resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
   };
@@ -50,6 +52,7 @@ export type Action =
   | { type: 'wait' | 'work'; seconds: number }
   | { type: 'propose-transport'; recipient: NpcId; quantity: number }
   | { type: 'respond-transport'; taskId: string; accept: boolean }
+  | { type: 'respond-transport'; taskId: string; accept: 'clarify'; question: string }
   | { type: 'fulfil-transport'; taskId: string }
   | { type: 'collect-self' | 'stock-stall' | 'buy'; quantity: number }
   | { type: 'set-sales'; open: boolean }
@@ -58,6 +61,8 @@ export interface NpcDecision { goalId: string; reason: string; action: Action }
 export interface NpcObservation {
   actor: Inhabitant; time: number;
   places: { id: string; node: string; name: string }[];
+  placeKnowledge: PlaceKnowledge[];
+  memoryEvidence: { id: string; interpretation: 'established-fact' | 'observed-world-event' | 'speech-only' | 'unverified-report' | 'uncertain-belief' | 'commitment' | 'verified-outcome' }[];
   nearbyPeople: { id: NpcId; name: string; occupation: string; activity: Activity['kind'] }[];
   resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
   tasks: Pick<TransportTask, 'id' | 'requester' | 'recipient' | 'quantity' | 'pickup' | 'destination' | 'status' | 'expiresAt'>[]; knownBlockedEdges: string[];

@@ -14,7 +14,7 @@ export function isNpcDecision(value: unknown): value is NpcDecision {
     case 'travel': return exact(action, ['type', 'destination']) && text(action.destination);
     case 'wait': case 'work': return exact(action, ['type', 'seconds']) && Number.isFinite(action.seconds) && Number(action.seconds) >= 1 && Number(action.seconds) <= 120;
     case 'propose-transport': return exact(action, ['type', 'recipient', 'quantity']) && npcIds.includes(action.recipient as typeof npcIds[number]) && quantity(action.quantity);
-    case 'respond-transport': return exact(action, ['type', 'taskId', 'accept']) && text(action.taskId) && typeof action.accept === 'boolean';
+    case 'respond-transport': return text(action.taskId) && (exact(action, ['type', 'taskId', 'accept']) && typeof action.accept === 'boolean' || exact(action, ['type','taskId','accept','question']) && action.accept === 'clarify' && text(action.question, 160));
     case 'fulfil-transport': return exact(action, ['type', 'taskId']) && text(action.taskId);
     case 'collect-self': case 'stock-stall': case 'buy': return exact(action, ['type', 'quantity']) && quantity(action.quantity);
     case 'set-sales': return exact(action, ['type', 'open']) && typeof action.open === 'boolean';
@@ -33,6 +33,7 @@ export const npcDecisionSchema = {
       ['wait', { seconds: { type: 'number' } }], ['work', { seconds: { type: 'number' } }],
       ['propose-transport', { recipient: { type: 'string', enum: npcIds }, quantity: { type: 'integer' } }],
       ['respond-transport', { taskId: { type: 'string' }, accept: { type: 'boolean' } }],
+      ['respond-transport', { taskId: { type: 'string' }, accept: { type: 'string', enum: ['clarify'] }, question: { type: 'string', minLength: 1, maxLength: 160 } }],
       ['fulfil-transport', { taskId: { type: 'string' } }],
       ...['collect-self', 'stock-stall', 'buy'].map(type => [type, { quantity: { type: 'integer' } }]),
       ['set-sales', { open: { type: 'boolean' } }],

@@ -1,6 +1,7 @@
 import { edges, nodes } from '../world/neighbourhood.js';
 import { initialState, places } from './initial-state.js';
 import { npcIds, type WorldState } from './types.js';
+import { placeCatalogue } from './knowledge.js';
 
 function check(condition: unknown): asserts condition { if (!condition) throw new Error('Invalid neighbourhood snapshot'); }
 const object = (value: unknown): boolean => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -29,6 +30,15 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
     check(object(npc.needs) && Object.values(npc.needs).length === 3 && Object.values(npc.needs).every(need => Number.isFinite(need) && need >= 0 && need <= 1));
     check(npc.intention === null || object(npc.intention) && npc.goals.some(goal => goal.id === npc.intention?.goalId) && text(npc.intention.reason, 400));
     check(object(npc.knowledge) && Array.isArray(npc.knowledge.places) && npc.knowledge.places.every(place => places.some(item => item.id === place)));
+    if (npc.knowledge.placeFacts !== undefined) {
+      check(object(npc.knowledge.placeFacts));
+      for (const [place, facts] of Object.entries(npc.knowledge.placeFacts)) {
+        const definition = placeCatalogue[place];
+        check(npc.knowledge.places.includes(place) && definition && object(facts) && facts.source === 'established' && typeof facts.complete === 'boolean');
+        check(Array.isArray(facts.services) && facts.services.every(service => definition.services.includes(service)) && Array.isArray(facts.products) && facts.products.every(product => definition.products.includes(product)));
+        if (facts.complete) check(JSON.stringify(facts) === JSON.stringify(definition));
+      }
+    }
     check(Array.isArray(npc.knowledge.people) && npc.knowledge.people.every(person => npcIds.includes(person) && person !== id));
     check(Array.isArray(npc.knowledge.blockedEdges) && npc.knowledge.blockedEdges.every(edge => edges.some(item => item.id === edge)) && object(npc.knowledge.tasks) && object(npc.knowledge.resources));
     for (const amount of [npc.knowledge.resources.supplierGoods, npc.knowledge.resources.marketGoods]) check(amount === null || integer(amount));

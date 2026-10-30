@@ -31,7 +31,7 @@ export class NeighbourhoodServerSession {
   private proposals = new Map<string, { request: NpcDecisionRequest; decision: unknown; expires: number }>();
   private listeners = new Set<(frame: NeighbourhoodFrame) => void>();
   private provider: NeighbourhoodProvider;
-  private constructor(private readonly options: { checkpoint: string; provider?: NeighbourhoodProvider; plan?: LivePlan; now?: () => number }) { this.provider = options.provider ?? new MockNeighbourhoodProvider(); }
+  private constructor(private readonly options: ConstructorParametersInternal) { this.provider = options.provider ?? new MockNeighbourhoodProvider(); }
   static async open(options: ConstructorParametersInternal): Promise<NeighbourhoodServerSession> {
     const session = new NeighbourhoodServerSession(options);
     if (session.provider.mode === 'live-meta') validateLivePlan(options.plan);
@@ -45,7 +45,7 @@ export class NeighbourhoodServerSession {
       for (const receipt of Object.values(data.receipts)) if (receipt.status === 'pending') { receipt.status = 'failed'; receipt.value = 'Interrupted by restart; request will not be repeated'; }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-      session.world = new Neighbourhood(`server-${randomUUID()}`);
+      session.world = options.initialWorld ? Neighbourhood.restore(options.initialWorld) : new Neighbourhood(`server-${randomUUID()}`);
       session.data = { version: 1, sessionId: randomUUID(), sequence: 0, world: '', paused: false, speed: 2, requests: 0, recent: [], last: {}, receipts: {}, history: { musa: [], amina: [], zainab: [] }, metrics: [], plan: null };
     }
     if (options.plan) {
@@ -129,7 +129,7 @@ export class NeighbourhoodServerSession {
       if (!this.data.paused) { this.world.advance(seconds * this.data.speed); await this.commit(); }
     });
   }
-  async decide(actorId?: NpcId): Promise<void> {
+  async decide(actorId?: NpcId, triggerOnly = false): Promise<void> {
     let request: NpcDecisionRequest | null = null; let origin: Neighbourhood; let epoch = 0;
     await this.transaction(async () => {
       if (this.data.paused || this.busy) return;
@@ -138,7 +138,7 @@ export class NeighbourhoodServerSession {
         const id = actorId ?? npcIds[(this.cursor++ % 3)]!;
         if (!actorId && this.world.snapshot.time - (this.data.last[id]?.simulation ?? -Infinity) < 20) continue;
         try { this.reserveRequest(id); } catch (error) { if (actorId) throw error; continue; }
-        request = actorId ? this.world.requestInteractionDecision(id) : this.world.requestDecision(id);
+        request = actorId && !triggerOnly ? this.world.requestInteractionDecision(id) : this.world.requestDecision(id);
         if (!request) { this.busy = false; this.data.requests--; this.data.recent.pop(); delete this.data.last[id]; if (this.mode === 'live-meta') { this.data.plan!.used--; this.data.plan!.reservedUsd -= maximumGenerationUsd; } continue; }
         origin = this.world; epoch = this.epoch; await this.commit(); return;
       }
@@ -201,7 +201,7 @@ export class NeighbourhoodServerSession {
   }
   async close(): Promise<void> { await this.tail; this.closed = true; this.listeners.clear(); }
 }
-type ConstructorParametersInternal = { checkpoint: string; provider?: NeighbourhoodProvider; plan?: LivePlan; now?: () => number };
+type ConstructorParametersInternal = { checkpoint: string; provider?: NeighbourhoodProvider; plan?: LivePlan; now?: () => number; initialWorld?: string };
 function mockExperiment(experiment: Experiment): NeighbourhoodProvider {
   return new MockNeighbourhoodProvider(new NeighbourhoodMockProvider({ trader: experiment === 'cooperate' || experiment === 'decline' ? 'cooperate' : experiment, driver: experiment === 'decline' ? 'decline' : 'accept' }));
 }

@@ -39,7 +39,7 @@ export interface NeighbourhoodSession {
 
 const observableTypes = new Set([
   'activity-started', 'activity-completed', 'arrived', 'transport-proposed', 'transport-accepted',
-  'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy',
+  'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy', 'transport-clarification-requested',
   'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
 ]);
 

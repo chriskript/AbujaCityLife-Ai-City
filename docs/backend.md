@@ -55,6 +55,8 @@ Only the selected character's existing observation and up to six recent turns ar
 
 Conversation output requires bounded dialogue, evidence IDs from the observation, uncertainty, and an optional strict NPC decision. Unsupported evidence is rejected. Prose grounding is instructed and evidence-checked, **not a proof of every factual sentence**; live evaluation must assess hallucination and identity fidelity. Consequential proposals are held separately and only the original action schema and semantic validator can execute them after confirmation. Saying “delivered” cannot transfer goods.
 
+Milestone 6B adds [explicit service/product knowledge and structured recommendation claims](knowledge-grounding.md). New live dialogue schemas require `claims`; legacy four-field fixtures remain readable. Structured claims are checked against the NPC's established service knowledge and timestamped stock evidence. Empty/omitted claim coverage still cannot prove that all prose is supported. This revised schema has offline coverage and awaits separate live approval.
+
 Mock conversation deliberately returns a **labelled fixture**, not keyword-matched natural dialogue. Live failure returns an error and no substituted response. Recorded replay is not implemented.
 
 ## Spending controls and separate live approval
