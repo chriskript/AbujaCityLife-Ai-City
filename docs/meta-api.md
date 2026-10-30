@@ -1,6 +1,6 @@
 # Meta API setup and verification
 
-The current Meta integration is a **standalone server-side contract probe**, not live gameplay or a public inference endpoint. One approved live Spark 1.3 destination-selection request returned a decision accepted by both validators. Browser gameplay, routine tests, and demonstrations use a scripted mock provider and make no Meta requests.
+The original **standalone server-side contract probe** has one approved live Spark 1.3 destination-selection result accepted by both validators. The [controlled neighbourhood backend](backend.md) now prepares decisions and conversations for live integration, with mocked HTTP contract coverage; its new schemas have not yet been evaluated live. Browser gameplay and routine tests default to mock mode. No public inference endpoint is enabled.
 
 ## Offline foundation check
 
@@ -52,7 +52,7 @@ Reservations are retained in full after success, timeout, or generation failure.
 
 Persist `runtime/meta-probe-budget.json` across runs and deployments. Deleting or replacing it defeats spending history. A crash can leave a `.lock` or `.pending` file; investigate manually rather than clearing accounting automatically. The initial ledger must be created explicitly, so an unexpectedly missing ledger is never silently replaced by a live run.
 
-These controls cover this probe only, not other applications or keys using the same Meta account. They depend on the configured prices and reservation assumptions. The probe is not suitable for public exposure. A production HTTP service, application-wide rate limiting, request deduplication, caching, reconciliation, and full live scenario evaluation remain planned.
+The [backend](backend.md) reuses this same ledger, adding session limits, request deduplication and approved evaluation allowances. These controls do not cover other applications or keys using the same Meta account and depend on configured prices and reservation assumptions. The probe and local demo service are not suitable for public exposure. Full live scenario evaluation and public hosting remain outstanding.
 
 ## Verification boundaries
 

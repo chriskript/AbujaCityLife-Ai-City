@@ -535,3 +535,9 @@
                                                                                                                                                                                                                                                                     max-height:none;
                                                                                                                                                                                                                                                                     overflow:visible}
                                                                                                                                                                                                                                                                   }
+/* Backend access and bounded conversation use the existing character card. */
+#backend-access { margin-top: 16px; padding: 12px; border: 1px solid #d8ddd2; border-radius: 10px; }
+#backend-access label { display: block; font-size: 12px; margin-bottom: 6px; }
+#demo-token { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 8px; }
+#transcript { max-height: 180px; overflow: auto; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+#connection-status, #conversation-status { font-size: 11px; line-height: 1.5; }

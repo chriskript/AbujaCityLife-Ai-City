@@ -25,6 +25,7 @@ export type SessionCommand = { id: string; worldId: string } & (
   | { type: 'pause'; paused: boolean }
   | { type: 'speed'; speed: 1 | 2 | 4 }
   | { type: 'reset'; experiment: Experiment }
+  | { type: 'road'; edgeId: string; blocked: boolean }
 );
 export interface CommandReceipt { accepted: boolean; reason: string }
 export interface NeighbourhoodSession {
@@ -39,7 +40,7 @@ export interface NeighbourhoodSession {
 const observableTypes = new Set([
   'activity-started', 'activity-completed', 'arrived', 'transport-proposed', 'transport-accepted',
   'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy',
-  'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'action-validated', 'action-proposed', 'intention-selected',
+  'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
 ]);
 
 export function projectNeighbourhood(state: WorldState): { snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null } {

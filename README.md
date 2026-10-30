@@ -14,11 +14,11 @@ Every model-proposed action must pass through a deterministic validation and exe
 
 **Implemented:** a playable Three.js neighbourhood where Musa, Amina, and Zainab pursue activities without player instructions. Select an inhabitant, follow their movements, and watch validated cooperation change cargo, stall stock, and purchases. Character cards, an activity feed, pause/reset controls, and alternative mock policies make their shared day observable.
 
-The browser currently uses a **scripted mock provider**, with no inference charges. One controlled server-side Muse Spark 1.3 test has returned a valid destination-selection decision. This verifies the API foundation; it does not enable live Meta gameplay in the browser.
+The browser now connects to a **controlled, authoritative Node backend**, with persistent world state, validated decisions, and conversation requests. Development defaults to a **scripted mock provider** with labelled conversation fixtures and no inference charges. A separate Muse Spark 1.3 destination-selection test has succeeded; the new neighbourhood decisions and natural dialogue still require approved live evaluation.
 
-The same headless foundation powers the browser: independent goals, limited knowledge, event-driven activities, inventory consequences, and structured memories. The original instruction-driven taxi demonstrations remain available in **Taxi lab**. Natural conversations are visibly unavailable until a live dialogue provider is connected.
+The same headless foundation powers the browser: independent goals, limited knowledge, event-driven activities, inventory consequences, and structured memories. The original instruction-driven mock taxi demonstrations remain available in **Taxi lab**. Consequential conversation actions require separate confirmation and simulation validation.
 
-**Next:** connect a secure, budget-controlled backend for live Meta decisions and grounded conversation, then evaluate complete interactions.
+**Next:** evaluate grounded conversation and autonomous decisions with live Meta inference under a separately approved, bounded test plan.
 
 ## Technology
 
@@ -35,13 +35,15 @@ cd AbujaCityLife-Ai-City
 npm ci
 ```
 
-Start the browser application:
+Initialize local demo access once, build, and start the mock backend:
 
 ```bash
-npm run dev
+npm run backend:init
+npm run build
+npm run backend
 ```
 
-Open **http://127.0.0.1:5173/** and observe the neighbourhood. Select characters in the scene or the character card. Use focus, pause, and time controls to inspect their activities; **Neighbourhood experiments** offers alternative mock policies that take effect on reset. The default clock runs at 2× speed.
+Open **http://127.0.0.1:8787/** and sign in using the token in ignored `runtime/demo-access.json`. Select characters, observe their activities, and try the clearly labelled mock conversation fixtures. **Neighbourhood experiments** offers alternative mock policies on reset. For frontend development, keep the backend running and use `npm run dev` in another terminal (port 5173). See the [backend guide](docs/backend.md) for access, persistence and operating limits.
 
 For the original journeys, open **Taxi lab** in the navigation (or `/?experience=taxi`). Try **Find a lake view**, **Visit the market**, or **Take a detour**. Its text input recognises market/lake fixtures; it is not general natural-language understanding.
 
@@ -67,13 +69,14 @@ npm run typecheck
 npm run build
 ```
 
-To inspect the production build locally, run `npm run preview` and open the URL printed in the terminal. A recent browser with WebGL 2 is required for the 3D scene.
+The backend serves the production build locally. `npm run preview` serves static files only; it does not proxy the API. A recent browser with WebGL 2 is required for the 3D scene.
 
 For server-side API setup and an offline configuration check, see the [Meta API guide](docs/meta-api.md). Keep credentials in local backend configuration; never put them in browser code or Git.
 
 ## Documentation
 
 - [Simulation architecture](docs/architecture.md)
+- [Controlled backend and local execution](docs/backend.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)
 - [Visible inhabitants and session contract](docs/visible-inhabitants.md)
 - [Browser verification and limitations](docs/browser-verification.md)

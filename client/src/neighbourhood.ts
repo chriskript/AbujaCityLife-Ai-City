@@ -1,6 +1,7 @@
 import './neighbourhood.css';
 import { NeighbourhoodScene } from './rendering/scene.js';
 import { LocalNeighbourhoodSession } from './simulation/local-neighbourhood-session.js';
+import { RemoteNeighbourhoodSession } from './simulation/remote-neighbourhood-session.js';
 import { PresentationStore, type NeighbourhoodSession, type NeighbourhoodFrame, type ObservableEvent, type Experiment, type SessionCommand } from '../../shared/neighbourhood/presentation.js';
 import type { NpcId } from '../../shared/neighbourhood/types.js';
 
@@ -20,7 +21,8 @@ document.querySelector('#experience')!.innerHTML = `
     <p id="person-intention" class="intention">The neighbourhood is waking up.</p>
     <div class="person-facts"><span id="person-location">Market Square</span><span id="person-goods">No goods carried</span></div>
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul>
-    <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span class="coming-soon">NOT CONNECTED</span></summary><label for="conversation-input">Conversation</label><textarea id="conversation-input" disabled placeholder="Natural conversation will be available after live Meta dialogue is connected."></textarea><button disabled>Send message</button><p>Mock mode runs activities, not unrestricted AI conversations.</p></details>
+    <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
+    <section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
     <details class="experiments"><summary>Neighbourhood experiments</summary><label for="experiment">Mock decision policy</label><select id="experiment"><option value="cooperate">Cooperation</option><option value="decline">Driver declines</option><option value="wait">Trader waits</option><option value="self-collect">Trader collects supplies herself</option><option value="reduce-sales">Trader pauses sales</option></select><p>Choose an alternative, then reset. These are labelled mock policies, not guaranteed live AI outcomes.</p></details>
   </section>
   <div class="view-controls" role="group" aria-label="Neighbourhood controls"><button id="focus" aria-pressed="false">◎ Focus Amina</button><button id="pause" aria-pressed="false">Ⅱ Pause</button></div>
@@ -30,7 +32,11 @@ document.querySelector('#experience')!.innerHTML = `
   <div id="notice" role="status">Activities use scripted mock decisions. No Meta requests are made.</div>`;
 
 const el = <T extends HTMLElement>(selector: string): T => document.querySelector<T>(selector)!;
-const session: NeighbourhoodSession = new LocalNeighbourhoodSession();
+const local = new URLSearchParams(location.search).get('authority') === 'local';
+const remote = local ? null : new RemoteNeighbourhoodSession();
+const session: NeighbourhoodSession = remote ?? new LocalNeighbourhoodSession();
+let proposalId: string | null = null;
+let conversationBusy = false;
 const store = new PresentationStore();
 const listeners = new AbortController();
 let frame: NeighbourhoodFrame | null = null;
@@ -42,7 +48,6 @@ let lastTime = 0;
 let elapsedFrames = 0;
 let elapsedSeconds = 0;
 let fps = 0;
-let commandId = 0;
 let previousWorld = '';
 let uiKey = '';
 let scene: NeighbourhoodScene;
@@ -74,7 +79,7 @@ export function describeObservable(event: ObservableEvent): string {
 function timeLabel(time: number): string { return `${String(Math.floor(time / 60)).padStart(2, '0')}:${String(Math.floor(time % 60)).padStart(2, '0')}`; }
 
 function select(id: NpcId): void {
-  selected = id; focused = true; scene.setFollow(true); updateUi(true);
+  selected = id; focused = true; proposalId = null; el('#confirm-proposal').hidden = true; scene.setFollow(true); updateUi(true); void loadHistory();
 }
 function updateUi(force = false): void {
   if (!frame) return;
@@ -111,20 +116,34 @@ function updateUi(force = false): void {
   if (!recent.children.length) { const item = document.createElement('li'); item.textContent = 'Their day is just beginning.'; recent.append(item); }
   el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, tasks: view.tasks, events: frame.events.slice(-12) }, null, 2);
   const mode = el('.mode-pill'); mode.replaceChildren(); const dot = document.createElement('i');
-  mode.title = frame.mode === 'mock' ? 'Scripted local decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
-  mode.append(dot, document.createTextNode(frame.mode === 'mock' ? 'Mock mode / local' : 'Live Meta'));
+  mode.title = frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
+  mode.append(dot, document.createTextNode(frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Meta / backend'));
   el('#feed-mode').textContent = frame.mode === 'mock' ? 'MOCK' : 'LIVE META';
   document.body.dataset.worldId = view.worldId; document.body.dataset.task = task?.status ?? 'none';
   document.body.dataset.selected = selected; document.body.dataset.paused = String(frame.paused);
   document.body.dataset.marketGoods = String(view.resources.marketGoods);
-  if (frame.decisionBudget.used >= frame.decisionBudget.limit) el('#notice').textContent = 'This mock day has reached its decision limit. Reset to explore a fresh neighbourhood.';
-  else el('#notice').textContent = 'Activities use scripted mock decisions. No Meta requests are made.';
+  el('#conversation-mode').textContent = frame.mode === 'live-meta' ? 'LIVE META' : 'MOCK FIXTURE';
+  el<HTMLButtonElement>('#send-message').disabled = !remote || conversationBusy;
+  el<HTMLTextAreaElement>('#conversation-input').disabled = !remote;
+  if (frame.decisionBudget.used >= frame.decisionBudget.limit) el('#notice').textContent = 'Session decision limit reached. Reset preserves request and spending limits.';
+  else el('#notice').textContent = frame.mode === 'live-meta' ? 'Live Meta decisions. Actions are validated by the authoritative backend.' : local ? 'Local mock test mode. No backend or Meta requests.' : 'Authoritative backend · mock activities and labelled conversation fixtures · no Meta requests.';
 }
 
 async function command(payload: Omit<Extract<SessionCommand, { type: 'pause' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'speed' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'reset' }>, 'id' | 'worldId'>): Promise<void> {
   if (!frame) return;
-  const receipt = await session.send({ ...payload, id: `ui-${++commandId}`, worldId: frame.snapshot.worldId });
-  if (!receipt.accepted) el('#notice').textContent = 'The world changed. Please try that control again.';
+  try {
+    const receipt = await session.send({ ...payload, id: `ui-${crypto.randomUUID()}`, worldId: frame.snapshot.worldId });
+    if (!receipt.accepted) el('#notice').textContent = receipt.reason;
+  } catch (error) { el('#notice').textContent = (error as Error).message; }
+}
+async function loadHistory(): Promise<void> {
+  if (!remote) return;
+  const actor = selected;
+  try {
+    const turns = await remote.history(actor); if (actor !== selected) return;
+    const target = el('#transcript'); target.replaceChildren();
+    for (const turn of turns) { const line = document.createElement('p'); line.textContent = `${turn.speaker === 'player' ? 'You' : names[actor]} (${turn.mode}): ${turn.text}`; target.append(line); }
+  } catch { /* Connection status is shown separately. */ }
 }
 let unsubscribe = (): void => {};
 function dispose(): void {
@@ -140,12 +159,37 @@ try {
   scene.enableInhabitants(select);
   unsubscribe = session.subscribe(next => {
     if (!store.accept(next)) return; frame = store.frame!;
-    if (previousWorld !== frame.snapshot.worldId) { scene.resetPresentation(); previousWorld = frame.snapshot.worldId; }
+    if (previousWorld !== frame.snapshot.worldId) { scene.resetPresentation(); previousWorld = frame.snapshot.worldId; proposalId = null; el('#confirm-proposal').hidden = true; void loadHistory(); }
     updateUi();
   });
   const options = { signal: listeners.signal };
+  remote?.onConnection(state => {
+    el('#backend-access').hidden = state === 'ready';
+    el('#demo-token').hidden = state !== 'unauthorized'; el('#sign-in').hidden = state !== 'unauthorized';
+    el('#connection-status').textContent = state === 'unauthorized' ? 'Controlled local demonstration. Use the token from runtime/demo-access.json.' : state === 'offline' ? 'Backend unavailable. Start npm run backend, then reload. The visible snapshot is frozen.' : state === 'connecting' ? 'Connecting to authoritative backend…' : '';
+    if (state !== 'ready') el('#notice').textContent = 'Waiting for the secured backend. No local fallback or inference is running.';
+  });
+  el('#sign-in').addEventListener('click', () => {
+    const input = el<HTMLInputElement>('#demo-token'); const token = input.value; input.value = '';
+    void remote?.login(token).catch(() => { el('#connection-status').textContent = 'Access denied or backend unavailable.'; });
+  }, options);
+  el('#send-message').addEventListener('click', () => {
+    if (!remote || !frame || conversationBusy) return;
+    const input = el<HTMLTextAreaElement>('#conversation-input'); const message = input.value.trim(); if (!message) return;
+    const actorId = selected; conversationBusy = true; updateUi(true); el('#conversation-status').textContent = 'Waiting for the backend…';
+    void remote.converse({ id: crypto.randomUUID(), worldId: frame.snapshot.worldId, actorId, message }).then(async result => {
+      input.value = ''; if (actorId === selected) { proposalId = result.proposalId; el('#confirm-proposal').hidden = !proposalId; }
+      el('#conversation-status').textContent = result.mode === 'mock' ? 'Mock fixture. No live reasoning or paid inference.' : 'Live Meta response. Proposed actions require confirmation.';
+      await loadHistory();
+    }).catch(error => { el('#conversation-status').textContent = (error as Error).message; }).finally(() => { conversationBusy = false; updateUi(true); });
+  }, options);
+  el('#confirm-proposal').addEventListener('click', () => {
+    if (!remote || !frame || !proposalId) return;
+    void remote.confirm({ id: crypto.randomUUID(), worldId: frame.snapshot.worldId, proposalId }).then(result => { el('#conversation-status').textContent = `Action validation: ${result.reason}`; }).catch(error => { el('#conversation-status').textContent = (error as Error).message; });
+    proposalId = null; el('#confirm-proposal').hidden = true;
+  }, options);
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-person]')) button.addEventListener('click', () => select(button.dataset.person as NpcId), options);
-  el('#pause').addEventListener('click', () => { void command({ type: 'pause', paused: !frame!.paused }); }, options);
+  el('#pause').addEventListener('click', () => { void command({ type: 'pause', paused: !(frame?.paused ?? true) }); }, options);
   el('#reset').addEventListener('click', () => {
     focused = false; scene.setFollow(false);
     void command({ type: 'reset', experiment: el<HTMLSelectElement>('#experiment').value as Experiment });

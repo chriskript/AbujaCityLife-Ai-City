@@ -1,5 +1,7 @@
 # Visible autonomous inhabitants
 
+This document records the Milestone 4 local adapter. **Current default:** the [controlled backend](backend.md) now owns the world and provides labelled mock conversation fixtures; use `/?authority=local` to run the original offline adapter described below. Current run commands, persistence, request limits and live-mode restrictions are in the backend guide. The historical 24-decision local limit below does not apply to the server session.
+
 The default browser view presents Musa, Amina, and Zainab using the existing shared neighbourhood core. Characters, cargo, stock, requests, and outcomes are driven by authoritative state and recorded events. All current decisions use labelled scripted mock policies. Conversation controls are disabled and explicitly marked as not connected.
 
 ## Local experience

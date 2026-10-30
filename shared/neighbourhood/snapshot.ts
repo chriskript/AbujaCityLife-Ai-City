@@ -40,7 +40,7 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
       check(object(memory) && ['fact', 'observed', 'reported', 'belief', 'commitment', 'outcome'].includes(memory.kind));
       const event = evidence.get(memory.eventId);
       check(event && event.audience.includes(id) && memory.subject === event.subject && memory.detail === event.detail && memory.time === event.time && memory.id === `${event.id}:${id}`);
-      check(['certain', 'uncertain'].includes(memory.certainty) && (memory.source === 'world' || npcIds.includes(memory.source)));
+      check(['certain', 'uncertain'].includes(memory.certainty) && (memory.source === 'world' || memory.source === 'player' || npcIds.includes(memory.source)));
       check(memory.kind !== 'belief' || memory.certainty === 'uncertain');
     }
     check(object(npc.activity)); const activity = npc.activity;

@@ -2,7 +2,7 @@ export const npcIds = ['musa', 'amina', 'zainab'] as const;
 export type NpcId = typeof npcIds[number];
 export type MemoryKind = 'fact' | 'observed' | 'reported' | 'belief' | 'commitment' | 'outcome';
 export interface Memory {
-  id: string; kind: MemoryKind; eventId: string; source: NpcId | 'world';
+  id: string; kind: MemoryKind; eventId: string; source: NpcId | 'world' | 'player';
   subject: string; detail: string; time: number; certainty: 'certain' | 'uncertain';
 }
 export interface Path { nodeIds: string[]; edgeIds: string[]; distance: number }

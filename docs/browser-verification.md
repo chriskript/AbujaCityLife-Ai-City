@@ -1,5 +1,7 @@
 # Browser milestone verification
 
+For the current authoritative backend, see [Milestone 5 verification](backend-verification.md). The checks below document the earlier taxi rendering milestone.
+
 Verified locally on October 27, 2026. All browser journeys used **scripted mock decisions**; this milestone made no Meta API requests or paid inference calls.
 
 ## Checks and evidence

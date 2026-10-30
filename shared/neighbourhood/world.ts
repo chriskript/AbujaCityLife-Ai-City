@@ -45,7 +45,7 @@ export class Neighbourhood {
   private witnesses(actor: NpcId): NpcId[] { return npcIds.filter(id => id === actor || this.nearby(id, actor)); }
 
   private record(type: string, actor: NpcId | null, audience: NpcId[], subject: string, detail: string,
-    data: WorldEvent['data'] = {}, kind?: MemoryKind, source: NpcId | 'world' = 'world', uncertain = false): WorldEvent {
+    data: WorldEvent['data'] = {}, kind?: MemoryKind, source: NpcId | 'world' | 'player' = 'world', uncertain = false): WorldEvent {
     const event: WorldEvent = {
       id: `event-${this.state.nextEvent++}`, revision: ++this.state.revision, time: this.state.time,
       type, actor, audience: [...new Set(audience)], subject, detail, data,
@@ -116,6 +116,16 @@ export class Neighbourhood {
       knownBlockedEdges: npc.knowledge.blockedEdges,
       permittedActions: npc.activity.kind === 'travel' || npc.activity.kind === 'work' ? [] : npc.capabilities,
     });
+  }
+
+  recordConversation(id: NpcId, speaker: 'player' | 'npc', text: string): void {
+    if (!text.trim() || text.length > 1000) throw new Error('Invalid utterance');
+    this.record('conversation', id, [id], speaker, text, {}, speaker === 'player' ? 'reported' : 'observed', speaker === 'player' ? 'player' : id, speaker === 'player');
+  }
+
+  requestInteractionDecision(id: NpcId): NpcDecisionRequest | null {
+    this.trigger(id, 'player-interaction');
+    return this.requestDecision(id);
   }
 
   requestDecision(id: NpcId): NpcDecisionRequest | null {
