@@ -1,5 +1,7 @@
 # Milestone 6C: first live autonomous decision
 
+Follow-up: the [offline quantity-contract correction and AI Town assessment](ai-town-assessment.md#milestone-6c-quantity-correction) aligns the schema and observed constraints with authoritative validation. The evaluation below remains the unchanged historical result; no new live result is implied.
+
 Evaluated October 30, 2026. This was **live Meta Muse Spark 1.3 Standard inference**, not a mock decision. One generation was made, with no retry. The conditional Musa call did not occur. Prompts, schemas, fixture setup and inputs were not changed to obtain a preferred result.
 
 **Result: a contextually reasonable intention produced an invalid executable proposal.** The application rejected it safely. This is not a successful cooperation or delivery demonstration.

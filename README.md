@@ -12,13 +12,13 @@ Every model-proposed action must pass through a deterministic validation and exe
 
 ## Capabilities and status
 
-**Implemented:** a playable Three.js neighbourhood where Musa, Amina, and Zainab pursue activities without player instructions. Select an inhabitant, follow their movements, and watch validated cooperation change cargo, stall stock, and purchases. Character cards, an activity feed, pause/reset controls, and alternative mock policies make their shared day observable.
+**Implemented:** a playable Three.js neighbourhood where Musa, Amina, Zainab, and Chris pursue activities without player instructions. A world-owned registry supports growing populations. Optional encounters receive independent responses and can lead to separately validated transport commitments and deliveries. Select a resident, follow their movements, and inspect encounter/task outcomes, stock and purchases. Original taxi and Amina–Musa supply fixtures remain available.
 
-The browser now connects to a **controlled, authoritative Node backend**, with persistent world state, validated decisions, and conversation requests. Development defaults to a **scripted mock provider** with labelled conversation fixtures and no inference charges. A separate Muse Spark 1.3 destination-selection test has succeeded; the new neighbourhood decisions and natural dialogue still require approved live evaluation.
+The browser now connects to a **controlled, authoritative Node backend**, with persistent world state, validated decisions, and conversation requests. Development defaults to a **scripted mock provider** with labelled conversation fixtures and no inference charges. Controlled Muse Spark 1.3 evaluations include a successful taxi destination selection, a partially grounded conversation, and an autonomous transport proposal rejected for an excessive quantity. The quantity contract is now corrected offline; successful live cooperation remains unproven.
 
 The same headless foundation powers the browser: independent goals, limited knowledge, event-driven activities, inventory consequences, and structured memories. The original instruction-driven mock taxi demonstrations remain available in **Taxi lab**. Consequential conversation actions require separate confirmation and simulation validation.
 
-**Next:** evaluate grounded conversation and autonomous decisions with live Meta inference under a separately approved, bounded test plan.
+**Evolution toward Abuja City Life: AI Town:** [Milestone 7A](docs/milestone-7a.md) adds extensible residents, autonomous encounters, persistent consequences and bounded offline headless progression. The [accepted assessment](docs/ai-town-assessment.md) remains the broader direction. Further population growth, phone/text channels and continuous unattended service operation remain future work. Further live Meta evaluation requires separate approval.
 
 ## Technology
 
@@ -61,6 +61,14 @@ npm run demo:neighbourhood
 
 The original demo runs three taxi scenarios; the neighbourhood demo runs a cooperative restocking fixture. Both print event traces without API keys or inference calls.
 
+Advance and save the normal four-resident town without a browser or Meta requests:
+
+```bash
+npm run town:headless -- --seconds=240
+```
+
+This bounded offline runner uses its own recovery file, `runtime/town-headless.json`. See [7A operation and limits](docs/milestone-7a.md).
+
 Run tests and static checks:
 
 ```bash
@@ -75,6 +83,8 @@ For server-side API setup and an offline configuration check, see the [Meta API 
 
 ## Documentation
 
+- [AI Town assessment, quantity fix, and proposed milestones](docs/ai-town-assessment.md)
+- [Milestone 7A implementation, evidence, and remaining limits](docs/milestone-7a.md)
 - [Simulation architecture](docs/architecture.md)
 - [Controlled backend and local execution](docs/backend.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)

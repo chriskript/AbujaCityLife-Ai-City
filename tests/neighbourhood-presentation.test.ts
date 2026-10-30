@@ -15,10 +15,10 @@ function connected() {
 }
 
 describe('observer snapshots and event transport', () => {
-  it('projects all three correct locations without exposing private NPC knowledge or memory', () => {
+  it('projects all four correct locations without exposing private NPC knowledge or memory', () => {
     const { snapshot, events } = projectNeighbourhood(new Neighbourhood('projection').snapshot);
     expect(snapshot.actors.map(actor => [actor.id, actor.node, actor.pose.x, actor.pose.z])).toEqual([
-      ['musa', 'stand', 0, 0], ['amina', 'market', 40, 40], ['zainab', 'centre', 40, 0],
+      ['musa', 'stand', 0, 0], ['amina', 'market', 40, 40], ['zainab', 'centre', 40, 0], ['chris', 'centre', 40, 0],
     ]);
     expect(snapshot.resources).toEqual({ supplierGoods: 8, marketGoods: 1, salesOpen: true });
     expect(events).toEqual([]);
@@ -114,9 +114,9 @@ describe('one shared simulation, local and future remote presentation', () => {
   });
 });
 
-it('constructs exactly three distinct, selectable original models with reusable disposable resources', () => {
+it('constructs four distinct, selectable original models with reusable disposable resources', () => {
   const population = createInhabitants();
-  expect(Object.keys(population.models)).toEqual(['musa', 'amina', 'zainab']);
+  expect(Object.keys(population.models)).toEqual(['musa', 'amina', 'zainab', 'chris']);
   const geometries = new Set<THREE.BufferGeometry>(); const materials = new Set<THREE.Material>();
   for (const [id, model] of Object.entries(population.models)) {
     expect(model.group.userData.npcId).toBe(id); expect(model.limbs).toHaveLength(4);
@@ -127,5 +127,5 @@ it('constructs exactly three distinct, selectable original models with reusable 
     geometries.add(object.geometry);
     for (const material of Array.isArray(object.material) ? object.material : [object.material]) materials.add(material);
   });
-  expect(geometries.size).toBe(6); geometries.forEach(geometry => geometry.dispose()); materials.forEach(material => material.dispose());
+  expect(geometries.size).toBe(4); geometries.forEach(geometry => geometry.dispose()); materials.forEach(material => material.dispose());
 });

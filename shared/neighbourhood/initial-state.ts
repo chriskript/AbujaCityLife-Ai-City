@@ -1,4 +1,4 @@
-import { npcIds, type WorldState, type Inhabitant, type NpcId } from './types.js';
+import { legacyNpcIds, type WorldState, type Inhabitant, type NpcId } from './types.js';
 import { initialPlaceFacts } from './knowledge.js';
 
 export const places = [
@@ -40,10 +40,35 @@ function inhabitant(id: NpcId): Inhabitant {
   };
 }
 
-export function initialState(id: string): WorldState {
+export const maximumResidents = 32;
+export function legacyResidents(): Inhabitant[] {
+  return legacyNpcIds.map(id => {
+    const resident = inhabitant(id);
+    return { ...resident, mobility: id === 'musa' ? 'taxi' : 'walk',
+      knowledge: { ...resident.knowledge, transporters: resident.knowledge.people.includes('musa') ? ['musa'] : [] },
+      capabilities: [...resident.capabilities, 'encounter', 'respond-encounter'] };
+  });
+}
+export function chrisResident(): Inhabitant {
   return {
-    version: 1, id, revision: 0, time: 0,
-    npcs: Object.fromEntries(npcIds.map(npc => [npc, inhabitant(npc)])) as Record<NpcId, Inhabitant>,
+    id: 'chris', name: 'Chris', occupation: 'Repair apprentice and supply courier',
+    personality: ['new to the neighbourhood', 'curious about local work', 'protects time for paid jobs'],
+    node: 'centre', home: 'hill', mobility: 'walk', circumstances: 'Renting a room near Hill Garden; knows Musa from a taxi ride, but has not met the market trader. Visiting the supply desk and seeking useful paid work before returning to repairs.',
+    revision: 0, intention: null, activity: { kind: 'idle' }, inventory: { goods: 0, rewards: 0 },
+    goals: [{ id: 'earn', description: 'Find useful local transport work' }, { id: 'errands', description: 'Meet neighbours and continue repair errands' }],
+    needs: { food: 0, stock: 0, income: 0.7 }, priorities: ['honour accepted work', 'find work', 'meet local people'],
+    capabilities: ['travel', 'wait', 'work', 'respond-transport', 'fulfil-transport', 'share', 'encounter', 'respond-encounter'],
+    knowledge: { places: ['hill', 'centre', 'market', 'stand'], placeFacts: initialPlaceFacts(['hill','centre','market','stand']), people: ['musa'], transporters: ['musa'], blockedEdges: [], tasks: {}, resources: { supplierGoods: null, marketGoods: null, salesOpen: null } },
+    relationships: { musa: { successfulJobs: 0 } }, memories: [],
+  };
+}
+export function defaultResidents(): Inhabitant[] { return [...legacyResidents(), chrisResident()]; }
+
+export function initialState(id: string, residents = defaultResidents()): WorldState {
+  return {
+    version: 2, id, revision: 0, time: 0, initialGoods: 9 + residents.reduce((sum, npc) => sum + npc.inventory.goods, 0),
+    social: { nextInteraction: 1, interactions: {}, noticed: {}, cooldowns: {} },
+    npcs: Object.fromEntries(residents.map(npc => [npc.id, structuredClone(npc)])) as WorldState['npcs'],
     resources: { supplierGoods: 8, marketGoods: 1, salesOpen: true, revision: 0 },
     roads: { blockedEdges: [], revision: 0 }, tasks: {}, events: [], triggers: {},
     nextEvent: 1, nextTask: 1, nextRequest: 1,

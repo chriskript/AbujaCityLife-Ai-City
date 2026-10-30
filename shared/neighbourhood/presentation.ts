@@ -1,10 +1,11 @@
 import { edges, nodes } from '../world/neighbourhood.js';
-import { npcIds, type NpcId, type WorldState, type WorldEvent, type TaskStatus } from './types.js';
+import { type NpcId, type WorldState, type WorldEvent, type TaskStatus, type Encounter } from './types.js';
 
 export interface ActorView {
   id: NpcId; name: string; occupation: string; node: string;
   pose: { x: number; z: number; heading: number };
   moving: boolean; activity: string; intention: string | null; goods: number; rewards: number;
+  mobility: 'walk' | 'taxi';
 }
 export interface PublicTask { id: string; requester: NpcId; recipient: NpcId; quantity: number; status: TaskStatus }
 export type ObservableEvent = Pick<WorldEvent, 'id' | 'time' | 'type' | 'actor' | 'subject' | 'detail' | 'data'>;
@@ -12,6 +13,7 @@ export interface NeighbourhoodView {
   worldId: string; revision: number; time: number; actors: ActorView[];
   resources: { supplierGoods: number; marketGoods: number; salesOpen: boolean };
   tasks: PublicTask[]; blockedEdges: string[];
+  encounters: Pick<Encounter,'id' | 'initiator' | 'recipient' | 'purpose' | 'status' | 'createdAt'>[];
 }
 // Observer transport contract, deliberately distinct from persistence and NPC observations.
 export interface NeighbourhoodFrame {
@@ -41,23 +43,24 @@ const observableTypes = new Set([
   'activity-started', 'activity-completed', 'arrived', 'transport-proposed', 'transport-accepted',
   'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy', 'transport-clarification-requested',
   'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
+  'encounter-noticed', 'encounter-invited', 'encounter-accepted', 'encounter-declined', 'encounter-deferred', 'encounter-clarified', 'encounter-expired', 'resident-introduced', 'information-shared',
 ]);
 
 export function projectNeighbourhood(state: WorldState): { snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null } {
-  const actors = npcIds.map(id => {
-    const npc = state.npcs[id]; const node = nodes.find(item => item.id === npc.node)!;
+  const actors = Object.keys(state.npcs).map(id => {
+    const npc = state.npcs[id]!; const node = nodes.find(item => item.id === npc.node)!;
     const pose = { x: node.x, z: node.z, heading: Math.PI / 2 };
     const motion = npc.activity;
-    let activity = motion.kind === 'idle' ? 'Between activities' : motion.kind === 'wait' ? 'Waiting' : motion.kind === 'work' ? id === 'amina' ? 'Working at the stall' : id === 'zainab' ? 'Continuing local errands' : 'Taking care of the taxi' : 'Travelling';
+    let activity = motion.kind === 'idle' ? 'Between activities' : motion.kind === 'wait' ? 'Waiting' : motion.kind === 'work' ? npc.capabilities.includes('set-sales') ? 'Working at the stall' : npc.mobility === 'taxi' ? 'Taking care of the taxi' : 'Continuing local errands' : 'Travelling';
     if (motion.kind === 'travel') {
       const next = nodes.find(item => item.id === motion.path.nodeIds[motion.step + 1])!;
       const edge = edges.find(item => item.id === motion.path.edgeIds[motion.step])!;
       const fraction = Math.min(1, motion.progress / edge.distance);
       pose.x += (next.x - node.x) * fraction; pose.z += (next.z - node.z) * fraction;
       pose.heading = Math.atan2(next.x - node.x, next.z - node.z);
-      activity = motion.leg === 'pickup' ? 'Driving to collect supplies' : motion.leg === 'delivery' ? 'Driving goods to the market' : id === 'musa' ? 'Driving through the neighbourhood' : `Walking to ${motion.path.nodeIds.at(-1) === 'stand' ? 'the taxi stand' : motion.path.nodeIds.at(-1) === 'market' ? 'Market Square' : 'the Community Centre'}`;
+      activity = motion.leg === 'pickup' ? 'Travelling to collect supplies' : motion.leg === 'delivery' ? 'Transporting goods to the market' : npc.mobility === 'taxi' ? 'Driving through the neighbourhood' : `Walking to ${motion.path.nodeIds.at(-1) === 'stand' ? 'the taxi stand' : motion.path.nodeIds.at(-1) === 'market' ? 'Market Square' : 'the Community Centre'}`;
     }
-    return { id, name: npc.name, occupation: npc.occupation, node: npc.node, pose,
+    return { id, name: npc.name, occupation: npc.occupation, node: npc.node, pose, mobility: npc.mobility ?? 'walk',
       moving: motion.kind === 'travel', activity,
       intention: npc.goals.find(goal => goal.id === npc.intention?.goalId)?.description ?? null,
       goods: npc.inventory.goods, rewards: npc.inventory.rewards };
@@ -66,6 +69,7 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
     snapshot: { worldId: state.id, revision: state.revision, time: state.time, actors,
       resources: { supplierGoods: state.resources.supplierGoods, marketGoods: state.resources.marketGoods, salesOpen: state.resources.salesOpen },
       tasks: Object.values(state.tasks).map(({ id, requester, recipient, quantity, status }) => ({ id, requester, recipient, quantity, status })),
+      encounters: Object.values(state.social.interactions).slice(-16).map(({id,initiator,recipient,purpose,status,createdAt}) => ({id,initiator,recipient,purpose,status,createdAt})),
       blockedEdges: [...state.roads.blockedEdges] },
     events: state.events.filter(event => observableTypes.has(event.type)).slice(-64).map(({ id, time, type, actor, subject, detail, data }) => ({ id, time, type, actor, subject, detail, data: { ...data } })),
     eventCursor: state.events.at(-1)?.id ?? null,

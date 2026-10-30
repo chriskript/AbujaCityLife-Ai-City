@@ -3,7 +3,6 @@ import { randomBytes, timingSafeEqual, createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { NeighbourhoodServerSession, SessionError } from './session.js';
-import { npcIds } from '../shared/neighbourhood/types.js';
 
 const digest = (value: string): Buffer => createHash('sha256').update(value).digest();
 export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, accessToken: string, options: { dist?: string; tick?: boolean } = {}) {
@@ -52,7 +51,7 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
         res.on('close', () => { clearInterval(heartbeat); unsubscribe(); streams.delete(res); }); return;
       }
       if (req.method === 'GET' && url.pathname === '/api/conversations') {
-        limit('read', 180); const id = url.searchParams.get('actorId'); if (!npcIds.includes(id as any)) throw new SessionError(400, 'Unknown inhabitant'); return json(res, 200, session.history(id as typeof npcIds[number]));
+        limit('read', 180); const id = url.searchParams.get('actorId'); if (!session.hasResident(id ?? '')) throw new SessionError(400, 'Unknown inhabitant'); return json(res, 200, session.history(id!));
       }
       if (req.method !== 'POST') throw new SessionError(404, 'Not found');
       limit('write', 60);
@@ -64,7 +63,7 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
       }
       if (url.pathname === '/api/conversations') {
         exact(body, ['id','worldId','actorId','message']);
-        if (!npcIds.includes(body.actorId) || typeof body.message !== 'string' || !body.message.trim() || body.message.length > 500) throw new SessionError(400, 'Invalid conversation');
+        if (!(typeof body.actorId === 'string' && session.hasResident(body.actorId)) || typeof body.message !== 'string' || !body.message.trim() || body.message.length > 500) throw new SessionError(400, 'Invalid conversation');
         return json(res, 200, await session.converse(body as any));
       }
       if (url.pathname === '/api/proposals') { exact(body, ['id','worldId','proposalId']); if (typeof body.proposalId !== 'string') throw new SessionError(400, 'Invalid proposal'); return json(res, 200, await session.confirm(body as any)); }

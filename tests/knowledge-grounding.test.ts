@@ -16,7 +16,7 @@ function reply(claims: ServiceClaim[], evidenceIds = ['place-facts:market'], unc
 }
 function apply(world: Neighbourhood, id: NpcId, action: Action) {
   const request = world.requestInteractionDecision(id)!;
-  const proposal = { goalId: world.snapshot.npcs[id].goals[0]!.id, reason: 'Offline fixture decision', action };
+  const proposal = { goalId: world.snapshot.npcs[id]!.goals[0]!.id, reason: 'Offline fixture decision', action };
   return { request, proposal, outcome: world.applyDecision(request.id, proposal, { mode: 'mock', model: 'test-fixture' }) };
 }
 

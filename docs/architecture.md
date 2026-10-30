@@ -1,5 +1,7 @@
 # Simulation architecture
 
+For the current cross-system assessment, Milestone 6C quantity correction, and proposed AI Town extension sequence, see [AI Town foundations](ai-town-assessment.md). This document records the earlier taxi/browser architecture; backend and provider status below is historical and superseded by the [backend guide](backend.md).
+
 The current implementation combines the headless taxi-agent testbed with a browser-based Three.js neighbourhood. A public inference backend and live gameplay remain later milestones.
 
 The [shared neighbourhood foundation](neighbourhood-foundation.md) owns three NPCs, scoped observations, autonomous scheduling, validated cooperation, inventory, and checkpointed memories. The default browser experience now presents this core through the [observer session contract](visible-inhabitants.md). The original taxi demonstration remains available at `/?experience=taxi`; neither browser experience uses live inference.

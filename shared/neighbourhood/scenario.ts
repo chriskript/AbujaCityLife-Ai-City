@@ -1,9 +1,10 @@
+import { legacyResidents } from './initial-state.js';
 import { Neighbourhood } from './world.js';
 import { DecisionScheduler } from './scheduler.js';
 import { NeighbourhoodMockProvider, type MockChoices } from './mock-provider.js';
 
 export async function runNeighbourhoodDemo(choices: MockChoices = { trader: 'cooperate', driver: 'accept' }): Promise<Neighbourhood> {
-  const world = new Neighbourhood('neighbourhood-demo');
+  const world = new Neighbourhood('neighbourhood-demo', legacyResidents());
   const scheduler = new DecisionScheduler(world, new NeighbourhoodMockProvider(choices));
   for (let step = 0; step < 960; step++) {
     await scheduler.pump(); world.advance(0.25);

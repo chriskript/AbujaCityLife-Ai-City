@@ -69,6 +69,7 @@
                           padding:18px}
                           .people{
                             display:flex;
+                            overflow-x:auto;
                             gap:5px;
                             border-bottom:1px solid #e2e5d7;
                             padding-bottom:14px;
@@ -78,7 +79,7 @@
                               flex-direction:column;
                               align-items:center;
                               gap:6px;
-                              flex:1;
+                              flex:1 0 48px;
                               background:transparent;
                               border:1px solid transparent;
                               border-radius:10px;
@@ -102,6 +103,7 @@
                                   .portrait.musa{
                                     background:#a1bec7;
                                     color:#355565}
+                                  .portrait.chris{background:#c0afd1;color:#504263}
                                     .portrait.zainab{
                                       background:#adc4a7;
                                       color:#3c614c}

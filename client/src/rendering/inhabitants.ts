@@ -1,14 +1,16 @@
 import * as THREE from 'three';
 import type { NpcId } from '../../../shared/neighbourhood/types.js';
+import { defaultResidents } from '../../../shared/neighbourhood/initial-state.js';
 
 export interface CharacterModel {
   group: THREE.Group; body: THREE.Group; limbs: THREE.Group[]; parcel: THREE.Group; ring: THREE.Mesh;
 }
-export function createInhabitants(): { group: THREE.Group; models: Record<NpcId, CharacterModel>; cargo: THREE.Group; stock: THREE.Group; supplies: THREE.Group } {
+export function createInhabitants(ids: readonly NpcId[] = defaultResidents().map(npc => npc.id)) {
   const group = new THREE.Group();
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const sphere = new THREE.SphereGeometry(1, 10, 8);
   const cylinder = new THREE.CylinderGeometry(1, 1, 1, 10);
+  const ringGeometry = new THREE.RingGeometry(2.1, 2.5, 24);
   const materials = new Map<string, THREE.MeshStandardMaterial>();
   function add(parent: THREE.Object3D, shape: THREE.BufferGeometry, color: string, x: number, y: number, z: number, sx: number, sy: number, sz: number): THREE.Mesh {
     if (!materials.has(color)) materials.set(color, new THREE.MeshStandardMaterial({ color, roughness: 0.85 }));
@@ -19,8 +21,10 @@ export function createInhabitants(): { group: THREE.Group; models: Record<NpcId,
   const createCharacter = (id: NpcId): CharacterModel => {
     const actor = new THREE.Group(); actor.name = `inhabitant:${id}`; actor.userData.npcId = id;
     const body = new THREE.Group(); actor.add(body); group.add(actor);
+    const palette = ['#598b75','#7666a0','#a06b4c','#547b9b'];
+    const hash = [...id].reduce((sum,char) => sum + char.charCodeAt(0),0);
     const skin = id === 'amina' ? '#87553c' : id === 'musa' ? '#77503a' : '#a06b4c';
-    const cloth = id === 'amina' ? '#c6794b' : id === 'musa' ? '#426c83' : '#598b75';
+    const cloth = id === 'amina' ? '#c6794b' : id === 'musa' ? '#426c83' : id === 'zainab' ? '#598b75' : palette[hash % palette.length]!;
     add(body, sphere, skin, 0, 4.45, 0, 0.72, 0.85, 0.7);
     add(body, cylinder, cloth, 0, 2.8, 0, 0.85, 2, 0.6);
     if (id === 'amina') {
@@ -43,11 +47,13 @@ export function createInhabitants(): { group: THREE.Group; models: Record<NpcId,
     add(parcel, geometry, '#bd9157', 0, 0, 0, 1.6, 1.1, 1);
     add(parcel, geometry, '#e2c889', 0, 0.1, 0, 0.18, 1.15, 1.05);
     parcel.visible = false;
-    const ring = new THREE.Mesh(new THREE.RingGeometry(2.1, 2.5, 24), new THREE.MeshBasicMaterial({ color: '#eecb69', side: THREE.DoubleSide }));
+    const ring = new THREE.Mesh(ringGeometry, new THREE.MeshBasicMaterial({ color: '#eecb69', side: THREE.DoubleSide }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.42; actor.add(ring);
     return { group: actor, body, limbs, parcel, ring };
   };
-  const models: Record<NpcId, CharacterModel> = { musa: createCharacter('musa'), amina: createCharacter('amina'), zainab: createCharacter('zainab') };
+  const models: Record<NpcId, CharacterModel> = {};
+  const ensureResident = (id: NpcId): CharacterModel => models[id] ?? (models[id] = createCharacter(id));
+  ids.forEach(ensureResident);
   function crates(count: number): THREE.Group {
     const crates = new THREE.Group();
     for (let index = 0; index < count; index++) {
@@ -60,5 +66,5 @@ export function createInhabitants(): { group: THREE.Group; models: Record<NpcId,
   const cargo = crates(6); const stock = crates(9); const supplies = crates(8);
   stock.position.set(39, 0.5, 58); supplies.position.set(60, 0.5, -7);
   group.add(stock, supplies);
-  return { group, models, cargo, stock, supplies };
+  return { group, models, cargo, stock, supplies, ensureResident };
 }

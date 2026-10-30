@@ -1,10 +1,11 @@
 import { edges } from '../world/neighbourhood.js';
 import { pathToNode } from '../navigation/routes.js';
-import { initialState, places } from './initial-state.js';
-import { isNpcDecision } from './decision-schema.js';
-import { npcIds, type Action, type DecisionOutcome, type MemoryKind, type NpcDecisionRequest, type NpcId, type NpcObservation, type TransportTask, type WorldEvent, type WorldState } from './types.js';
-import { assertSnapshot } from './snapshot.js';
+import { initialState, places, defaultResidents } from './initial-state.js';
+import { isNpcDecision, isResidentId } from './decision-schema.js';
+import { type Inhabitant, type Action, type DecisionOutcome, type MemoryKind, type NpcDecisionRequest, type NpcId, type NpcObservation, type TransportTask, type WorldEvent, type WorldState } from './types.js';
+import { assertSnapshot, migrateSnapshot } from './snapshot.js';
 import { projectPlaceKnowledge } from './knowledge.js';
+import { quantityBounds, transportCapacity, selfCollectionCapacity } from './action-limits.js';
 
 let worldSequence = 0;
 const copy = <T>(value: T): T => structuredClone(value);
@@ -14,22 +15,27 @@ export class Neighbourhood {
   private readonly pending = new Map<string, NpcDecisionRequest>();
   private readonly processed = new Map<string, DecisionOutcome>();
 
-  constructor(id = `local-neighbourhood-${++worldSequence}`) {
+  constructor(id = `local-neighbourhood-${++worldSequence}`, residents: Inhabitant[] = defaultResidents()) {
     if (!/^[a-zA-Z0-9:_-]{1,120}$/.test(id)) throw new Error('Invalid neighbourhood identifier');
-    this.state = initialState(id);
-    for (const actor of npcIds) {
-      this.record('identity-established', actor, [actor], actor, `${this.state.npcs[actor].name}: ${this.state.npcs[actor].occupation}`, {}, 'fact');
+    this.state = initialState(id, residents);
+    if (Object.keys(this.state.npcs).length !== residents.length) throw new Error('Duplicate resident ID');
+    assertSnapshot(this.state);
+    for (const actor of this.residentIds) {
+      this.record('identity-established', actor, [actor], actor, `${this.state.npcs[actor]!.name}: ${this.state.npcs[actor]!.occupation}`, {}, 'fact');
+      if (this.state.npcs[actor]!.circumstances) this.record('circumstances-established', actor, [actor], actor, this.state.npcs[actor]!.circumstances!, {}, 'fact');
       this.perceive(actor); this.trigger(actor, 'activation');
     }
   }
 
   get snapshot(): WorldState { return copy(this.state); }
+  get residentIds(): NpcId[] { return Object.keys(this.state.npcs); }
+  hasResident(id: string): boolean { return Object.hasOwn(this.state.npcs, id); }
   serialize(): string { return JSON.stringify(this.state); }
   static restore(serialized: string): Neighbourhood {
-    const state: unknown = JSON.parse(serialized); assertSnapshot(state);
+    const state: unknown = migrateSnapshot(JSON.parse(serialized)); assertSnapshot(state);
     const world = new Neighbourhood(state.id); world.state = copy(state);
     // No in-flight response survives restoration; new request IDs continue monotonically.
-    for (const id of npcIds) if (['idle', 'wait'].includes(world.state.npcs[id].activity.kind)) world.trigger(id, 'restored');
+    for (const id of world.residentIds) if (['idle', 'wait'].includes(world.state.npcs[id]!.activity.kind)) world.trigger(id, 'restored');
     return world;
   }
 
@@ -39,11 +45,76 @@ export class Neighbourhood {
     this.state.triggers[actor] = triggers.slice(-8);
   }
 
-  private atNode(actor: NpcId): boolean { return this.state.npcs[actor].activity.kind !== 'travel'; }
+  private atNode(actor: NpcId): boolean { return this.state.npcs[actor]!.activity.kind !== 'travel'; }
   private nearby(a: NpcId, b: NpcId): boolean {
-    return a !== b && this.atNode(a) && this.atNode(b) && this.state.npcs[a].node === this.state.npcs[b].node;
+    return a !== b && this.hasResident(a) && this.hasResident(b) && this.atNode(a) && this.atNode(b) && this.state.npcs[a]!.node === this.state.npcs[b]!.node;
   }
-  private witnesses(actor: NpcId): NpcId[] { return npcIds.filter(id => id === actor || this.nearby(id, actor)); }
+  private witnesses(actor: NpcId): NpcId[] { return this.residentIds.filter(id => id === actor || this.nearby(id, actor)); }
+
+  private pair(a: NpcId, b: NpcId): string { return [a,b].sort().join(':'); }
+  private available(id: NpcId): boolean { return ['idle','wait'].includes(this.state.npcs[id]!.activity.kind); }
+  private canEncounter(a: NpcId, b: NpcId): boolean {
+    return this.nearby(a,b) && this.available(a) && this.available(b) &&
+      this.state.npcs[a]!.capabilities.includes('encounter') && this.state.npcs[b]!.capabilities.includes('respond-encounter') &&
+      (this.state.social.cooldowns[this.pair(a,b)] ?? 0) <= this.state.time &&
+      !Object.values(this.state.social.interactions).some(item => item.status === 'pending' &&
+        [item.initiator,item.recipient].some(id => id === a || id === b));
+  }
+  private detectEncounters(): void {
+    const ids = this.residentIds;
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+      const a = ids[i]!, b = ids[j]!, key = this.pair(a,b);
+      if (!this.nearby(a,b)) { delete this.state.social.noticed[key]; continue; }
+      if (!this.canEncounter(a,b) || Object.hasOwn(this.state.social.noticed,key)) continue;
+      this.state.social.noticed[key] = this.state.time;
+      this.record('encounter-noticed', null, [a,b], key, 'Noticed another available resident nearby; engagement remains optional', { first: a, second: b }, 'observed');
+      this.trigger(a,'encounter-noticed'); this.trigger(b,'encounter-noticed');
+    }
+    for (const item of Object.values(this.state.social.interactions)) if (item.status === 'pending' && this.state.time >= item.expiresAt) {
+      item.status = 'expired';
+      this.record('encounter-expired', null, [item.initiator,item.recipient], item.id, 'No response before the encounter invitation expired', {}, 'outcome');
+      this.trigger(item.initiator,'encounter-resolved'); this.trigger(item.recipient,'encounter-resolved');
+    }
+  }
+  private introduce(source: NpcId, observer: NpcId): void {
+    const npc = this.state.npcs[observer]!, person = this.state.npcs[source]!;
+    if (npc.knowledge.people.includes(source)) return;
+    npc.knowledge.people.push(source);
+    const offersTransport = person.capabilities.includes('fulfil-transport');
+    if (offersTransport) npc.knowledge.transporters = [...npc.knowledge.transporters ?? [],source];
+    this.record('resident-introduced', source, [observer], source, `${person.name} introduced themself as ${person.occupation}${offersTransport ? ' and disclosed that they can transport supplies' : ''}`, { offersTransport }, 'reported', source);
+  }
+  private startEncounter(id: NpcId, action: Extract<Action,{type:'encounter'}>): void {
+    const item = { id: `encounter-${this.state.social.nextInteraction++}`, initiator: id, recipient: action.recipient,
+      purpose: action.purpose, message: action.message, response: null, status: 'pending' as const,
+      createdAt: this.state.time, expiresAt: this.state.time + 90 };
+    this.state.social.interactions[item.id] = item;
+    this.state.social.cooldowns[this.pair(id, action.recipient)] = this.state.time + 300;
+    this.introduce(id, action.recipient);
+    this.record('encounter-invited', id, [id,action.recipient], item.id, action.message, { recipient: action.recipient, purpose: action.purpose }, 'reported', id, true);
+    this.trigger(action.recipient,'encounter-invitation'); this.trigger(id,'encounter-pending');
+  }
+  private respondEncounter(id: NpcId, action: Extract<Action,{type:'respond-encounter'}>): void {
+    const item = this.state.social.interactions[action.interactionId]!;
+    item.status = ({ accept: 'accepted', decline: 'declined', defer: 'deferred', clarify: 'clarified' } as const)[action.response];
+    item.response = action.message;
+    if (action.response === 'accept') this.introduce(id,item.initiator);
+    this.record(`encounter-${item.status}`, id, [id,item.initiator], item.id, action.message,
+      { initiator: item.initiator, response: action.response, purpose: item.purpose }, 'reported', id, true);
+    // This records willingness to converse, never a transport commitment or friendship.
+    this.trigger(item.initiator,'encounter-resolved'); this.trigger(id,'encounter-resolved');
+  }
+
+  addResident(resident: Inhabitant): void {
+    if (!isResidentId(resident.id) || this.hasResident(resident.id) || resident.memories.length || resident.inventory.goods || resident.inventory.rewards) throw new Error('Invalid new resident');
+    const candidate = copy(this.state);
+    candidate.npcs[resident.id] = copy(resident);
+    assertSnapshot(candidate); // Validate the entire registry and references before mutation.
+    this.state = candidate;
+    this.record('identity-established', resident.id, [resident.id], resident.id, `${resident.name}: ${resident.occupation}`, {}, 'fact');
+    if (resident.circumstances) this.record('circumstances-established', resident.id, [resident.id], resident.id, resident.circumstances, {}, 'fact');
+    this.perceive(resident.id); this.trigger(resident.id,'activation');
+  }
 
   private record(type: string, actor: NpcId | null, audience: NpcId[], subject: string, detail: string,
     data: WorldEvent['data'] = {}, kind?: MemoryKind, source: NpcId | 'world' | 'player' = 'world', uncertain = false): WorldEvent {
@@ -53,14 +124,14 @@ export class Neighbourhood {
     };
     this.state.events.push(event);
     if (kind) for (const id of event.audience) {
-      const npc = this.state.npcs[id];
+      const npc = this.state.npcs[id]!;
       npc.memories.push({ id: `${event.id}:${id}`, eventId: event.id, kind, source, subject, detail, time: event.time, certainty: uncertain ? 'uncertain' : 'certain' });
       // Commitments remain available separately through known task state.
       npc.memories = npc.memories.slice(-24); npc.revision++;
     }
     // Retain bounded recent history plus evidence for currently retained memories.
     if (this.state.events.length > 1024) {
-      const evidence = new Set(npcIds.flatMap(id => this.state.npcs[id].memories.map(memory => memory.eventId)));
+      const evidence = new Set(this.residentIds.flatMap(id => this.state.npcs[id]!.memories.map(memory => memory.eventId)));
       const recent = new Set(this.state.events.slice(-768).map(item => item.id));
       this.state.events = this.state.events.filter(item => evidence.has(item.id) || recent.has(item.id));
     }
@@ -68,13 +139,13 @@ export class Neighbourhood {
   }
 
   private perceive(id: NpcId): void {
-    const npc = this.state.npcs[id];
+    const npc = this.state.npcs[id]!;
     if (!this.atNode(id)) return;
     const visible = npc.knowledge.resources;
     if (npc.node === 'market' && (visible.marketGoods !== this.state.resources.marketGoods || visible.salesOpen !== this.state.resources.salesOpen)) {
       visible.marketGoods = this.state.resources.marketGoods; visible.salesOpen = this.state.resources.salesOpen;
       this.record('stock-observed', id, [id], 'market', `Observed ${visible.marketGoods} goods at the stall`, { quantity: visible.marketGoods, salesOpen: visible.salesOpen }, 'observed');
-      if (id === 'amina') {
+      if (npc.capabilities.includes('stock-stall')) {
         const before = npc.needs.stock; npc.needs.stock = visible.marketGoods < 2 ? 0.8 : 0.1;
         if (before < 0.5 && npc.needs.stock >= 0.5) this.trigger(id, 'stock-low');
       }
@@ -102,7 +173,20 @@ export class Neighbourhood {
   }
 
   observe(id: NpcId): NpcObservation {
-    const npc = this.state.npcs[id];
+    if (!this.hasResident(id)) throw new Error('Unknown resident');
+    const npc = this.state.npcs[id]!;
+    const actionConstraints: NpcObservation['actionConstraints'] = {};
+    for (const type of ['propose-transport', 'collect-self', 'stock-stall', 'buy'] as const) {
+      if (npc.capabilities.includes(type)) actionConstraints[type] = { quantity: { ...quantityBounds } };
+    }
+    if (npc.capabilities.includes('collect-self')) Object.assign(actionConstraints['collect-self']!, {
+      carryingCapacity: selfCollectionCapacity,
+      remainingCarryingCapacity: Math.max(0, selfCollectionCapacity - npc.inventory.goods),
+    });
+    if (npc.capabilities.includes('fulfil-transport')) actionConstraints['fulfil-transport'] = {
+      carryingCapacity: transportCapacity,
+      remainingCarryingCapacity: Math.max(0, transportCapacity - npc.inventory.goods),
+    };
     return copy({
       actor: npc, time: this.state.time,
       places: places.filter(place => npc.knowledge.places.includes(place.id)),
@@ -110,9 +194,14 @@ export class Neighbourhood {
       memoryEvidence: npc.memories.map(memory => ({ id: memory.id, interpretation:
         this.state.events.find(event => event.id === memory.eventId)?.type === 'conversation' && memory.source === id ? 'speech-only' :
         memory.kind === 'fact' ? 'established-fact' : memory.kind === 'reported' ? 'unverified-report' : memory.kind === 'belief' ? 'uncertain-belief' : memory.kind === 'commitment' ? 'commitment' : memory.kind === 'outcome' ? 'verified-outcome' : 'observed-world-event' })),
-      nearbyPeople: npcIds.filter(other => npc.knowledge.people.includes(other) && this.nearby(id, other)).map(other => ({
-        id: other, name: this.state.npcs[other].name, occupation: this.state.npcs[other].occupation, activity: this.state.npcs[other].activity.kind,
+      nearbyPeople: this.residentIds.filter(other => this.nearby(id, other)).map(other => ({
+        id: other, name: npc.knowledge.people.includes(other) ? this.state.npcs[other]!.name : null,
+        occupation: npc.knowledge.people.includes(other) ? this.state.npcs[other]!.occupation : null,
+        activity: this.state.npcs[other]!.activity.kind, known: npc.knowledge.people.includes(other),
+        canTransport: npc.knowledge.transporters?.includes(other) ?? false,
       })),
+      encounters: Object.values(this.state.social.interactions).filter(item => item.initiator === id || item.recipient === id).slice(-8),
+      encounterOpportunities: this.residentIds.filter(other => this.canEncounter(id, other)),
       resources: npc.knowledge.resources,
       tasks: Object.entries(npc.knowledge.tasks).flatMap(([taskId, status]) => {
         const task = this.state.tasks[taskId];
@@ -120,20 +209,24 @@ export class Neighbourhood {
       }),
       knownBlockedEdges: npc.knowledge.blockedEdges,
       permittedActions: npc.activity.kind === 'travel' || npc.activity.kind === 'work' ? [] : npc.capabilities,
+      actionConstraints,
     });
   }
 
   recordConversation(id: NpcId, speaker: 'player' | 'npc', text: string): void {
+    if (!this.hasResident(id)) throw new Error('Unknown resident');
     if (!text.trim() || text.length > 1000) throw new Error('Invalid utterance');
     this.record('conversation', id, [id], speaker, text, {}, speaker === 'player' ? 'reported' : 'observed', speaker === 'player' ? 'player' : id, speaker === 'player');
   }
 
   requestInteractionDecision(id: NpcId): NpcDecisionRequest | null {
+    if (!this.hasResident(id)) return null;
     this.trigger(id, 'player-interaction');
     return this.requestDecision(id);
   }
 
   requestDecision(id: NpcId): NpcDecisionRequest | null {
+    if (!this.hasResident(id)) return null;
     if (!this.state.triggers[id]?.length || [...this.pending.values()].some(request => request.actorId === id)) return null;
     const observation = this.observe(id);
     if (!observation.permittedActions.length) return null;
@@ -159,7 +252,7 @@ export class Neighbourhood {
     const request = this.pending.get(requestId);
     if (!request) return { accepted: false, reason: 'unknown-request', duplicate: false };
     this.pending.delete(requestId);
-    const actor = this.state.npcs[request.actorId];
+    const actor = this.state.npcs[request.actorId]!;
     const reason = actor.revision !== request.actorRevision ? 'stale-actor' :
       !isNpcDecision(proposal) ? 'invalid-schema' :
       !actor.goals.some(goal => goal.id === proposal.goalId) ? 'unknown-goal' : this.validate(request.actorId, proposal.action);
@@ -189,18 +282,30 @@ export class Neighbourhood {
   }
 
   private validate(id: NpcId, action: Action): string | null {
-    const npc = this.state.npcs[id];
+    const npc = this.state.npcs[id]!;
     if (!npc.capabilities.includes(action.type)) return 'missing-capability';
     if (npc.activity.kind !== 'idle' && npc.activity.kind !== 'wait') return 'actor-busy';
+    if ('recipient' in action && !this.hasResident(action.recipient)) return 'unknown-recipient';
+    if (action.type === 'encounter') {
+      if (!this.canEncounter(id, action.recipient)) return 'encounter-unavailable';
+      if (Object.keys(this.state.social.interactions).length >= 128) return 'interaction-capacity';
+      if (action.purpose === 'request-help' && !npc.capabilities.includes('propose-transport')) return 'missing-assistance-capability';
+    } else if (action.type === 'respond-encounter') {
+      const encounter = this.state.social.interactions[action.interactionId];
+      if (!encounter || encounter.recipient !== id) return 'wrong-encounter-recipient';
+      if (encounter.status !== 'pending' || this.state.time >= encounter.expiresAt) return 'encounter-not-open';
+      if (!this.nearby(id, encounter.initiator)) return 'initiator-not-nearby';
+      if (!this.available(encounter.initiator)) return 'initiator-busy';
+    }
     if (action.type === 'travel') {
       if (!npc.knowledge.places.includes(action.destination)) return 'unknown-place';
       if (!pathToNode(npc.node, action.destination, new Set(npc.knowledge.blockedEdges))) return 'no-known-route';
     } else if (action.type === 'propose-transport') {
       if (Object.keys(this.state.tasks).length >= 64) return 'task-capacity';
       if (!npc.knowledge.people.includes(action.recipient) || !this.nearby(id, action.recipient)) return 'recipient-not-nearby';
-      if (!this.state.npcs[action.recipient].capabilities.includes('fulfil-transport')) return 'recipient-cannot-transport';
+      if (!this.state.npcs[action.recipient]!.capabilities.includes('fulfil-transport') || !this.state.npcs[action.recipient]!.capabilities.includes('respond-transport')) return 'recipient-cannot-transport';
       if (Object.values(this.state.tasks).some(task => task.requester === id && ['proposed', 'accepted', 'collected'].includes(task.status))) return 'existing-commitment';
-      if (action.quantity > 6 || this.availableSupplies() < action.quantity) return 'insufficient-supplies';
+      if (action.quantity > transportCapacity || this.availableSupplies() < action.quantity) return 'insufficient-supplies';
     } else if (action.type === 'respond-transport' || action.type === 'fulfil-transport') {
       const task = this.state.tasks[action.taskId];
       if (!task || task.recipient !== id) return 'wrong-task-recipient';
@@ -208,6 +313,7 @@ export class Neighbourhood {
         if (task.status !== 'proposed' || this.state.time >= task.expiresAt) return 'offer-not-open';
         if (!this.nearby(id, task.requester)) return 'requester-not-nearby';
         if (action.accept === true && Object.values(this.state.tasks).some(other => other.recipient === id && ['accepted', 'collected'].includes(other.status))) return 'existing-commitment';
+        if (action.accept === true && npc.inventory.goods + task.quantity > transportCapacity) return 'carrying-capacity';
         if (action.accept === true && this.availableSupplies() < task.quantity) return 'insufficient-supplies';
       } else {
         if (!['accepted', 'collected'].includes(task.status)) return 'task-not-active';
@@ -216,13 +322,13 @@ export class Neighbourhood {
       }
     } else if (action.type === 'collect-self') {
       if (npc.node !== 'centre') return 'not-at-supplier';
-      if (npc.inventory.goods + action.quantity > 2) return 'carrying-capacity';
+      if (npc.inventory.goods + action.quantity > selfCollectionCapacity) return 'carrying-capacity';
       if (this.availableSupplies() < action.quantity) return 'insufficient-supplies';
     } else if (action.type === 'stock-stall') {
       if (npc.node !== 'market') return 'not-at-market';
       if (npc.inventory.goods < action.quantity) return 'missing-goods';
     } else if (action.type === 'buy') {
-      if (npc.node !== 'market' || !this.nearby(id, 'amina')) return 'trader-not-nearby';
+      if (npc.node !== 'market' || !this.residentIds.some(other => this.nearby(id, other) && this.state.npcs[other]!.capabilities.includes('set-sales'))) return 'trader-not-nearby';
       if (!this.state.resources.salesOpen) return 'sales-paused';
       if (this.state.resources.marketGoods < action.quantity) return 'insufficient-stock';
     } else if (action.type === 'set-sales') {
@@ -235,7 +341,9 @@ export class Neighbourhood {
   }
 
   private execute(id: NpcId, action: Action): void {
-    const npc = this.state.npcs[id]; npc.activity = { kind: 'idle' };
+    const npc = this.state.npcs[id]!; npc.activity = { kind: 'idle' };
+    if (action.type === 'encounter') { this.startEncounter(id, action); return; }
+    if (action.type === 'respond-encounter') { this.respondEncounter(id, action); return; }
     if (action.type === 'travel') this.travel(id, action.destination, null, null);
     else if (action.type === 'wait' || action.type === 'work') {
       npc.activity = { kind: action.type, until: this.state.time + action.seconds };
@@ -247,7 +355,7 @@ export class Neighbourhood {
         expiresAt: this.state.time + 90, reserved: 0, rewardPaid: false,
       };
       this.state.tasks[task.id] = task;
-      for (const participant of [id, task.recipient]) this.state.npcs[participant].knowledge.tasks[task.id] = 'proposed';
+      for (const participant of [id, task.recipient]) this.state.npcs[participant]!.knowledge.tasks[task.id] = 'proposed';
       this.record('transport-proposed', id, [id, task.recipient], task.id, 'Requested help transporting supplies', { quantity: task.quantity }, 'observed');
       this.trigger(task.recipient, 'transport-request'); this.trigger(id, 'offer-proposed');
     } else if (action.type === 'respond-transport') {
@@ -259,7 +367,7 @@ export class Neighbourhood {
       }
       task.status = action.accept ? 'accepted' : 'declined'; task.revision++;
       task.reserved = action.accept ? task.quantity : 0;
-      for (const participant of [id, task.requester]) this.state.npcs[participant].knowledge.tasks[task.id] = task.status;
+      for (const participant of [id, task.requester]) this.state.npcs[participant]!.knowledge.tasks[task.id] = task.status;
       this.record(`transport-${task.status}`, id, [id, task.requester], task.id, action.accept ? 'Accepted the transport commitment' : 'Declined the transport request', {}, action.accept ? 'commitment' : 'outcome');
       this.trigger(id, 'offer-resolved'); this.trigger(task.requester, 'offer-resolved');
     } else if (action.type === 'fulfil-transport') {
@@ -290,7 +398,7 @@ export class Neighbourhood {
   }
 
   private travel(id: NpcId, destination: string, taskId: string | null, leg: 'pickup' | 'delivery' | null): void {
-    const npc = this.state.npcs[id];
+    const npc = this.state.npcs[id]!;
     const path = pathToNode(npc.node, destination, new Set(npc.knowledge.blockedEdges));
     if (!path) { this.fail(id, 'No route in current knowledge'); return; }
     npc.activity = { kind: 'travel', path, step: 0, progress: 0, taskId, leg };
@@ -299,26 +407,26 @@ export class Neighbourhood {
   }
 
   private fail(id: NpcId, detail: string): void {
-    this.state.npcs[id].activity = { kind: 'idle' };
+    this.state.npcs[id]!.activity = { kind: 'idle' };
     this.record('action-failed', id, [id], id, detail, {}, 'observed'); this.trigger(id, 'action-failed');
   }
 
   private arrive(id: NpcId): void {
-    const npc = this.state.npcs[id]; const activity = npc.activity;
+    const npc = this.state.npcs[id]!; const activity = npc.activity;
     if (activity.kind !== 'travel') return;
     npc.activity = { kind: 'idle' };
     this.record('arrived', id, this.witnesses(id), npc.node, 'Reached a waypoint destination', {}, 'observed');
     this.perceive(id);
-    for (const other of npcIds) if (this.nearby(id, other)) this.trigger(other, 'person-arrived');
+    for (const other of this.residentIds) if (this.nearby(id, other)) this.trigger(other, 'person-arrived');
     if (activity.taskId) this.finishLeg(id, activity.taskId, activity.leg);
     else this.trigger(id, 'activity-completed');
   }
 
   private finishLeg(id: NpcId, taskId: string, leg: 'pickup' | 'delivery' | null): void {
-    const task = this.state.tasks[taskId]; const npc = this.state.npcs[id];
+    const task = this.state.tasks[taskId]; const npc = this.state.npcs[id]!;
     if (!task || task.recipient !== id) { this.fail(id, 'Task is unavailable'); return; }
     if (leg === 'pickup') {
-      if (task.status !== 'accepted' || npc.node !== task.pickup || task.reserved !== task.quantity || this.state.resources.supplierGoods < task.quantity) { this.fail(id, 'Collection prerequisites changed'); return; }
+      if (task.status !== 'accepted' || npc.node !== task.pickup || task.reserved !== task.quantity || this.state.resources.supplierGoods < task.quantity || npc.inventory.goods + task.quantity > transportCapacity) { this.fail(id, 'Collection prerequisites changed'); return; }
       this.state.resources.supplierGoods -= task.quantity; npc.inventory.goods += task.quantity;
       task.reserved = 0; task.status = 'collected'; task.revision++; this.state.resources.revision++;
       npc.knowledge.tasks[task.id] = 'collected';
@@ -342,12 +450,12 @@ export class Neighbourhood {
   setRoadBlocked(edgeId: string, blocked: boolean): boolean {
     if (typeof blocked !== 'boolean') return false;
     if (!edges.some(edge => edge.id === edgeId)) return false;
-    if (npcIds.some(id => { const activity = this.state.npcs[id].activity; return activity.kind === 'travel' && activity.path.edgeIds[activity.step] === edgeId && activity.progress > 0; })) return false;
+    if (this.residentIds.some(id => { const activity = this.state.npcs[id]!.activity; return activity.kind === 'travel' && activity.path.edgeIds[activity.step] === edgeId && activity.progress > 0; })) return false;
     if (this.state.roads.blockedEdges.includes(edgeId) === blocked) return false;
     this.state.roads.blockedEdges = blocked ? [...this.state.roads.blockedEdges, edgeId] : this.state.roads.blockedEdges.filter(id => id !== edgeId);
     this.state.roads.revision++;
     this.record('road-changed', null, [], edgeId, blocked ? 'Road blocked' : 'Road reopened', { blocked });
-    for (const id of npcIds) this.perceive(id);
+    for (const id of this.residentIds) this.perceive(id);
     return true;
   }
 
@@ -361,16 +469,16 @@ export class Neighbourhood {
         task.status = 'expired'; task.revision++;
         this.record('offer-expired', null, [task.requester, task.recipient], task.id, 'Unaccepted offer reached its known deadline', {}, 'outcome');
         for (const id of [task.requester, task.recipient]) {
-          this.state.npcs[id].knowledge.tasks[task.id] = 'expired'; this.state.npcs[id].revision++; this.trigger(id, 'offer-expired');
+          this.state.npcs[id]!.knowledge.tasks[task.id] = 'expired'; this.state.npcs[id]!.revision++; this.trigger(id, 'offer-expired');
         }
       }
-      for (const id of npcIds) {
-        const npc = this.state.npcs[id]; const activity = npc.activity;
+      for (const id of this.residentIds) {
+        const npc = this.state.npcs[id]!; const activity = npc.activity;
         if ((activity.kind === 'wait' || activity.kind === 'work') && this.state.time >= activity.until) {
           npc.activity = { kind: 'idle' }; npc.revision++;
           this.record('activity-completed', id, [id], activity.kind, 'Selected activity finished', {}, 'observed'); this.trigger(id, 'activity-completed');
         } else if (activity.kind === 'travel') {
-          let distance = (id === 'musa' ? 14 : 4) * dt;
+          let distance = (npc.mobility === 'taxi' ? 14 : 4) * dt;
           while (distance > 0 && npc.activity === activity) {
             const edge = edges.find(item => item.id === activity.path.edgeIds[activity.step]);
             if (!edge) { this.arrive(id); break; }
@@ -388,6 +496,7 @@ export class Neighbourhood {
           }
         }
       }
+      this.detectEncounters();
     }
   }
 }

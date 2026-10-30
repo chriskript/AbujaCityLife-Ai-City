@@ -14,7 +14,7 @@ const mock = { mode: 'mock', model: 'test-fixture' } as const;
 function decide(world: Neighbourhood, actor: NpcId, action: Action, expected = true) {
   const request = world.requestDecision(actor);
   expect(request, `No decision trigger for ${actor}`).not.toBeNull();
-  const decision = { goalId: world.snapshot.npcs[actor].goals[0]!.id, reason: 'MOCK test choice.', action };
+  const decision = { goalId: world.snapshot.npcs[actor]!.goals[0]!.id, reason: 'MOCK test choice.', action };
   const result = world.applyDecision(request!.id, decision, mock);
   expect(result.accepted, result.reason).toBe(expected);
   return { request: request!, decision, result };
@@ -41,9 +41,9 @@ function totalGoods(world: Neighbourhood) {
 }
 
 describe('independent state and scoped knowledge', () => {
-  it('has three identities, distinct personal goals, and isolated world instances', () => {
+  it('has four identities, distinct personal goals, and isolated world instances', () => {
     const first = new Neighbourhood(); const second = new Neighbourhood();
-    expect(Object.values(first.snapshot.npcs).map(npc => npc.name)).toEqual(['Musa', 'Amina', 'Zainab']);
+    expect(Object.values(first.snapshot.npcs).map(npc => npc.name)).toEqual(['Musa', 'Amina', 'Zainab', 'Chris']);
     expect(first.snapshot.npcs.musa.goals[0]!.id).not.toBe(first.snapshot.npcs.amina.goals[0]!.id);
     expect(first.snapshot.npcs.zainab.goals[0]!.id).toBe('food');
     const exported = first.snapshot; exported.npcs.amina.node = 'stand';
@@ -322,14 +322,14 @@ describe('event-derived memories and persistence', () => {
 });
 
 describe('event-driven autonomy with alternative fixture policies', () => {
-  it('starts three distinct activities without player commands and does not infer on every tick', async () => {
+  it('starts four distinct activities without player commands and does not infer on every tick', async () => {
     const world = new Neighbourhood(); const fixture = new NeighbourhoodMockProvider();
     const decideSpy = vi.fn((request: Parameters<NpcDecisionProvider['decide']>[0]) => fixture.decide(request));
     const scheduler = new DecisionScheduler(world, { decide: decideSpy });
-    await scheduler.pump(); await scheduler.pump(); await scheduler.pump();
+    for (const _id of world.residentIds) await scheduler.pump();
     expect(Object.values(world.snapshot.npcs).every(npc => npc.intention !== null && npc.activity.kind !== 'idle')).toBe(true);
     for (let tick = 0; tick < 20; tick++) { world.advance(0.25); await scheduler.pump(); }
-    expect(decideSpy).toHaveBeenCalledTimes(3);
+    expect(decideSpy).toHaveBeenCalledTimes(world.residentIds.length);
     expect(world.snapshot.npcs.zainab.activity.kind).toBe('travel');
   });
 
@@ -358,7 +358,7 @@ describe('event-driven autonomy with alternative fixture policies', () => {
     const failing = vi.fn<NpcDecisionProvider['decide']>(async () => { throw new Error('private transport error'); });
     const world = new Neighbourhood(); const failed = new DecisionScheduler(world, { decide: failing }, { cooldownSeconds: 0, perMinute: 10, maximumDecisions: 10 });
     for (let index = 0; index < 6; index++) await failed.pump();
-    expect(failing).toHaveBeenCalledTimes(3);
+    expect(failing).toHaveBeenCalledTimes(world.residentIds.length);
     expect(world.serialize()).not.toContain('private transport error');
     expect(Object.values(world.snapshot.npcs).every(npc => npc.activity.kind === 'idle')).toBe(true);
   });
@@ -373,7 +373,7 @@ describe('event-driven autonomy with alternative fixture policies', () => {
   it('rejects extra action fields and provides a strict schema for future Meta integration', () => {
     expect(isNpcDecision({ goalId: 'restock', reason: 'Delivered', action: { type: 'wait', seconds: 1, marketGoods: 999 } })).toBe(false);
     expect(npcDecisionSchema.additionalProperties).toBe(false);
-    expect(npcDecisionSchema.properties.action.anyOf.length).toBe(12);
+    expect(npcDecisionSchema.properties.action.anyOf.length).toBe(14);
   });
 });
 

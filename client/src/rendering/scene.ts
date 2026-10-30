@@ -5,7 +5,7 @@ import type { Route } from '../../../shared/navigation/routes.js';
 import { nodes } from '../../../shared/world/neighbourhood.js';
 import { createInhabitants } from './inhabitants.js';
 import type { NeighbourhoodView } from '../../../shared/neighbourhood/presentation.js';
-import { npcIds, type NpcId } from '../../../shared/neighbourhood/types.js';
+import { type NpcId } from '../../../shared/neighbourhood/types.js';
 
 export class NeighbourhoodScene {
   readonly renderer: THREE.WebGLRenderer;
@@ -29,6 +29,7 @@ export class NeighbourhoodScene {
   private readonly actorLabels = new Map<NpcId, HTMLButtonElement>();
   private populationListeners: AbortController | null = null;
   private populationPlaced = false;
+  private selectResident: ((id: NpcId) => void) | null = null;
 
   constructor(private readonly container: HTMLElement, private readonly labels: HTMLElement, onContextChange: (lost: boolean) => void) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -82,27 +83,22 @@ export class NeighbourhoodScene {
   setFollow(follow: boolean): void { this.follow = follow; }
   enableInhabitants(onSelect: (id: NpcId) => void): void {
     if (this.population) return;
-    this.population = createInhabitants(); this.scene.add(this.population.group);
+    this.selectResident = onSelect;
+    this.population = createInhabitants([]); this.scene.add(this.population.group);
     this.world.taxi.add(this.population.cargo); this.population.cargo.position.set(-0.8, 2.8, -0.8); this.population.cargo.scale.setScalar(0.45);
     this.world.taxi.userData.npcId = 'musa';
     this.populationListeners = new AbortController();
-    const overlay = document.querySelector<HTMLElement>('#inhabitant-labels')!;
-    for (const id of npcIds) {
-      const button = document.createElement('button'); button.className = `npc-marker npc-${id}`;
-      button.dataset.npc = id; button.addEventListener('click', () => onSelect(id), { signal: this.populationListeners.signal });
-      overlay.append(button); this.actorLabels.set(id, button);
-    }
     const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
     this.renderer.domElement.addEventListener('pointerup', event => {
       if (!this.population) return;
       const rect = this.renderer.domElement.getBoundingClientRect();
       pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
       raycaster.setFromCamera(pointer, this.camera);
-      const hits = raycaster.intersectObjects([this.world.taxi, ...npcIds.map(id => this.population!.models[id].group)], true);
+      const hits = raycaster.intersectObjects([this.world.taxi, ...Object.values(this.population.models).map(model => model.group)], true);
       for (const hit of hits) {
         let object: THREE.Object3D | null = hit.object;
         while (object && !object.userData.npcId) object = object.parent;
-        if (object && npcIds.includes(object.userData.npcId as NpcId)) { onSelect(object.userData.npcId as NpcId); return; }
+        if (object && Object.hasOwn(this.population.models, object.userData.npcId)) { onSelect(object.userData.npcId as NpcId); return; }
       }
     }, { signal: this.populationListeners.signal });
     this.resize();
@@ -111,19 +107,25 @@ export class NeighbourhoodScene {
   renderInhabitants(view: NeighbourhoodView, selected: NpcId, seconds: number): void {
     const population = this.population; if (!population) return;
     const ease = this.populationPlaced ? 1 - Math.exp(-Math.min(seconds, 0.05) * 14) : 1;
-    for (const actor of view.actors) {
-      const model = population.models[actor.id];
-      const standing = actor.id === 'musa' ? { x: -5, z: -5 } : actor.id === 'amina' ? { x: 5, z: 8 } : { x: -7, z: 7 };
-      const x = actor.pose.x + (actor.moving ? actor.id === 'musa' ? 0 : Math.cos(actor.pose.heading) * 4.4 : standing.x);
-      const z = actor.pose.z + (actor.moving ? actor.id === 'musa' ? 0 : -Math.sin(actor.pose.heading) * 4.4 : standing.z);
+    for (const [index,actor] of view.actors.entries()) {
+      const model = population.ensureResident(actor.id);
+      model.group.visible = true;
+      if (!this.actorLabels.has(actor.id)) {
+        const button = document.createElement('button'); button.className = 'npc-marker'; button.dataset.npc = actor.id;
+        button.addEventListener('click', () => this.selectResident?.(actor.id), { signal: this.populationListeners!.signal });
+        document.querySelector('#inhabitant-labels')!.append(button); this.actorLabels.set(actor.id,button);
+      }
+      const standing = { x: (index % 3 - 1) * 6, z: 6 + Math.floor(index / 3) * 5 };
+      const x = actor.pose.x + (actor.moving ? actor.mobility === 'taxi' ? 0 : Math.cos(actor.pose.heading) * 4.4 : standing.x);
+      const z = actor.pose.z + (actor.moving ? actor.mobility === 'taxi' ? 0 : -Math.sin(actor.pose.heading) * 4.4 : standing.z);
       model.group.position.x += (x - model.group.position.x) * ease;
       model.group.position.z += (z - model.group.position.z) * ease;
       const difference = Math.atan2(Math.sin(actor.pose.heading - model.group.rotation.y), Math.cos(actor.pose.heading - model.group.rotation.y));
       model.group.rotation.y += difference * ease;
-      model.body.visible = !(actor.id === 'musa' && actor.moving);
+      model.body.visible = !(actor.mobility === 'taxi' && actor.moving);
       model.body.position.y = actor.moving ? Math.abs(Math.sin(view.time * 7)) * 0.16 : Math.sin(view.time * 2) * 0.025;
       model.limbs.forEach((limb, index) => { limb.rotation.x = actor.moving ? Math.sin(view.time * 7 + index * Math.PI) * 0.38 : 0; });
-      model.parcel.visible = actor.goods > 0 && actor.id !== 'musa'; model.ring.visible = actor.id === selected;
+      model.parcel.visible = actor.goods > 0 && actor.mobility !== 'taxi'; model.ring.visible = actor.id === selected;
       const marker = this.actorLabels.get(actor.id)!;
       const caption = actor.name;
       if (marker.textContent !== caption) marker.textContent = caption;
@@ -132,21 +134,22 @@ export class NeighbourhoodScene {
     }
     population.stock.children.forEach((crate, index) => { crate.visible = index < view.resources.marketGoods; });
     population.supplies.children.forEach((crate, index) => { crate.visible = index < view.resources.supplierGoods; });
-    const musa = view.actors.find(actor => actor.id === 'musa')!;
+    const musa = view.actors.find(actor => actor.mobility === 'taxi') ?? view.actors[0]!;
     population.cargo.children.forEach((crate, index) => { crate.visible = index < musa.goods; });
-    const focused = view.actors.find(actor => actor.id === selected)!;
+    const focused = view.actors.find(actor => actor.id === selected) ?? musa;
     this.render(musa.pose, seconds, focused.pose);
     this.taxiLabel.hidden = true;
-    for (const actor of view.actors) {
-      const position = population.models[actor.id].group.position;
+    for (const [index,actor] of view.actors.entries()) {
+      const position = population.models[actor.id]!.group.position;
       this.projection.set(position.x, 8, position.z).project(this.camera);
       const marker = this.actorLabels.get(actor.id)!;
-      const labelOffset = actor.id === 'musa' ? -15 : actor.id === 'amina' ? -5 : 12;
+      const labelOffset = -8 - Math.floor(index / 3) * 21;
       const crowded = view.actors.some(other => other.id !== actor.id && Math.hypot(other.pose.x - actor.pose.x, other.pose.z - actor.pose.z) < 18);
-      const horizontalOffset = crowded ? actor.id === 'amina' ? 27 : actor.id === 'zainab' ? -20 : 0 : 0;
+      const horizontalOffset = crowded ? (index % 3 - 1) * 30 : 0;
       marker.style.transform = `translate(${(this.projection.x + 1) * this.container.clientWidth / 2 + horizontalOffset}px, ${(1 - this.projection.y) * this.container.clientHeight / 2 + labelOffset}px) translate(-50%, -100%)`;
       marker.hidden = this.projection.z > 1 || Math.abs(this.projection.x) > 1 || Math.abs(this.projection.y) > 1;
     }
+    for (const [id,model] of Object.entries(population.models)) if (!view.actors.some(actor => actor.id === id)) { model.group.visible = false; this.actorLabels.get(id)!.hidden = true; }
     this.populationPlaced = true;
   }
   resetPresentation(): void { this.populationPlaced = false; }

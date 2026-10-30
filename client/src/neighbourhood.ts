@@ -5,22 +5,19 @@ import { RemoteNeighbourhoodSession } from './simulation/remote-neighbourhood-se
 import { PresentationStore, type NeighbourhoodSession, type NeighbourhoodFrame, type ObservableEvent, type Experiment, type SessionCommand } from '../../shared/neighbourhood/presentation.js';
 import type { NpcId } from '../../shared/neighbourhood/types.js';
 
-document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = 'Observe three inhabitants working, travelling and cooperating in an original miniature neighbourhood inspired by Abuja.';
+document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = 'Observe the residents working, travelling and cooperating in an original miniature neighbourhood inspired by Abuja.';
 document.querySelector('#experience')!.innerHTML = `
-  <div id="world" aria-label="Living 3D neighbourhood with three autonomous mock inhabitants"></div>
+  <div id="world" aria-label="Living 3D neighbourhood with autonomous mock residents"></div>
   <div id="labels" aria-hidden="true"></div><div id="inhabitant-labels" aria-label="Select an inhabitant in the scene"></div>
-  <div class="scene-caption"><span class="eyebrow">THREE NEIGHBOURS. ONE SHARED WORLD.</span><h1>Life happens<br />around you.</h1><p>Watch their day unfold. Choose someone to get closer.</p></div>
+  <div class="scene-caption"><span class="eyebrow">INDEPENDENT LIVES. ONE SHARED WORLD.</span><h1>Life happens<br />around you.</h1><p>Watch their day unfold. Choose someone to get closer.</p></div>
   <section class="inhabitant-panel" aria-label="Inhabitants">
     <div class="people" role="group" aria-label="Choose an inhabitant">
-      <button data-person="amina" aria-pressed="true"><span class="portrait amina">A</span>Amina</button>
-      <button data-person="musa" aria-pressed="false"><span class="portrait musa">M</span>Musa</button>
-      <button data-person="zainab" aria-pressed="false"><span class="portrait zainab">Z</span>Zainab</button>
     </div>
     <div class="person-heading"><span id="person-avatar" class="portrait large amina">A</span><div><h2 id="person-name">Amina</h2><p id="person-role">Market trader</p></div><span class="local-tag">NEIGHBOUR</span></div>
     <div class="activity-line"><span></span><strong id="person-activity" role="status">Starting the day</strong></div>
     <p id="person-intention" class="intention">The neighbourhood is waking up.</p>
     <div class="person-facts"><span id="person-location">Market Square</span><span id="person-goods">No goods carried</span></div>
-    <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul>
+    <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
     <section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
     <details class="experiments"><summary>Neighbourhood experiments</summary><label for="experiment">Mock decision policy</label><select id="experiment"><option value="cooperate">Cooperation</option><option value="decline">Driver declines</option><option value="wait">Trader waits</option><option value="self-collect">Trader collects supplies herself</option><option value="reduce-sales">Trader pauses sales</option></select><p>Choose an alternative, then reset. These are labelled mock policies, not guaranteed live AI outcomes.</p></details>
@@ -51,12 +48,21 @@ let fps = 0;
 let previousWorld = '';
 let uiKey = '';
 let scene: NeighbourhoodScene;
-const names = { amina: 'Amina', musa: 'Musa', zainab: 'Zainab' };
+const names: Record<string,string> = {};
 const locations: Record<string, string> = { stand: 'Taxi Stand', centre: 'Community Centre', market: 'Market Square', overlook: 'Lake Overlook', hill: 'Hill Garden', west: 'West road', junction: 'Road junction', bridge: 'Lake junction' };
 
 export function describeObservable(event: ObservableEvent): string {
-  const name = event.actor ? names[event.actor] : 'Neighbourhood';
+  const name = event.actor ? names[event.actor] ?? 'Resident' : 'Neighbourhood';
   const descriptions: Record<string, string> = {
+    'encounter-noticed': `${names[String(event.data.first)] ?? 'A resident'} noticed ${names[String(event.data.second)] ?? 'a neighbour'} nearby.`,
+    'encounter-invited': `${name} invited ${names[String(event.data.recipient)] ?? 'a neighbour'} to talk: ${event.detail}`,
+    'encounter-accepted': `${name} agreed to discuss the opportunity. This is not a job commitment.`,
+    'encounter-declined': `${name} declined the conversation.`,
+    'encounter-deferred': `${name} deferred the conversation to attend to another priority.`,
+    'encounter-clarified': `${name} asked for clarification: ${event.detail}`,
+    'encounter-expired': 'An encounter invitation expired without a response.',
+    'resident-introduced': event.detail,
+    'information-shared': `${name} shared an attributed report: ${event.detail}`,
     'transport-proposed': `${name} asked for help bringing supplies.`,
     'transport-accepted': `${name} accepted the transport request.`,
     'transport-declined': `${name} declined the transport request.`,
@@ -87,12 +93,24 @@ function updateUi(force = false): void {
   el('#world-clock').textContent = `${timeLabel(view.time)}${frame.paused ? ' · paused' : ''}`;
   const key = `${view.worldId}:${frame.eventCursor}:${selected}:${frame.paused}:${frame.speed}:${focused}`;
   if (!force && key === uiKey) return; uiKey = key;
+  if (!view.actors.some(actor => actor.id === selected)) selected = view.actors[0]!.id;
+  for (const person of view.actors) names[person.id] = person.name;
+  const roster = el('.people');
+  if ([...roster.querySelectorAll<HTMLElement>('[data-person]')].map(button => button.dataset.person).join(':') !== view.actors.map(person => person.id).join(':')) {
+    roster.replaceChildren();
+    for (const person of view.actors) {
+      const button = document.createElement('button'); button.dataset.person = person.id;
+      const portrait = document.createElement('span'); portrait.className = 'portrait ' + person.id; portrait.textContent = person.name[0]!;
+      button.append(portrait,document.createTextNode(person.name));
+      button.addEventListener('click',() => select(person.id), { signal: listeners.signal }); roster.append(button);
+    }
+  }
   const actor = view.actors.find(actor => actor.id === selected)!;
   el('#person-name').textContent = actor.name; el('#person-role').textContent = actor.occupation;
   el('#person-activity').textContent = actor.activity;
   el('#person-intention').textContent = actor.intention ?? 'Choosing an activity from personal priorities.';
   el('#person-location').textContent = actor.moving ? `From ${locations[actor.node] ?? actor.node}` : locations[actor.node] ?? actor.node;
-  el('#person-goods').textContent = actor.goods ? `Carrying ${actor.goods} goods` : selected === 'musa' && actor.rewards ? `${actor.rewards} completed job` : 'No goods carried';
+  el('#person-goods').textContent = actor.goods ? `Carrying ${actor.goods} goods` : actor.rewards ? `${actor.rewards} completed job` : 'No goods carried';
   el('#person-avatar').className = `portrait large ${selected}`; el('#person-avatar').textContent = actor.name[0]!;
   el('#talk-name').textContent = actor.name;
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-person]')) button.setAttribute('aria-pressed', String(button.dataset.person === selected));
@@ -102,7 +120,7 @@ function updateUi(force = false): void {
   el('#market-stock').textContent = `${view.resources.marketGoods} ${view.resources.marketGoods === 1 ? 'portion' : 'portions'}${view.resources.salesOpen ? ' available' : ' · sales paused'}`;
   el('#supplier-stock').textContent = `${view.resources.supplierGoods} goods`;
   const task = view.tasks.at(-1);
-  const statuses = { proposed: 'Transport requested', accepted: 'Musa agreed to help', declined: 'Musa declined the request', collected: 'Supplies on board', delivered: 'Delivery completed', expired: 'Request expired' };
+  const statuses = { proposed: 'Transport requested', accepted: `${names[task?.recipient ?? ''] ?? 'Resident'} agreed to help`, declined: `${names[task?.recipient ?? ''] ?? 'Resident'} declined the request`, collected: 'Supplies on board', delivered: 'Delivery completed', expired: 'Request expired' };
   el('#task-status').textContent = task ? statuses[task.status] : 'Neighbours at work';
   const events = frame.events.filter(event => !['action-validated', 'action-proposed', 'intention-selected'].includes(event.type));
   const feed = el('#activity-feed'); feed.replaceChildren();
@@ -114,7 +132,9 @@ function updateUi(force = false): void {
   const recent = el('#person-recent'); recent.replaceChildren();
   for (const event of relevant.slice(-2).reverse()) { const item = document.createElement('li'); item.textContent = describeObservable(event); recent.append(item); }
   if (!recent.children.length) { const item = document.createElement('li'); item.textContent = 'Their day is just beginning.'; recent.append(item); }
-  el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, tasks: view.tasks, events: frame.events.slice(-12) }, null, 2);
+  const encounter = view.encounters.filter(item => item.initiator === selected || item.recipient === selected).at(-1);
+  el('#person-social').textContent = encounter ? `Encounter with ${names[encounter.initiator === selected ? encounter.recipient : encounter.initiator]}: ${encounter.status}. Job commitments are recorded separately.` : 'Nearby encounters are optional.';
+  el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, tasks: view.tasks, encounters: view.encounters, events: frame.events }, null, 2);
   const mode = el('.mode-pill'); mode.replaceChildren(); const dot = document.createElement('i');
   mode.title = frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
   mode.append(dot, document.createTextNode(frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Meta / backend'));
@@ -188,7 +208,7 @@ try {
     void remote.confirm({ id: crypto.randomUUID(), worldId: frame.snapshot.worldId, proposalId }).then(result => { el('#conversation-status').textContent = `Action validation: ${result.reason}`; }).catch(error => { el('#conversation-status').textContent = (error as Error).message; });
     proposalId = null; el('#confirm-proposal').hidden = true;
   }, options);
-  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-person]')) button.addEventListener('click', () => select(button.dataset.person as NpcId), options);
+
   el('#pause').addEventListener('click', () => { void command({ type: 'pause', paused: !(frame?.paused ?? true) }); }, options);
   el('#reset').addEventListener('click', () => {
     focused = false; scene.setFollow(false);

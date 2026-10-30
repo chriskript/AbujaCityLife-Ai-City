@@ -1,5 +1,7 @@
 # Controlled neighbourhood backend
 
+For current resident-registry migration, autonomous encounters and mock routine scheduling, see [Milestone 7A](milestone-7a.md). Live requests and all conversations retain the wall-clock/spending safeguards below; autonomous mock routines now use a separate persisted simulation-time rate window, with the same bounded session allowance. The HTTP observer clock remains unchanged; a bounded offline headless driver is available separately.
+
 Milestone 5 adds a single authoritative Node service around the existing `Neighbourhood` core. The default browser receives public snapshots through SSE; it sends controls, messages and confirmations over HTTP. Rendering never applies inventory, task or memory changes. The original local taxi lab remains an explicitly mock regression experience; `/?authority=local` selects the previous local neighbourhood test adapter.
 
 ## Run locally in mock mode

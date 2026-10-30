@@ -1,4 +1,4 @@
-import { npcIds, type NpcDecisionProvider } from './types.js';
+import { type NpcDecisionProvider } from './types.js';
 import { NeighbourhoodMockProvider } from './mock-provider.js';
 import { Neighbourhood } from './world.js';
 
@@ -19,6 +19,7 @@ export class DecisionScheduler {
     const time = this.world.snapshot.time;
     while (this.recent.length && this.recent[0]! <= time - 60) this.recent.shift();
     if (this.recent.length >= this.limits.perMinute) return false;
+    const npcIds = this.world.residentIds;
     for (let index = 0; index < npcIds.length; index++) {
       const position = (this.cursor + index) % npcIds.length;
       const id = npcIds[position]!;

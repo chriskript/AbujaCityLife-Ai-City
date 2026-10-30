@@ -1,3 +1,4 @@
+import { legacyResidents } from '../../shared/neighbourhood/initial-state.js';
 import { Neighbourhood } from '../../shared/neighbourhood/world.js';
 import type { Action, NpcId } from '../../shared/neighbourhood/types.js';
 import type { NeighbourhoodFrame } from '../../shared/neighbourhood/presentation.js';
@@ -9,11 +10,11 @@ export const autonomyProbeMaximumUsd = Math.ceil(2 * maximumGenerationUsd * 1e6)
 // Deterministic SETUP, not model reasoning: learn supplies via a visit; co-locate at market.
 // All movement uses the existing validator/executor. Stock, needs and relationships are not patched.
 export function prepareAutonomyFixture(): Neighbourhood {
-  const world = new Neighbourhood('autonomy-probe-fixture-v1');
+  const world = new Neighbourhood('autonomy-probe-fixture-v1', legacyResidents());
   const move = (id: NpcId, destination: string, seconds: number) => {
     const request = world.requestInteractionDecision(id)!;
     const action: Action = { type: 'travel', destination };
-    const outcome = world.applyDecision(request.id, { goalId: world.snapshot.npcs[id].goals[0]!.id, reason: 'MOCK fixture setup only: validated relocation and observation.', action }, { mode: 'mock', model: 'fixture-setup' });
+    const outcome = world.applyDecision(request.id, { goalId: world.snapshot.npcs[id]!.goals[0]!.id, reason: 'MOCK fixture setup only: validated relocation and observation.', action }, { mode: 'mock', model: 'fixture-setup' });
     if (!outcome.accepted) throw new Error('Fixture relocation failed'); world.advance(seconds);
   };
   move('amina', 'centre', 10); move('amina', 'market', 10); move('musa', 'market', 6);

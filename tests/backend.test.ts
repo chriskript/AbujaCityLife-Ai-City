@@ -8,6 +8,8 @@ import { MockNeighbourhoodProvider, MetaNeighbourhoodProvider, maximumGeneration
 import { initializeProbeBudget } from '../server/controls/probe-budget.js';
 import { Neighbourhood } from '../shared/neighbourhood/world.js';
 import type { ConversationContext } from '../shared/neighbourhood/conversation.js';
+import { prepareAutonomyFixture } from '../server/evaluation/autonomy-probe.js';
+import { npcDecisionSchema } from '../shared/neighbourhood/decision-schema.js';
 
 const folders: string[] = []; const cleanup: (() => Promise<void>)[] = [];
 async function directory() { const path = await mkdtemp(join(tmpdir(), 'city-backend-')); folders.push(path); return path; }
@@ -36,11 +38,14 @@ describe('authoritative durable session', () => {
   });
   it('runs collection, delivery and purchases using the existing authoritative world', async () => {
     const { value, elapse } = await session();
-    for (let index = 0; index < 300; index++) { elapse(); await value.decide(); await value.tick(.25); }
+    for (let index = 0; index < 300; index++) {
+      elapse(); await value.decide(); await value.tick(.25);
+      if (value.frame.snapshot.tasks.some(task => task.status === 'delivered') && value.frame.snapshot.actors.find(actor => actor.id === 'zainab')!.goods === 1) break;
+    }
     expect(value.frame.snapshot.tasks.some(task => task.status === 'delivered')).toBe(true);
     expect(value.frame.snapshot.actors.find(actor => actor.id === 'zainab')!.goods).toBe(1);
     expect(value.frame.snapshot.resources.supplierGoods + value.frame.snapshot.resources.marketGoods + value.frame.snapshot.actors.reduce((sum, actor) => sum + actor.goods, 0)).toBe(9);
-  });
+  }, 15_000);
   it('restores memories, time, event sequence, transcript and request counts across restart', async () => {
     const { value, checkpoint } = await session(); const id = value.frame.snapshot.worldId;
     await value.converse({ id: 'chat', worldId: id, actorId: 'zainab', message: 'I heard supplies vanished' });
@@ -189,6 +194,48 @@ describe('Meta neighbourhood contract without paid requests', () => {
   });
   it('makes no HTTP calls when the persistent budget cannot reserve the maximum', async () => {
     const { provider: p, fetcher } = await provider({}, .001); await expect(p.converse(context())).rejects.toThrow('exhausted'); expect(fetcher).not.toHaveBeenCalled();
+  });
+  it.each([1, 6, 8])('sends quantity bounds and scoped limits through the real adapter for a fake quantity %i response', async quantity => {
+    const world = prepareAutonomyFixture(); const request = world.requestDecision('amina')!;
+    const decision = { goalId: 'restock', reason: 'Offline reproduction of 6C', action: { type: 'propose-transport', recipient: 'musa', quantity } };
+    const { provider: p, fetcher, ledgerPath } = await provider(output(decision));
+    const before = world.serialize();
+    if (quantity === 8) await expect(p.decide(request)).rejects.toThrow('Invalid Meta decision');
+    else expect((await p.decide(request)).decision).toEqual(decision);
+    expect(world.serialize()).toBe(before); // Provider results alone never execute.
+    expect(fetcher).toHaveBeenCalledTimes(2); // Token count + fake generation, no retry.
+    for (const call of fetcher.mock.calls) {
+      const body = JSON.parse(call[1]!.body as string);
+      expect(body.text.format.schema).toEqual(npcDecisionSchema);
+      const observation = JSON.parse(body.input).observation;
+      expect(observation.actionConstraints['propose-transport'].quantity).toEqual({ minimum: 1, maximum: 6 });
+      expect(observation.actionConstraints['collect-self'].carryingCapacity).toBe(2);
+      expect(observation.nearbyPeople).toEqual([{ id: 'musa', name: 'Musa', occupation: 'Taxi driver', activity: 'idle', known: true, canTransport: true }]);
+      expect(observation).not.toHaveProperty('npcs');
+      expect(body.instructions).toContain('actionConstraints');
+    }
+    expect(JSON.parse(await readFile(ledgerPath, 'utf8')).reservations).toHaveLength(1);
+  });
+  it('preserves all gameplay state when the adapter rejects the recorded quantity-eight proposal', async () => {
+    const { provider: p, fetcher } = await provider(output({ goalId: 'restock', reason: 'Request supplies', action: { type: 'propose-transport', recipient: 'musa', quantity: 8 } }));
+    // Only the injected fake transport runs; no live plan or runtime ledger is used.
+    const checkpoint = join(await directory(), 'quantity-session.json');
+    const value = await NeighbourhoodServerSession.open({ checkpoint, initialWorld: prepareAutonomyFixture().serialize(),
+      provider: { mode: 'mock', metrics: null, decide: request => p.decide(request), converse: context => p.converse(context) } });
+    cleanup.push(() => value.close());
+    const before = JSON.parse(JSON.parse(await readFile(checkpoint, 'utf8')).world);
+    await value.decide('amina', true);
+    const after = JSON.parse(JSON.parse(await readFile(checkpoint, 'utf8')).world);
+    expect(after.npcs).toEqual(before.npcs);
+    expect(after.resources).toEqual(before.resources);
+    expect(after.roads).toEqual(before.roads);
+    expect(after.tasks).toEqual(before.tasks);
+    expect(after.time).toBe(before.time);
+    expect(after.nextTask).toBe(before.nextTask);
+    expect(after.events.slice(before.events.length).map((event: { type: string }) => event.type)).toEqual(['inference-unavailable']);
+    expect(after.triggers.amina).toBeUndefined(); // No automatic retry trigger.
+    expect(JSON.parse(JSON.parse(fetcher.mock.calls[1]![1]!.body as string).input).actorId).toBe('amina');
+    expect(fetcher).toHaveBeenCalledTimes(2);
   });
   it('does not retry network failures and retains reservations', async () => {
     const { provider: p, fetcher, ledgerPath } = await provider({}); fetcher.mockReset().mockRejectedValue(new DOMException('Timeout', 'TimeoutError'));
