@@ -14,6 +14,9 @@ export function isNpcDecision(value: unknown): value is NpcDecision {
   const action = decision.action as Record<string, unknown>;
   switch (action.type) {
     case 'travel': return exact(action, ['type', 'destination']) && text(action.destination);
+    case 'take-work': return exact(action, ['type','businessId']) && isResidentId(action.businessId);
+    case 'rest': return exact(action, ['type','seconds']) && Number.isFinite(action.seconds) && Number(action.seconds) >= 10 && Number(action.seconds) <= 120;
+    case 'eat': return exact(action, ['type','quantity']) && quantity(action.quantity);
     case 'wait': case 'work': return exact(action, ['type', 'seconds']) && Number.isFinite(action.seconds) && Number(action.seconds) >= 1 && Number(action.seconds) <= 120;
     case 'propose-transport': return exact(action, ['type', 'recipient', 'quantity']) && isResidentId(action.recipient) && quantity(action.quantity);
     case 'respond-transport': return text(action.taskId) && (exact(action, ['type', 'taskId', 'accept']) && typeof action.accept === 'boolean' || exact(action, ['type','taskId','accept','question']) && action.accept === 'clarify' && text(action.question, 160));
@@ -33,6 +36,9 @@ export const npcDecisionSchema = {
   properties: {
     goalId: { type: 'string' }, reason: { type: 'string' },
     action: { anyOf: [
+      ['take-work', { businessId: { type: 'string', pattern: '^[a-z][a-z0-9_-]{0,47}$' } }],
+      ['rest', { seconds: { type: 'number', minimum: 10, maximum: 120 } }],
+      ['eat', { quantity: { type: 'integer', ...quantityBounds } }],
       ['travel', { destination: { type: 'string' } }],
       ['wait', { seconds: { type: 'number' } }], ['work', { seconds: { type: 'number' } }],
       ['propose-transport', { recipient: { type: 'string', pattern: '^[a-z][a-z0-9_-]{0,47}$' }, quantity: { type: 'integer', ...quantityBounds } }],

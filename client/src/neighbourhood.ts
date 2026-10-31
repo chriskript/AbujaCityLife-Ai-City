@@ -16,7 +16,7 @@ document.querySelector('#experience')!.innerHTML = `
     <div class="person-heading"><span id="person-avatar" class="portrait large amina">A</span><div><h2 id="person-name">Amina</h2><p id="person-role">Market trader</p></div><span class="local-tag">NEIGHBOUR</span></div>
     <div class="activity-line"><span></span><strong id="person-activity" role="status">Starting the day</strong></div>
     <p id="person-intention" class="intention">The neighbourhood is waking up.</p>
-    <div class="person-facts"><span id="person-location">Market Square</span><span id="person-goods">No goods carried</span></div>
+    <div class="person-facts"><span id="person-location">Market Square</span><span id="person-goods">No goods carried</span></div><p id="person-wallet" class="intention" hidden></p>
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
     <section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
@@ -54,6 +54,13 @@ const locations: Record<string, string> = { stand: 'Taxi Stand', centre: 'Commun
 export function describeObservable(event: ObservableEvent): string {
   const name = event.actor ? names[event.actor] ?? 'Resident' : 'Neighbourhood';
   const descriptions: Record<string, string> = {
+    'paid-work-started': `${name} accepted funded work; payment awaits completion.`,
+    'paid-work-completed': `${name} completed work, earning ${event.data.wage} demo credits${event.data.quantity ? ` and producing ${event.data.quantity} supplies` : ''}.`,
+    'purchase-paid': `${name} paid ${event.data.coins} demo credits for food.`,
+    'food-consumed': `${name} ate ${event.data.quantity} portion.`,
+    'rest-started': `${name} chose time to rest.`,
+    'rest-completed': `${name} finished resting.`,
+    'transport-paid': `${name} received ${event.data.coins} demo credits for the completed delivery.`,
     'encounter-noticed': `${names[String(event.data.first)] ?? 'A resident'} noticed ${names[String(event.data.second)] ?? 'a neighbour'} nearby.`,
     'encounter-invited': `${name} invited ${names[String(event.data.recipient)] ?? 'a neighbour'} to talk: ${event.detail}`,
     'encounter-accepted': `${name} agreed to discuss the opportunity. This is not a job commitment.`,
@@ -111,6 +118,8 @@ function updateUi(force = false): void {
   el('#person-intention').textContent = actor.intention ?? 'Choosing an activity from personal priorities.';
   el('#person-location').textContent = actor.moving ? `From ${locations[actor.node] ?? actor.node}` : locations[actor.node] ?? actor.node;
   el('#person-goods').textContent = actor.goods ? `Carrying ${actor.goods} goods` : actor.rewards ? `${actor.rewards} completed job` : 'No goods carried';
+  el('#person-wallet').hidden=actor.coins===undefined;
+  el('#person-wallet').textContent=actor.coins===undefined ? '' : `${actor.coins} demo credits · ${actor.food ?? 0} food portions carried`;
   el('#person-avatar').className = `portrait large ${selected}`; el('#person-avatar').textContent = actor.name[0]!;
   el('#talk-name').textContent = actor.name;
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-person]')) button.setAttribute('aria-pressed', String(button.dataset.person === selected));
@@ -134,7 +143,7 @@ function updateUi(force = false): void {
   if (!recent.children.length) { const item = document.createElement('li'); item.textContent = 'Their day is just beginning.'; recent.append(item); }
   const encounter = view.encounters.filter(item => item.initiator === selected || item.recipient === selected).at(-1);
   el('#person-social').textContent = encounter ? `Encounter with ${names[encounter.initiator === selected ? encounter.recipient : encounter.initiator]}: ${encounter.status}. Job commitments are recorded separately.` : 'Nearby encounters are optional.';
-  el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, tasks: view.tasks, encounters: view.encounters, events: frame.events }, null, 2);
+  el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, events: frame.events }, null, 2);
   const mode = el('.mode-pill'); mode.replaceChildren(); const dot = document.createElement('i');
   mode.title = frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
   mode.append(dot, document.createTextNode(frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Meta / backend'));

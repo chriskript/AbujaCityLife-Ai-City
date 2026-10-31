@@ -6,6 +6,8 @@ import { type Inhabitant, type Action, type DecisionOutcome, type MemoryKind, ty
 import { assertSnapshot, migrateSnapshot } from './snapshot.js';
 import { projectPlaceKnowledge } from './knowledge.js';
 import { quantityBounds, transportCapacity, selfCollectionCapacity } from './action-limits.js';
+import { residentPlan, townBusinesses } from './population.js';
+import { initialPlaceFacts } from './knowledge.js';
 
 let worldSequence = 0;
 const copy = <T>(value: T): T => structuredClone(value);
@@ -28,9 +30,12 @@ export class Neighbourhood {
   }
 
   get snapshot(): WorldState { return copy(this.state); }
+  get time(): number { return this.state.time; }
+  get id(): string { return this.state.id; }
   get residentIds(): NpcId[] { return Object.keys(this.state.npcs); }
   hasResident(id: string): boolean { return Object.hasOwn(this.state.npcs, id); }
   serialize(): string { return JSON.stringify(this.state); }
+  get hasTownEconomy(): boolean { return this.state.town !== undefined; }
   static restore(serialized: string): Neighbourhood {
     const state: unknown = migrateSnapshot(JSON.parse(serialized)); assertSnapshot(state);
     const world = new Neighbourhood(state.id); world.state = copy(state);
@@ -52,9 +57,12 @@ export class Neighbourhood {
   private witnesses(actor: NpcId): NpcId[] { return this.residentIds.filter(id => id === actor || this.nearby(id, actor)); }
 
   private pair(a: NpcId, b: NpcId): string { return [a,b].sort().join(':'); }
-  private available(id: NpcId): boolean { return ['idle','wait'].includes(this.state.npcs[id]!.activity.kind); }
+  private available(id: NpcId): boolean {
+    const activity=this.state.npcs[id]!.activity;
+    return activity.kind==='idle' || activity.kind==='wait' && !activity.resting;
+  }
   private canEncounter(a: NpcId, b: NpcId): boolean {
-    return this.nearby(a,b) && this.available(a) && this.available(b) &&
+    return Object.keys(this.state.social.interactions).length<128 && this.nearby(a,b) && this.available(a) && this.available(b) &&
       this.state.npcs[a]!.capabilities.includes('encounter') && this.state.npcs[b]!.capabilities.includes('respond-encounter') &&
       (this.state.social.cooldowns[this.pair(a,b)] ?? 0) <= this.state.time &&
       !Object.values(this.state.social.interactions).some(item => item.status === 'pending' &&
@@ -106,6 +114,7 @@ export class Neighbourhood {
   }
 
   addResident(resident: Inhabitant): void {
+    if (this.state.town) throw new Error('Expand a town through the validated town upgrade');
     if (!isResidentId(resident.id) || this.hasResident(resident.id) || resident.memories.length || resident.inventory.goods || resident.inventory.rewards) throw new Error('Invalid new resident');
     const candidate = copy(this.state);
     candidate.npcs[resident.id] = copy(resident);
@@ -114,6 +123,83 @@ export class Neighbourhood {
     this.record('identity-established', resident.id, [resident.id], resident.id, `${resident.name}: ${resident.occupation}`, {}, 'fact');
     if (resident.circumstances) this.record('circumstances-established', resident.id, [resident.id], resident.id, resident.circumstances, {}, 'fact');
     this.perceive(resident.id); this.trigger(resident.id,'activation');
+  }
+
+  enableTown(residents: Inhabitant[]): void {
+    if (new Set(residents.map(npc=>npc.id)).size!==residents.length) throw new Error('Duplicate resident ID');
+    // Build admission, credits and new businesses in an isolated candidate before publishing.
+    const candidate = Neighbourhood.restore(this.serialize()), state = candidate.state;
+    const priorTown = state.town, admitted: string[] = [];
+    for (const resident of residents) if (!candidate.hasResident(resident.id)) {
+      if (!isResidentId(resident.id) || resident.memories.length || resident.inventory.goods || resident.inventory.rewards) throw new Error('Invalid new resident');
+      state.npcs[resident.id] = copy(resident); admitted.push(resident.id);
+    }
+    const configured = priorTown ? admitted : candidate.residentIds;
+    if (!configured.length) return;
+    const definitions=townBusinesses(candidate.residentIds);
+    const businesses=priorTown?.businesses ?? {};
+    let addedMoney=0;
+    for (const [id,business] of Object.entries(definitions)) {
+      if (!Object.hasOwn(businesses,id)) { businesses[id]=business; addedMoney+=business.coins; }
+      else businesses[id]!.staff=[...new Set([...businesses[id]!.staff,...business.staff])];
+    }
+    for (const id of configured) {
+      const npc=state.npcs[id]!, plan=residentPlan(id), previousPlaces=new Set(npc.knowledge.places);
+      npc.inventory.coins ??= plan.coins; addedMoney+=npc.inventory.coins; npc.home ??= plan.home;
+      const cargo=Object.values(state.tasks).filter(task=>task.recipient===id && task.status==='collected').reduce((sum,task)=>sum+task.quantity,0);
+      const purchases=state.events.filter(event=>event.actor===id && event.type==='buy').reduce((sum,event)=>sum+Number(event.data.quantity ?? 0),0);
+      npc.inventory.food ??= Math.min(npc.inventory.goods-cargo,purchases);
+      npc.skills ??= [...new Set(['general',plan.skill,...(npc.capabilities.includes('fulfil-transport') ? ['transport'] : [])])];
+      npc.routine ??= {workplace:plan.workplace,leisure:plan.leisure,sociability:plan.sociability};
+      npc.needs.rest ??= 'rest' in plan && typeof plan.rest==='number' ? plan.rest : .1;
+      npc.capabilities=[...new Set([...npc.capabilities,'buy','take-work','eat','rest'] as const)];
+      npc.knowledge.places=[...new Set([...npc.knowledge.places,npc.home,npc.routine.workplace,npc.routine.leisure,'market'])];
+      for (const place of npc.knowledge.places) if (!previousPlaces.has(place)) npc.knowledge.placeFacts={...npc.knowledge.placeFacts,...initialPlaceFacts([place])};
+      npc.knowledge.businesses ??= Object.fromEntries(Object.values(businesses).filter(b=>npc.skills!.includes(b.skill)).map(b=>[b.id,{available:null,observedAt:null}]));
+      candidate.trigger(id,'town-opportunities');
+    }
+    state.town=priorTown ? {...priorTown,businesses,initialMoney:priorTown.initialMoney+addedMoney} : {
+      businesses,initialMoney:addedMoney,initialInputs:96,rawInputs:96,produced:0,consumed:0,nextNeedsAt:state.time+60,
+      marketPrice:2,transportPayment:2,supplierCapacity:24,
+    };
+    for (const id of admitted) {
+      const npc=state.npcs[id]!;
+      candidate.record('identity-established',id,[id],id,npc.name+': '+npc.occupation,{},'fact');
+      if (npc.circumstances) candidate.record('circumstances-established',id,[id],id,npc.circumstances,{},'fact');
+    }
+    for (const id of configured) {
+      // Existing residents keep their entire retained memory buffer during migration.
+      // Later real observations resume normal retention; setup must not evict old evidence.
+      const newlyAdmitted=admitted.includes(id);
+      candidate.record('routine-established',id,[id],id,'Learned personal work opportunities and the town credit/food rules',{},newlyAdmitted ? 'fact' : undefined);
+      if (newlyAdmitted) candidate.perceive(id);
+    }
+    assertSnapshot(state);
+    this.state=copy(state); this.pending.clear();
+  }
+
+  private workAvailable(businessId: string): boolean {
+    const town = this.state.town, business = town?.businesses[businessId]; if (!town || !business) return false;
+    const bookings = Object.values(this.state.npcs).flatMap(npc => npc.activity.kind === 'work' && npc.activity.job ? [npc.activity.job] : []);
+    return bookings.filter(job=>job.businessId===businessId).length < business.slots && business.coins >= business.wage &&
+      town.rawInputs >= business.output && this.state.resources.supplierGoods + bookings.reduce((sum,job)=>sum+job.output,0) + business.output <= town.supplierCapacity;
+  }
+
+  private townNeeds(): void {
+    const town = this.state.town; if (!town || this.state.time < town.nextNeedsAt) return;
+    town.nextNeedsAt += 60;
+    for (const npc of Object.values(this.state.npcs)) {
+      npc.needs.food = Math.min(1,Number((npc.needs.food + .08).toFixed(6)));
+      npc.needs.rest = Math.min(1,Number(((npc.needs.rest ?? 0) + (['travel','work'].includes(npc.activity.kind) ? .08 : .04)).toFixed(6)));
+      npc.needs.income = Math.min(1,Number((npc.needs.income + .03).toFixed(6))); npc.revision++;
+      this.trigger(npc.id,'personal-needs-changed'); this.perceive(npc.id);
+    }
+  }
+  private marketServing(buyer: string): boolean {
+    return this.state.town!.businesses.market!.staff.some(id=>{
+      const npc=this.state.npcs[id]!;
+      return npc.node==='market' && this.atNode(id) && (id===buyer || !(npc.activity.kind==='wait' && npc.activity.resting));
+    });
   }
 
   private record(type: string, actor: NpcId | null, audience: NpcId[], subject: string, detail: string,
@@ -141,6 +227,15 @@ export class Neighbourhood {
   private perceive(id: NpcId): void {
     const npc = this.state.npcs[id]!;
     if (!this.atNode(id)) return;
+    if (this.state.town) for (const business of Object.values(this.state.town.businesses)) if (business.node === npc.node) {
+      const available = this.workAvailable(business.id), previous = npc.knowledge.businesses?.[business.id];
+      npc.knowledge.businesses ??= {};
+      if (!previous || previous.available !== available) {
+        npc.knowledge.businesses[business.id] = {available,observedAt:this.state.time};
+        this.record('work-observed',id,[id],business.id,available ? 'Observed a funded work opening' : 'Observed no current work opening',{available},'observed');
+        this.trigger(id,'work-availability-changed');
+      }
+    }
     const visible = npc.knowledge.resources;
     if (npc.node === 'market' && (visible.marketGoods !== this.state.resources.marketGoods || visible.salesOpen !== this.state.resources.salesOpen)) {
       visible.marketGoods = this.state.resources.marketGoods; visible.salesOpen = this.state.resources.salesOpen;
@@ -176,7 +271,7 @@ export class Neighbourhood {
     if (!this.hasResident(id)) throw new Error('Unknown resident');
     const npc = this.state.npcs[id]!;
     const actionConstraints: NpcObservation['actionConstraints'] = {};
-    for (const type of ['propose-transport', 'collect-self', 'stock-stall', 'buy'] as const) {
+    for (const type of ['propose-transport', 'collect-self', 'stock-stall', 'buy', 'eat'] as const) {
       if (npc.capabilities.includes(type)) actionConstraints[type] = { quantity: { ...quantityBounds } };
     }
     if (npc.capabilities.includes('collect-self')) Object.assign(actionConstraints['collect-self']!, {
@@ -202,13 +297,22 @@ export class Neighbourhood {
       })),
       encounters: Object.values(this.state.social.interactions).filter(item => item.initiator === id || item.recipient === id).slice(-8),
       encounterOpportunities: this.residentIds.filter(other => this.canEncounter(id, other)),
+      ...(this.state.town ? { town: {
+        marketPrice:this.state.town.marketPrice,ownsMarket:this.state.town.businesses.market?.owner===id,transportPayment:this.state.town.transportPayment,
+        marketServing:npc.node==='market' && this.atNode(id) ? this.marketServing(id) : null,
+        work:Object.entries(npc.knowledge.businesses ?? {}).flatMap(([key,knowledge])=>{
+          const business=this.state.town!.businesses[key];
+          return business && npc.skills?.includes(business.skill) ? [{id:business.id,name:business.name,node:business.node,skill:business.skill,wage:business.wage,seconds:business.seconds,
+            available:npc.node===business.node && this.atNode(id) ? this.workAvailable(key) : knowledge.available,observedAt:npc.node===business.node && this.atNode(id) ? this.state.time : knowledge.observedAt}] : [];
+        }),
+      }} : {}),
       resources: npc.knowledge.resources,
       tasks: Object.entries(npc.knowledge.tasks).flatMap(([taskId, status]) => {
         const task = this.state.tasks[taskId];
         return task ? [{ id: task.id, requester: task.requester, recipient: task.recipient, quantity: task.quantity, pickup: task.pickup, destination: task.destination, status, expiresAt: task.expiresAt }] : [];
       }),
       knownBlockedEdges: npc.knowledge.blockedEdges,
-      permittedActions: npc.activity.kind === 'travel' || npc.activity.kind === 'work' ? [] : npc.capabilities,
+      permittedActions: npc.activity.kind === 'travel' || npc.activity.kind === 'work' || npc.activity.kind==='wait' && npc.activity.resting ? [] : npc.capabilities,
       actionConstraints,
     });
   }
@@ -284,7 +388,21 @@ export class Neighbourhood {
   private validate(id: NpcId, action: Action): string | null {
     const npc = this.state.npcs[id]!;
     if (!npc.capabilities.includes(action.type)) return 'missing-capability';
-    if (npc.activity.kind !== 'idle' && npc.activity.kind !== 'wait') return 'actor-busy';
+    if (!this.available(id)) return 'actor-busy';
+    const town = this.state.town;
+    if (action.type === 'take-work') {
+      const business = town?.businesses[action.businessId];
+      if (!business || !Object.hasOwn(npc.knowledge.businesses ?? {},action.businessId)) return 'unknown-work';
+      if (npc.node !== business.node) return 'not-at-workplace';
+      if (!npc.skills?.includes(business.skill)) return 'missing-skill';
+      if (!this.workAvailable(business.id)) return 'work-unavailable';
+    } else if (action.type === 'rest') {
+      if (!town || (npc.node !== npc.home && !npc.knowledge.placeFacts?.[npc.node]?.services.includes('scenic-view'))) return 'not-at-rest-place';
+    } else if (action.type === 'eat') {
+      if (!town) return 'town-economy-unavailable';
+      const cargo = Object.values(this.state.tasks).filter(task=>task.recipient===id && task.status==='collected').reduce((sum,task)=>sum+task.quantity,0);
+      if ((npc.inventory.food ?? 0) < action.quantity || npc.inventory.goods - cargo < action.quantity) return 'missing-personal-food';
+    }
     if ('recipient' in action && !this.hasResident(action.recipient)) return 'unknown-recipient';
     if (action.type === 'encounter') {
       if (!this.canEncounter(id, action.recipient)) return 'encounter-unavailable';
@@ -306,6 +424,7 @@ export class Neighbourhood {
       if (!this.state.npcs[action.recipient]!.capabilities.includes('fulfil-transport') || !this.state.npcs[action.recipient]!.capabilities.includes('respond-transport')) return 'recipient-cannot-transport';
       if (Object.values(this.state.tasks).some(task => task.requester === id && ['proposed', 'accepted', 'collected'].includes(task.status))) return 'existing-commitment';
       if (action.quantity > transportCapacity || this.availableSupplies() < action.quantity) return 'insufficient-supplies';
+      if (town && (npc.inventory.coins ?? 0) < town.transportPayment) return 'insufficient-funds';
     } else if (action.type === 'respond-transport' || action.type === 'fulfil-transport') {
       const task = this.state.tasks[action.taskId];
       if (!task || task.recipient !== id) return 'wrong-task-recipient';
@@ -315,6 +434,7 @@ export class Neighbourhood {
         if (action.accept === true && Object.values(this.state.tasks).some(other => other.recipient === id && ['accepted', 'collected'].includes(other.status))) return 'existing-commitment';
         if (action.accept === true && npc.inventory.goods + task.quantity > transportCapacity) return 'carrying-capacity';
         if (action.accept === true && this.availableSupplies() < task.quantity) return 'insufficient-supplies';
+        if (action.accept === true && (this.state.npcs[task.requester]!.inventory.coins ?? 0) < (task.payment ?? 0)) return 'insufficient-payer-funds';
       } else {
         if (!['accepted', 'collected'].includes(task.status)) return 'task-not-active';
         if (task.status === 'collected' && npc.inventory.goods < task.quantity) return 'missing-cargo';
@@ -327,12 +447,16 @@ export class Neighbourhood {
     } else if (action.type === 'stock-stall') {
       if (npc.node !== 'market') return 'not-at-market';
       if (npc.inventory.goods < action.quantity) return 'missing-goods';
+      if (town && npc.inventory.goods-(npc.inventory.food ?? 0)<action.quantity) return 'missing-stall-supplies';
     } else if (action.type === 'buy') {
-      if (npc.node !== 'market' || !this.residentIds.some(other => this.nearby(id, other) && this.state.npcs[other]!.capabilities.includes('set-sales'))) return 'trader-not-nearby';
+      const present = town ? this.marketServing(id) : this.residentIds.some(other => this.nearby(id, other) && this.state.npcs[other]!.capabilities.includes('set-sales'));
+      if (npc.node !== 'market' || !present) return 'trader-not-nearby';
       if (!this.state.resources.salesOpen) return 'sales-paused';
       if (this.state.resources.marketGoods < action.quantity) return 'insufficient-stock';
+      if (town && (npc.inventory.coins ?? 0) < (town.businesses.market!.owner===id ? 0 : town.marketPrice * action.quantity)) return 'insufficient-funds';
     } else if (action.type === 'set-sales') {
       if (npc.node !== 'market') return 'not-at-market';
+      if (town && town.businesses.market!.owner!==id && !town.businesses.market!.staff.includes(id)) return 'not-market-operator';
     } else if (action.type === 'share') {
       if (!npc.knowledge.people.includes(action.recipient) || !this.nearby(id, action.recipient)) return 'recipient-not-nearby';
       if (!npc.memories.some(memory => memory.id === action.memoryId)) return 'unknown-memory';
@@ -344,6 +468,23 @@ export class Neighbourhood {
     const npc = this.state.npcs[id]!; npc.activity = { kind: 'idle' };
     if (action.type === 'encounter') { this.startEncounter(id, action); return; }
     if (action.type === 'respond-encounter') { this.respondEncounter(id, action); return; }
+    if (action.type === 'take-work') {
+      const town=this.state.town!, business=town.businesses[action.businessId]!;
+      business.coins -= business.wage; town.rawInputs -= business.output;
+      npc.activity={kind:'work',until:this.state.time+business.seconds,job:{businessId:business.id,wage:business.wage,inputs:business.output,output:business.output}};
+      this.record('paid-work-started',id,[id],business.id,'Accepted funded work; wage and inputs held until completion',{wage:business.wage,output:business.output},'commitment');
+      for (const witness of this.witnesses(id)) this.perceive(witness);
+      return;
+    }
+    if (action.type === 'rest') {
+      npc.activity={kind:'wait',until:this.state.time+action.seconds,resting:action.seconds};
+      this.record('rest-started',id,[id],npc.node,'Chose time for rest',{seconds:action.seconds},'observed'); return;
+    }
+    if (action.type === 'eat') {
+      npc.inventory.goods-=action.quantity; npc.inventory.food!-=action.quantity; this.state.town!.consumed+=action.quantity;
+      npc.needs.food=Math.max(0,npc.needs.food-.8*action.quantity);
+      this.record('food-consumed',id,this.witnesses(id),id,'Consumed personal food; goods leave inventory',{quantity:action.quantity},'outcome'); this.trigger(id,'meal-completed'); return;
+    }
     if (action.type === 'travel') this.travel(id, action.destination, null, null);
     else if (action.type === 'wait' || action.type === 'work') {
       npc.activity = { kind: action.type, until: this.state.time + action.seconds };
@@ -354,6 +495,7 @@ export class Neighbourhood {
         quantity: action.quantity, pickup: 'centre', destination: 'market', status: 'proposed',
         expiresAt: this.state.time + 90, reserved: 0, rewardPaid: false,
       };
+      if (this.state.town) { task.payment=this.state.town.transportPayment; task.escrow=0; }
       this.state.tasks[task.id] = task;
       for (const participant of [id, task.recipient]) this.state.npcs[participant]!.knowledge.tasks[task.id] = 'proposed';
       this.record('transport-proposed', id, [id, task.recipient], task.id, 'Requested help transporting supplies', { quantity: task.quantity }, 'observed');
@@ -367,6 +509,7 @@ export class Neighbourhood {
       }
       task.status = action.accept ? 'accepted' : 'declined'; task.revision++;
       task.reserved = action.accept ? task.quantity : 0;
+      if (action.accept === true && task.payment) { this.state.npcs[task.requester]!.inventory.coins!-=task.payment; task.escrow=task.payment; }
       for (const participant of [id, task.requester]) this.state.npcs[participant]!.knowledge.tasks[task.id] = task.status;
       this.record(`transport-${task.status}`, id, [id, task.requester], task.id, action.accept ? 'Accepted the transport commitment' : 'Declined the transport request', {}, action.accept ? 'commitment' : 'outcome');
       this.trigger(id, 'offer-resolved'); this.trigger(task.requester, 'offer-resolved');
@@ -377,7 +520,17 @@ export class Neighbourhood {
       const quantity = action.quantity;
       if (action.type === 'collect-self') { this.state.resources.supplierGoods -= quantity; npc.inventory.goods += quantity; }
       if (action.type === 'stock-stall') { npc.inventory.goods -= quantity; this.state.resources.marketGoods += quantity; }
-      if (action.type === 'buy') { this.state.resources.marketGoods -= quantity; npc.inventory.goods += quantity; npc.needs.food = Math.max(0, npc.needs.food - 0.8 * quantity); }
+      if (action.type === 'buy') {
+        this.state.resources.marketGoods -= quantity; npc.inventory.goods += quantity;
+        if (this.state.town) {
+          npc.inventory.food!+=quantity;
+          const market=this.state.town.businesses.market!, owner=this.state.npcs[market.owner]!;
+          const payment=market.owner===id ? 0 : this.state.town.marketPrice*quantity;
+          npc.inventory.coins!-=payment; market.coins+=payment/2; owner.inventory.coins!+=payment/2;
+          if (payment>0) owner.needs.income=Math.max(0,owner.needs.income-.1*quantity);
+          this.record('purchase-paid',id,[id,market.owner],market.id,'Paid for food; proceeds split between the owner and funded stall work',{coins:payment,quantity},'outcome');
+        } else npc.needs.food = Math.max(0, npc.needs.food - 0.8 * quantity);
+      }
       this.state.resources.revision++;
       this.record(action.type, id, this.witnesses(id), action.type, 'Goods transferred after validation', { quantity }, 'outcome');
       for (const witness of this.witnesses(id)) this.perceive(witness);
@@ -437,6 +590,10 @@ export class Neighbourhood {
       if (task.status !== 'collected' || npc.node !== task.destination || npc.inventory.goods < task.quantity || task.rewardPaid) { this.fail(id, 'Delivery prerequisites changed'); return; }
       npc.inventory.goods -= task.quantity; this.state.resources.marketGoods += task.quantity;
       task.status = 'delivered'; task.revision++; task.rewardPaid = true; npc.inventory.rewards++;
+      if (task.escrow) {
+        const payment=task.escrow; npc.inventory.coins!+=payment; task.escrow=0;
+        this.record('transport-paid',id,[id,task.requester],task.id,'Received the previously reserved delivery payment',{coins:payment},'outcome');
+      }
       npc.needs.income = Math.max(0, npc.needs.income - 0.3); this.state.resources.revision++;
       npc.knowledge.tasks[task.id] = 'delivered';
       npc.memories = npc.memories.filter(memory => !(memory.kind === 'commitment' && memory.subject === task.id));
@@ -475,8 +632,21 @@ export class Neighbourhood {
       for (const id of this.residentIds) {
         const npc = this.state.npcs[id]!; const activity = npc.activity;
         if ((activity.kind === 'wait' || activity.kind === 'work') && this.state.time >= activity.until) {
+          if (activity.job) {
+            const job=activity.job;
+            npc.memories=npc.memories.filter(memory=>!(memory.kind==='commitment' && memory.subject===job.businessId));
+            npc.inventory.coins!+=job.wage; npc.needs.income=Math.max(0,npc.needs.income-.3);
+            this.state.town!.produced+=job.output; this.state.resources.supplierGoods+=job.output;
+            if (job.output) this.state.resources.revision++;
+            this.record('paid-work-completed',id,[id],job.businessId,'Completed physical work; received held wage and deposited any produced supplies',{wage:job.wage,quantity:job.output},'outcome');
+          }
+          if (activity.resting) {
+            npc.needs.rest=Math.max(0,(npc.needs.rest ?? 0)-activity.resting*.01);
+            this.record('rest-completed',id,[id],npc.node,'Rest reduced personal fatigue',{},'outcome');
+          }
           npc.activity = { kind: 'idle' }; npc.revision++;
           this.record('activity-completed', id, [id], activity.kind, 'Selected activity finished', {}, 'observed'); this.trigger(id, 'activity-completed');
+          if (this.state.town) for (const witness of this.witnesses(id)) this.perceive(witness);
         } else if (activity.kind === 'travel') {
           let distance = (npc.mobility === 'taxi' ? 14 : 4) * dt;
           while (distance > 0 && npc.activity === activity) {
@@ -497,6 +667,7 @@ export class Neighbourhood {
         }
       }
       this.detectEncounters();
+      this.townNeeds();
     }
   }
 }

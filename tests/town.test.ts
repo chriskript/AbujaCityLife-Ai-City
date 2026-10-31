@@ -42,7 +42,7 @@ describe('extensible resident registry', () => {
     expect(world.snapshot.npcs.zainab.inventory.goods).toBe(1);
   });
   it('runs four residents and a complete autonomous encounter with a persistent economic consequence', async () => {
-    const runner = new HeadlessTownRunner(); await runner.advance(240);
+    const runner = new HeadlessTownRunner(new Neighbourhood()); await runner.advance(240);
     const world = runner.world, state = world.snapshot;
     expect(world.residentIds).toEqual(['musa','amina','zainab','chris']);
     expect(state.social.interactions['encounter-1']).toMatchObject({ initiator:'amina',recipient:'chris',status:'accepted' });
@@ -213,7 +213,7 @@ describe('independent authoritative face-to-face encounters', () => {
     expect(apply(other,'chris',{type:'respond-encounter',interactionId:pending.id,response:'accept',message:'Yes'}).reason).toBe('initiator-not-nearby');
   });
   it('rejects duplicate commitments and keeps pending conversation, accepted job and delivery distinct', async () => {
-    const runner = new HeadlessTownRunner(); await runner.advance(60.25);
+    const runner = new HeadlessTownRunner(new Neighbourhood()); await runner.advance(60.25);
     const world = runner.world;
     expect(Object.values(world.snapshot.social.interactions)[0]!.status).toBe('accepted');
     expect(Object.values(world.snapshot.tasks)).toHaveLength(0);
@@ -231,7 +231,7 @@ describe('independent authoritative face-to-face encounters', () => {
     expect(Object.keys(world.snapshot.tasks)).toHaveLength(1);
   });
   it('can choose no interaction in the normal town', async () => {
-    const runner = new HeadlessTownRunner(undefined,{trader:'cooperate',driver:'accept',social:'ignore'});
+    const runner = new HeadlessTownRunner(new Neighbourhood(),{trader:'cooperate',driver:'accept',social:'ignore'});
     await runner.advance(240);
     expect(runner.world.snapshot.social.interactions).toEqual({});
     expect(runner.world.snapshot.tasks['task-1']).toMatchObject({recipient:'musa',status:'delivered'});
@@ -257,7 +257,7 @@ describe('bounded progression and recovery', () => {
   });
   it('preserves Chris, social consequences and accounting through the normal durable server session', async () => {
     const checkpoint = join(await directory(),'session.json');
-    const session = await NeighbourhoodServerSession.open({checkpoint}); sessions.push(session);
+    const session = await NeighbourhoodServerSession.open({townPopulation:false,checkpoint}); sessions.push(session);
     await session.command({id:'speed',worldId:session.frame.snapshot.worldId,type:'speed',speed:4});
     // Fixed wall clock: routine mock actions must still follow bounded simulation time.
     for(let i=0;i<240;i++) {
@@ -269,7 +269,7 @@ describe('bounded progression and recovery', () => {
     const saved = JSON.parse(await readFile(checkpoint,'utf8'));
     const state = JSON.parse(saved.world);
     expect(state.npcs.chris.relationships.amina.successfulJobs).toBe(1);
-    await session.close(); const restored = await NeighbourhoodServerSession.open({checkpoint}); sessions.push(restored);
+    await session.close(); const restored = await NeighbourhoodServerSession.open({townPopulation:false,checkpoint}); sessions.push(restored);
     expect(restored.frame.snapshot.tasks).toEqual(session.frame.snapshot.tasks);
     expect(restored.frame.decisionBudget).toEqual(session.frame.decisionBudget);
     expect(restored.history('chris')).toEqual([]);
@@ -277,18 +277,18 @@ describe('bounded progression and recovery', () => {
   }, 15_000);
   it('migrates a legacy three-resident world without erasing original state and saves a rollback copy', async () => {
     const checkpoint = join(await directory(),'legacy.json');
-    const initial = await NeighbourhoodServerSession.open({checkpoint,initialWorld:new Neighbourhood('legacy',legacyResidents()).serialize()}); sessions.push(initial);
+    const initial = await NeighbourhoodServerSession.open({townPopulation:false,checkpoint,initialWorld:new Neighbourhood('legacy',legacyResidents()).serialize()}); sessions.push(initial);
     await initial.decide('amina'); await initial.close();
     const envelope = JSON.parse(await readFile(checkpoint,'utf8')); const old = JSON.parse(envelope.world);
     old.version=1; delete old.social; delete old.initialGoods;
     for(const npc of Object.values(old.npcs) as Inhabitant[]) { npc.capabilities = npc.capabilities.filter(type => !['encounter','respond-encounter'].includes(type)); delete npc.mobility; }
     envelope.world=JSON.stringify(old); const legacy = JSON.stringify(envelope); await writeFile(checkpoint,legacy);
-    const migrated = await NeighbourhoodServerSession.open({checkpoint}); sessions.push(migrated);
+    const migrated = await NeighbourhoodServerSession.open({townPopulation:false,checkpoint}); sessions.push(migrated);
     expect(await readFile(checkpoint+'.v1-backup','utf8')).toBe(legacy);
     const after = JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
     for(const id of ['amina','musa','zainab']) for(const field of ['name','occupation','memories','relationships','inventory','activity','node','intention']) expect(after.npcs[id][field]).toEqual(old.npcs[id][field]);
     expect(after.tasks).toEqual(old.tasks); expect(after.resources).toEqual(old.resources);
-    expect(after.version).toBe(2); expect(migrated.hasResident('chris')).toBe(true);
+    expect(after.version).toBe(3); expect(migrated.hasResident('chris')).toBe(true);
     expect(migrated.frame.decisionBudget.used).toBe(envelope.requests);
   });
   it.each(['recipient','capacity','evidence'] as const)('rejects corrupt social/registry %s checkpoints', kind => {

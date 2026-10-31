@@ -373,7 +373,7 @@ describe('event-driven autonomy with alternative fixture policies', () => {
   it('rejects extra action fields and provides a strict schema for future Meta integration', () => {
     expect(isNpcDecision({ goalId: 'restock', reason: 'Delivered', action: { type: 'wait', seconds: 1, marketGoods: 999 } })).toBe(false);
     expect(npcDecisionSchema.additionalProperties).toBe(false);
-    expect(npcDecisionSchema.properties.action.anyOf.length).toBe(14);
+    expect(npcDecisionSchema.properties.action.anyOf.length).toBe(17);
   });
 });
 

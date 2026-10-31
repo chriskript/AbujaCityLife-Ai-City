@@ -1,5 +1,7 @@
 # Abuja City Life: AI Town — foundation assessment and implementation path
 
+Current implementation: [Milestone 7B](milestone-7b.md) provides sixteen residents with connected work, food, rest, credits and resource production. The original assessment remains the accepted direction and records the earlier capability inventory.
+
 Implementation follow-up: [Milestone 7A](milestone-7a.md) now provides extensible residents, Chris, autonomous face-to-face encounters and bounded offline headless progression. The assessment below records the pre-7A findings and accepted direction; its capability statuses describe that earlier point.
 
 Assessed October 30, 2026, against the current source, tests, documentation and milestone history. Submission deadline: November 4, 2026. AI Town extends the existing project; this assessment does not rename the repository or replace the engine.

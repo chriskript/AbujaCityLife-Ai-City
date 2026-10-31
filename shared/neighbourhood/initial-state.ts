@@ -66,7 +66,7 @@ export function defaultResidents(): Inhabitant[] { return [...legacyResidents(),
 
 export function initialState(id: string, residents = defaultResidents()): WorldState {
   return {
-    version: 2, id, revision: 0, time: 0, initialGoods: 9 + residents.reduce((sum, npc) => sum + npc.inventory.goods, 0),
+    version: 3, id, revision: 0, time: 0, initialGoods: 9 + residents.reduce((sum, npc) => sum + npc.inventory.goods, 0),
     social: { nextInteraction: 1, interactions: {}, noticed: {}, cooldowns: {} },
     npcs: Object.fromEntries(residents.map(npc => [npc.id, structuredClone(npc)])) as WorldState['npcs'],
     resources: { supplierGoods: 8, marketGoods: 1, salesOpen: true, revision: 0 },

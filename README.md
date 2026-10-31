@@ -12,13 +12,13 @@ Every model-proposed action must pass through a deterministic validation and exe
 
 ## Capabilities and status
 
-**Implemented:** a playable Three.js neighbourhood where Musa, Amina, Zainab, and Chris pursue activities without player instructions. A world-owned registry supports growing populations. Optional encounters receive independent responses and can lead to separately validated transport commitments and deliveries. Select a resident, follow their movements, and inspect encounter/task outcomes, stock and purchases. Original taxi and Amina–Musa supply fixtures remain available.
+**Implemented:** a playable Three.js town with sixteen residents, including Musa, Amina, Zainab and Chris. Residents independently pursue funded work, earn/spend demo credits, rest, buy/eat food, produce supplies from finite inputs and coordinate physical deliveries. Optional encounters receive independent responses. Select residents and inspect real activity, resource and payment outcomes. Original taxi and Amina–Musa supply fixtures remain available.
 
 The browser now connects to a **controlled, authoritative Node backend**, with persistent world state, validated decisions, and conversation requests. Development defaults to a **scripted mock provider** with labelled conversation fixtures and no inference charges. Controlled Muse Spark 1.3 evaluations include a successful taxi destination selection, a partially grounded conversation, and an autonomous transport proposal rejected for an excessive quantity. The quantity contract is now corrected offline; successful live cooperation remains unproven.
 
 The same headless foundation powers the browser: independent goals, limited knowledge, event-driven activities, inventory consequences, and structured memories. The original instruction-driven mock taxi demonstrations remain available in **Taxi lab**. Consequential conversation actions require separate confirmation and simulation validation.
 
-**Evolution toward Abuja City Life: AI Town:** [Milestone 7A](docs/milestone-7a.md) adds extensible residents, autonomous encounters, persistent consequences and bounded offline headless progression. The [accepted assessment](docs/ai-town-assessment.md) remains the broader direction. Further population growth, phone/text channels and continuous unattended service operation remain future work. Further live Meta evaluation requires separate approval.
+**Evolution toward Abuja City Life: AI Town:** [Milestone 7B](docs/milestone-7b.md) expands the [7A foundation](docs/milestone-7a.md) to sixteen residents with connected personal/resource routines and a conserved credit economy. The [accepted assessment](docs/ai-town-assessment.md) remains the broader direction. Continuous unattended service operation, phone/text channels and longer-horizon systems remain future work. Further live Meta evaluation requires separate approval.
 
 ## Technology
 
@@ -61,13 +61,13 @@ npm run demo:neighbourhood
 
 The original demo runs three taxi scenarios; the neighbourhood demo runs a cooperative restocking fixture. Both print event traces without API keys or inference calls.
 
-Advance and save the normal four-resident town without a browser or Meta requests:
+Advance and save the normal sixteen-resident town without a browser or Meta requests:
 
 ```bash
 npm run town:headless -- --seconds=240
 ```
 
-This bounded offline runner uses its own recovery file, `runtime/town-headless.json`. See [7A operation and limits](docs/milestone-7a.md).
+This bounded offline runner uses its own recovery file, `runtime/town-headless.json`. Use `--population=8` for the smaller starting/growth target. Existing residents are preserved when expanding a checkpoint. See [7B operation and limits](docs/milestone-7b.md).
 
 Run tests and static checks:
 
@@ -85,6 +85,7 @@ For server-side API setup and an offline configuration check, see the [Meta API 
 
 - [AI Town assessment, quantity fix, and proposed milestones](docs/ai-town-assessment.md)
 - [Milestone 7A implementation, evidence, and remaining limits](docs/milestone-7a.md)
+- [Milestone 7B population, economy, recovery, and verification](docs/milestone-7b.md)
 - [Simulation architecture](docs/architecture.md)
 - [Controlled backend and local execution](docs/backend.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)

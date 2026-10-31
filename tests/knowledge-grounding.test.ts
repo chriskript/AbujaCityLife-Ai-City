@@ -106,7 +106,7 @@ async function openFixture(first: Action, second: 'accept' | 'decline' | 'clarif
   const path = await mkdtemp(join(tmpdir(),'city-grounding-test-')); folders.push(path);
   const decide = vi.fn<NeighbourhoodProvider['decide']>().mockImplementation(async request => ({ mode: 'mock', model: 'offline-choice', decision: { goalId: request.observation.actor.goals[0]!.id, reason: 'Independent offline alternative', action: request.actorId === 'amina' ? first : second === 'clarify' ? { type:'respond-transport', taskId:request.observation.tasks[0]!.id, accept:'clarify',question:'How many goods should I collect?' } : {type:'respond-transport',taskId:request.observation.tasks[0]!.id,accept:second === 'accept'} } }));
   const provider: NeighbourhoodProvider = { mode:'mock',metrics:null,decide,converse:async()=>{throw new Error('No conversation in autonomy test');} };
-  const session = await NeighbourhoodServerSession.open({checkpoint:join(path,'session.json'),initialWorld:prepareAutonomyFixture().serialize(),provider}); sessions.push(session);
+  const session = await NeighbourhoodServerSession.open({townPopulation:false,checkpoint:join(path,'session.json'),initialWorld:prepareAutonomyFixture().serialize(),provider}); sessions.push(session);
   return {session,decide,path};
 }
 describe('conditional event-driven autonomy readiness', () => {

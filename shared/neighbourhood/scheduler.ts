@@ -16,7 +16,7 @@ export class DecisionScheduler {
   get decisionCount(): number { return this.count; }
   async pump(): Promise<boolean> {
     if (this.inFlight || this.count >= this.limits.maximumDecisions) return false;
-    const time = this.world.snapshot.time;
+    const time = this.world.time;
     while (this.recent.length && this.recent[0]! <= time - 60) this.recent.shift();
     if (this.recent.length >= this.limits.perMinute) return false;
     const npcIds = this.world.residentIds;

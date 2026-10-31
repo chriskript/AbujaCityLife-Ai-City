@@ -15,7 +15,9 @@ export function createInhabitants(ids: readonly NpcId[] = defaultResidents().map
   function add(parent: THREE.Object3D, shape: THREE.BufferGeometry, color: string, x: number, y: number, z: number, sx: number, sy: number, sz: number): THREE.Mesh {
     if (!materials.has(color)) materials.set(color, new THREE.MeshStandardMaterial({ color, roughness: 0.85 }));
     const mesh = new THREE.Mesh(shape, materials.get(color));
-    mesh.position.set(x, y, z); mesh.scale.set(sx, sy, sz); mesh.castShadow = true; mesh.receiveShadow = true;
+    mesh.position.set(x, y, z); mesh.scale.set(sx, sy, sz);
+    // Large silhouettes/cargo ground the residents without a shadow draw for each eye, limb or trim.
+    mesh.castShadow = sx >= .65 && sy >= .65; mesh.receiveShadow = true;
     parent.add(mesh); return mesh;
   }
   const createCharacter = (id: NpcId): CharacterModel => {
@@ -63,7 +65,7 @@ export function createInhabitants(ids: readonly NpcId[] = defaultResidents().map
     }
     return crates;
   }
-  const cargo = crates(6); const stock = crates(9); const supplies = crates(8);
+  const cargo = crates(6); const stock = crates(24); const supplies = crates(24);
   stock.position.set(39, 0.5, 58); supplies.position.set(60, 0.5, -7);
   group.add(stock, supplies);
   return { group, models, cargo, stock, supplies, ensureResident };

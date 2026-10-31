@@ -1,4 +1,5 @@
 import type { NpcDecisionProvider, NpcDecisionRequest, NpcInferenceResult, Action } from './types.js';
+import { townDecision } from './town-policy.js';
 
 export interface MockChoices {
   trader: 'cooperate' | 'self-collect' | 'wait' | 'reduce-sales'; driver: 'accept' | 'decline';
@@ -9,6 +10,7 @@ export interface MockChoices {
 export class NeighbourhoodMockProvider implements NpcDecisionProvider {
   constructor(private readonly choices: MockChoices = { trader: 'cooperate', driver: 'accept' }) {}
   async decide(request: NpcDecisionRequest): Promise<NpcInferenceResult> {
+    if (request.observation.town) return {mode:'mock',model:'town-offline-rules-v1',decision:townDecision(request,this.choices)};
     const { actor, tasks, resources, nearbyPeople, encounters, encounterOpportunities } = request.observation;
     let action: Action = { type: 'wait', seconds: 120 };
     let goalId = actor.goals[0]!.id;

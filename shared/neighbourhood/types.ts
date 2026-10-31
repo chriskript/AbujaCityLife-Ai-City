@@ -2,7 +2,7 @@ import type { PlaceFacts, PlaceKnowledge } from './knowledge.js';
 export const legacyNpcIds = ['musa', 'amina', 'zainab'] as const;
 // Legacy fixture IDs are retained for compatibility; runtime membership is world-owned.
 export type NpcId = string;
-export const actionTypes = ['travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter'] as const;
+export const actionTypes = ['travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat'] as const;
 export type MemoryKind = 'fact' | 'observed' | 'reported' | 'belief' | 'commitment' | 'outcome';
 export interface Memory {
   id: string; kind: MemoryKind; eventId: string; source: NpcId | 'world' | 'player';
@@ -11,19 +11,21 @@ export interface Memory {
 export interface Path { nodeIds: string[]; edgeIds: string[]; distance: number }
 export type Activity =
   | { kind: 'idle' }
-  | { kind: 'wait' | 'work'; until: number }
+  | { kind: 'wait' | 'work'; until: number; resting?: number; job?: WorkBooking }
   | { kind: 'travel'; path: Path; step: number; progress: number; taskId: string | null; leg: 'pickup' | 'delivery' | null };
 export interface Inhabitant {
   id: NpcId; name: string; occupation: string; personality: string[];
   home?: string; circumstances?: string; mobility?: 'walk' | 'taxi';
+  skills?: string[]; routine?: { workplace: string; leisure: string; sociability: number };
   node: string; revision: number; goals: { id: string; description: string }[];
   intention: { goalId: string; reason: string } | null;
-  needs: { food: number; stock: number; income: number };
+  needs: { food: number; stock: number; income: number; rest?: number };
   priorities: string[]; capabilities: Action['type'][];
-  activity: Activity; inventory: { goods: number; rewards: number };
+  activity: Activity; inventory: { goods: number; rewards: number; coins?: number; food?: number };
   knowledge: {
     places: string[]; people: NpcId[]; blockedEdges: string[];
     transporters?: NpcId[];
+    businesses?: Record<string, { available: boolean | null; observedAt: number | null }>;
     placeFacts?: Record<string, PlaceFacts>;
     tasks: Record<string, TaskStatus>;
     resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
@@ -36,6 +38,7 @@ export interface TransportTask {
   id: string; revision: number; requester: NpcId; recipient: NpcId;
   quantity: number; pickup: 'centre'; destination: 'market'; status: TaskStatus;
   expiresAt: number; reserved: number; rewardPaid: boolean;
+  payment?: number; escrow?: number;
 }
 export interface WorldEvent {
   id: string; revision: number; time: number; type: string;
@@ -43,10 +46,11 @@ export interface WorldEvent {
   data: Record<string, string | number | boolean | null>;
 }
 export interface WorldState {
-  version: 2; id: string; revision: number; time: number;
+  version: 3; id: string; revision: number; time: number;
   // The original residents remain required for the preserved supply scenario.
   npcs: Record<NpcId, Inhabitant> & { musa: Inhabitant; amina: Inhabitant; zainab: Inhabitant };
   initialGoods: number;
+  town?: TownEconomy;
   social: { nextInteraction: number; interactions: Record<string, Encounter>; noticed: Record<string, number>; cooldowns: Record<string, number> };
   resources: { supplierGoods: number; marketGoods: number; salesOpen: boolean; revision: number };
   roads: { blockedEdges: string[]; revision: number };
@@ -55,6 +59,9 @@ export interface WorldState {
   nextEvent: number; nextTask: number; nextRequest: number;
 }
 export type Action =
+  | { type: 'take-work'; businessId: string }
+  | { type: 'rest'; seconds: number }
+  | { type: 'eat'; quantity: number }
   | { type: 'encounter'; recipient: NpcId; purpose: 'introduce' | 'ask' | 'request-help'; message: string }
   | { type: 'respond-encounter'; interactionId: string; response: 'accept' | 'decline' | 'defer' | 'clarify'; message: string }
   | { type: 'travel'; destination: string }
@@ -80,6 +87,10 @@ export interface NpcObservation {
   nearbyPeople: { id: NpcId; name: string | null; occupation: string | null; activity: Activity['kind']; known: boolean; canTransport: boolean }[];
   encounters: Encounter[];
   encounterOpportunities: NpcId[];
+  town?: {
+    marketPrice: number; ownsMarket: boolean; transportPayment: number; marketServing: boolean | null;
+    work: { id: string; name: string; node: string; skill: string; wage: number; seconds: number; available: boolean | null; observedAt: number | null }[];
+  };
   resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
   tasks: Pick<TransportTask, 'id' | 'requester' | 'recipient' | 'quantity' | 'pickup' | 'destination' | 'status' | 'expiresAt'>[]; knownBlockedEdges: string[];
   permittedActions: Action['type'][];
@@ -97,3 +108,13 @@ export interface NpcDecisionRequest {
 export interface NpcInferenceResult { mode: 'mock' | 'meta'; model: string; decision: unknown }
 export interface NpcDecisionProvider { decide(request: NpcDecisionRequest): Promise<NpcInferenceResult> }
 export interface DecisionOutcome { accepted: boolean; reason: string; duplicate: boolean }
+export interface WorkBooking { businessId: string; wage: number; inputs: number; output: number }
+export interface Business {
+  id: string; name: string; node: string; owner: NpcId; staff: NpcId[]; coins: number;
+  skill: string; wage: number; seconds: number; slots: number; output: number;
+}
+export interface TownEconomy {
+  businesses: Record<string, Business>; initialMoney: number; initialInputs: number; rawInputs: number;
+  produced: number; consumed: number; nextNeedsAt: number;
+  marketPrice: number; transportPayment: number; supplierCapacity: number;
+}

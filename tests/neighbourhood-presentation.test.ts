@@ -7,7 +7,7 @@ import { LocalNeighbourhoodSession } from '../client/src/simulation/local-neighb
 import { createInhabitants } from '../client/src/rendering/inhabitants.js';
 
 function connected() {
-  const session = new LocalNeighbourhoodSession(); let latest!: NeighbourhoodFrame;
+  const session = new LocalNeighbourhoodSession({legacy:true}); let latest!: NeighbourhoodFrame;
   const unsubscribe = session.subscribe(frame => { latest = frame; });
   let sequence = 0;
   const send = (payload: { type: 'pause'; paused: boolean } | { type: 'speed'; speed: 1 | 2 | 4 } | { type: 'reset'; experiment: 'cooperate' | 'decline' | 'wait' | 'self-collect' | 'reduce-sales' }) => session.send({ ...payload, id: `test-${++sequence}`, worldId: latest.snapshot.worldId });

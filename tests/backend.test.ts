@@ -16,7 +16,7 @@ async function directory() { const path = await mkdtemp(join(tmpdir(), 'city-bac
 afterEach(async () => { for (const close of cleanup.splice(0)) await close(); for (const path of folders.splice(0)) await rm(path, { recursive: true, force: true }); });
 async function session(provider?: NeighbourhoodProvider) {
   let wall = 100_000; const checkpoint = join(await directory(), 'session.json');
-  const value = await NeighbourhoodServerSession.open({ checkpoint, ...(provider ? { provider } : {}), now: () => wall });
+  const value = await NeighbourhoodServerSession.open({townPopulation:false, checkpoint, ...(provider ? { provider } : {}), now: () => wall });
   cleanup.push(() => value.close()); return { value, checkpoint, elapse: () => { wall += 4000; } };
 }
 const context = (): ConversationContext => ({ observation: new Neighbourhood().observe('zainab'), message: 'Where can I eat?', history: [] });
@@ -50,7 +50,7 @@ describe('authoritative durable session', () => {
     const { value, checkpoint } = await session(); const id = value.frame.snapshot.worldId;
     await value.converse({ id: 'chat', worldId: id, actorId: 'zainab', message: 'I heard supplies vanished' });
     await value.command({ id: 'pause', worldId: id, type: 'pause', paused: true }); const before = value.frame; await value.close();
-    const restored = await NeighbourhoodServerSession.open({ checkpoint }); cleanup.push(() => restored.close());
+    const restored = await NeighbourhoodServerSession.open({townPopulation:false, checkpoint }); cleanup.push(() => restored.close());
     expect(restored.frame.sequence).toBeGreaterThan(before.sequence); expect(restored.frame.snapshot.worldId).toBe(id);
     expect(restored.frame.paused).toBe(true); expect(restored.frame.decisionBudget.used).toBe(1);
     expect(restored.history('zainab')).toHaveLength(2);
@@ -109,7 +109,7 @@ describe('authoritative durable session', () => {
     await expect(value.converse(input)).rejects.toThrow('no mock substitution'); await expect(value.converse(input)).rejects.toThrow('will not be retried'); expect(spy).toHaveBeenCalledTimes(1);
   });
   it('fails closed on corrupt checkpoints', async () => {
-    const checkpoint = join(await directory(), 'bad.json'); await writeFile(checkpoint, '{}'); await expect(NeighbourhoodServerSession.open({ checkpoint })).rejects.toThrow('checkpoint');
+    const checkpoint = join(await directory(), 'bad.json'); await writeFile(checkpoint, '{}'); await expect(NeighbourhoodServerSession.open({townPopulation:false, checkpoint })).rejects.toThrow('checkpoint');
   });
   it('rejects stale actor proposals after state changes and expires unanswered proposals', async () => {
     const provider = new MockNeighbourhoodProvider();
@@ -126,7 +126,7 @@ describe('authoritative durable session', () => {
       for (let j=0;j<16;j++) elapse();
       await value.converse({ id: `chat-${i}`, worldId: value.frame.snapshot.worldId, actorId: 'zainab', message: 'Hello' });
     }
-    await value.close(); const restored = await NeighbourhoodServerSession.open({ checkpoint, now: () => 10_000_000 }); cleanup.push(() => restored.close());
+    await value.close(); const restored = await NeighbourhoodServerSession.open({townPopulation:false, checkpoint, now: () => 10_000_000 }); cleanup.push(() => restored.close());
     await expect(restored.converse({ id: 'exhausted', worldId: restored.frame.snapshot.worldId, actorId: 'musa', message: 'Hello' })).rejects.toThrow('limit');
     expect(restored.frame.decisionBudget.used).toBe(48);
   });
@@ -135,7 +135,7 @@ describe('authoritative durable session', () => {
     const provider: NeighbourhoodProvider = { mode: 'live-meta', metrics: null, converse: context => fixture.converse(context), decide: request => fixture.decide(request) };
     const checkpoint = join(await directory(), 'session.json');
     const plan = { id: 'test-plan', approved: true as const, expiresAt: new Date(Date.now()+60000).toISOString(), maxGenerations: 1, maxEstimatedUsd: .025, allowAutonomy: false };
-    const value = await NeighbourhoodServerSession.open({ checkpoint, provider, plan }); cleanup.push(() => value.close());
+    const value = await NeighbourhoodServerSession.open({townPopulation:false, checkpoint, provider, plan }); cleanup.push(() => value.close());
     await value.decide(); expect(value.frame.decisionBudget.used).toBe(0);
     await value.converse({ id: 'chat', worldId: value.frame.snapshot.worldId, actorId: 'zainab', message: 'Hello' });
     await value.command({ id: 'reset', worldId: value.frame.snapshot.worldId, type: 'reset', experiment: 'cooperate' });
@@ -220,7 +220,7 @@ describe('Meta neighbourhood contract without paid requests', () => {
     const { provider: p, fetcher } = await provider(output({ goalId: 'restock', reason: 'Request supplies', action: { type: 'propose-transport', recipient: 'musa', quantity: 8 } }));
     // Only the injected fake transport runs; no live plan or runtime ledger is used.
     const checkpoint = join(await directory(), 'quantity-session.json');
-    const value = await NeighbourhoodServerSession.open({ checkpoint, initialWorld: prepareAutonomyFixture().serialize(),
+    const value = await NeighbourhoodServerSession.open({townPopulation:false, checkpoint, initialWorld: prepareAutonomyFixture().serialize(),
       provider: { mode: 'mock', metrics: null, decide: request => p.decide(request), converse: context => p.converse(context) } });
     cleanup.push(() => value.close());
     const before = JSON.parse(JSON.parse(await readFile(checkpoint, 'utf8')).world);
@@ -249,6 +249,6 @@ describe('Meta neighbourhood contract without paid requests', () => {
   it('requires explicit, unexpired and bounded live evaluation approval', async () => {
     expect(() => validateLivePlan(undefined)).toThrow(); expect(() => validateLivePlan({ id: 'eval', approved: true, expiresAt: '2000-01-01', maxGenerations: 1, maxEstimatedUsd: .1, allowAutonomy: false })).toThrow();
     const plan = { id: 'eval', approved: true, expiresAt: new Date(Date.now()+60000).toISOString(), maxGenerations: 1, maxEstimatedUsd: .025, allowAutonomy: false }; expect(() => validateLivePlan(plan)).not.toThrow();
-    const { provider: p } = await provider({}); await expect(NeighbourhoodServerSession.open({ checkpoint: join(await directory(), 'session.json'), provider: p })).rejects.toThrow('approved');
+    const { provider: p } = await provider({}); await expect(NeighbourhoodServerSession.open({townPopulation:false, checkpoint: join(await directory(), 'session.json'), provider: p })).rejects.toThrow('approved');
   });
 });

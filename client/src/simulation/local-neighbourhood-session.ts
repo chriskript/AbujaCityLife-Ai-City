@@ -1,14 +1,16 @@
 import { Neighbourhood } from '../../../shared/neighbourhood/world.js';
 import { DecisionScheduler } from '../../../shared/neighbourhood/scheduler.js';
 import { NeighbourhoodMockProvider } from '../../../shared/neighbourhood/mock-provider.js';
+import { createTown } from '../../../shared/neighbourhood/town.js';
+import { offlineTownLimits } from '../../../shared/neighbourhood/population.js';
 import { projectNeighbourhood, type NeighbourhoodSession, type NeighbourhoodFrame, type SessionCommand, type CommandReceipt, type Experiment } from '../../../shared/neighbourhood/presentation.js';
 
 let sessions = 0;
 export class LocalNeighbourhoodSession implements NeighbourhoodSession {
   private readonly id = `local-session-${++sessions}`;
   private epoch = 1;
-  private world = new Neighbourhood(`${this.id}:world-1`);
-  private scheduler = new DecisionScheduler(this.world);
+  private world: Neighbourhood;
+  private scheduler: DecisionScheduler;
   private sequence = 0;
   private paused = false;
   private visible = true;
@@ -18,10 +20,14 @@ export class LocalNeighbourhoodSession implements NeighbourhoodSession {
   private disposed = false;
   private readonly listeners = new Set<(frame: NeighbourhoodFrame) => void>();
   private readonly receipts = new Map<string, CommandReceipt>();
+  constructor(private readonly options: { legacy?: boolean } = {}) {
+    this.world=options.legacy ? new Neighbourhood(`${this.id}:world-1`) : createTown(`${this.id}:world-1`);
+    this.scheduler=new DecisionScheduler(this.world,undefined,this.world.hasTownEconomy ? offlineTownLimits : undefined);
+  }
 
   private frame(): NeighbourhoodFrame {
     return { version: 1, sessionId: this.id, sequence: this.sequence, mode: 'mock', paused: this.paused,
-      speed: this.speed, conversationAvailable: false, decisionBudget: { used: this.scheduler.decisionCount, limit: 24 }, ...projectNeighbourhood(this.world.snapshot) };
+      speed: this.speed, conversationAvailable: false, decisionBudget: { used: this.scheduler.decisionCount, limit: this.world.hasTownEconomy ? offlineTownLimits.maximumDecisions : 24 }, ...projectNeighbourhood(this.world.snapshot) };
   }
   private publish(): void {
     if (this.disposed) return;
@@ -49,8 +55,8 @@ export class LocalNeighbourhoodSession implements NeighbourhoodSession {
     return { ...receipt };
   }
   private reset(experiment: Experiment): void {
-    this.epoch++; this.world = new Neighbourhood(`${this.id}:world-${this.epoch}`);
-    this.scheduler = new DecisionScheduler(this.world, new NeighbourhoodMockProvider({ trader: experiment === 'decline' ? 'cooperate' : experiment, driver: experiment === 'decline' ? 'decline' : 'accept' }));
+    this.epoch++; this.world = this.options.legacy ? new Neighbourhood(`${this.id}:world-${this.epoch}`) : createTown(`${this.id}:world-${this.epoch}`);
+    this.scheduler = new DecisionScheduler(this.world, new NeighbourhoodMockProvider({ trader: experiment === 'decline' ? 'cooperate' : experiment, driver: experiment === 'decline' ? 'decline' : 'accept' }),this.world.hasTownEconomy ? offlineTownLimits : undefined);
     this.paused = false;
   }
   // One exact core step, also used for browser/headless parity tests.
