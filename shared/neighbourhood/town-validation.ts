@@ -1,12 +1,13 @@
 import { skills } from './population.js';
 import { isResidentId } from './decision-schema.js';
-import { places } from './initial-state.js';
+import { mapFor } from '../world/town-layout.js';
 import type { WorldState, WorkBooking } from './types.js';
 
 const integer=(value: unknown): value is number=>Number.isSafeInteger(value) && Number(value)>=0;
 function check(value: unknown): asserts value { if (!value) throw new Error('Invalid neighbourhood snapshot: town economy'); }
 export function assertTownEconomy(state: WorldState): void {
   const town=state.town;
+  const map=mapFor(state.mapId),places=map.places;
   if (!town) {
     for (const npc of Object.values(state.npcs)) if (npc.activity.kind==='work' || npc.activity.kind==='wait') check(npc.activity.job===undefined && npc.activity.resting===undefined);
     return;
@@ -17,6 +18,7 @@ export function assertTownEconomy(state: WorldState): void {
   check(town.marketPrice===2 && town.transportPayment===2 && town.supplierCapacity===24);
   check(Number.isFinite(town.nextNeedsAt) && town.nextNeedsAt>state.time && town.nextNeedsAt<=state.time+60);
   const bookings: WorkBooking[]=[];
+  const homes=new Set<string>();
   let money=0;
   for (const npc of Object.values(state.npcs)) {
     check(integer(npc.inventory.coins)); money+=npc.inventory.coins;
@@ -25,6 +27,7 @@ export function assertTownEconomy(state: WorldState): void {
     check(npc.inventory.food+cargo<=npc.inventory.goods);
     check(Array.isArray(npc.skills) && npc.skills.length>0 && npc.skills.every(skill=>skills.includes(skill)) && new Set(npc.skills).size===npc.skills.length);
     check(npc.home && npc.knowledge.places.includes(npc.home));
+    if(state.mapId==='town-v1'){check(map.nodes.find(node=>node.id===npc.home)?.kind==='home' && !homes.has(npc.home));homes.add(npc.home);}
     check(npc.routine && npc.knowledge.places.includes(npc.routine.workplace) && npc.knowledge.places.includes(npc.routine.leisure) && Number.isFinite(npc.routine.sociability) && npc.routine.sociability>=0 && npc.routine.sociability<=1);
     check(npc.knowledge.businesses && typeof npc.knowledge.businesses==='object' && !Array.isArray(npc.knowledge.businesses));
     for (const [id,known] of Object.entries(npc.knowledge.businesses)) {
@@ -36,7 +39,9 @@ export function assertTownEconomy(state: WorldState): void {
       if (activity.resting!==undefined) check(activity.kind==='wait' && Number.isFinite(activity.resting) && activity.resting>=10 && activity.resting<=120 && activity.until-state.time<=activity.resting && !activity.job);
       if (activity.job) {
         const job=activity.job,business=town.businesses[job.businessId];
-        check(activity.kind==='work' && business && npc.node===business.node && npc.skills.includes(business.skill) && npc.capabilities.includes('take-work'));
+        const legacySite=business?.id==='market'?'market':['repair-workshop','utility-work'].includes(business?.id ?? '')?'stand':'centre';
+        const site=job.siteNode ?? business?.node;
+        check(activity.kind==='work' && business && npc.node===site && (site===business.node || state.mapUpgradedAt!==undefined && site===legacySite && activity.until-business.seconds<=state.mapUpgradedAt) && npc.skills.includes(business.skill) && npc.capabilities.includes('take-work'));
         check(integer(job.wage) && job.wage===business.wage && integer(job.inputs) && job.inputs===business.output && job.output===business.output && activity.until-state.time<=business.seconds);
         bookings.push(job); money+=job.wage;
       }

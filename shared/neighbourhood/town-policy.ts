@@ -1,12 +1,13 @@
 import type { Action, NpcDecision, NpcDecisionRequest } from './types.js';
 import type { MockChoices } from './mock-provider.js';
 import { pathToNode } from '../navigation/routes.js';
+import { mapFor } from '../world/town-layout.js';
 
 // Reusable OFFLINE rules: no character IDs, dialogue story sequence or world-state access.
 export function townDecision(request: NpcDecisionRequest, choices: MockChoices): NpcDecision {
   const o=request.observation,a=o.actor,town=o.town!;
   const choose=(action: Action,reason: string): NpcDecision=>({goalId:a.goals[0]!.id,reason:'OFFLINE: '+reason,action});
-  const canReach=(node: string)=>a.knowledge.places.includes(node) && Boolean(pathToNode(a.node,node,new Set(o.knownBlockedEdges)));
+  const canReach=(node: string)=>a.knowledge.places.includes(node) && Boolean(pathToNode(a.node,node,new Set(o.knownBlockedEdges),mapFor(o.mapId)));
   const go=(node: string,reason: string)=>choose({type:'travel',destination:node},reason);
   const rest=()=>a.node===a.home || a.knowledge.placeFacts?.[a.node]?.services.includes('scenic-view') ? choose({type:'rest',seconds:60},'Make time for rest') : canReach(a.home!) ? go(a.home!,'Return to my own home to rest') : choose({type:'wait',seconds:60},'A known route home is unavailable');
   const active=o.tasks.find(task=>task.recipient===a.id && ['accepted','collected'].includes(task.status));

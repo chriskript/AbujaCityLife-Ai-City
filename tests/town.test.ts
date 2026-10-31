@@ -288,7 +288,7 @@ describe('bounded progression and recovery', () => {
     const after = JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
     for(const id of ['amina','musa','zainab']) for(const field of ['name','occupation','memories','relationships','inventory','activity','node','intention']) expect(after.npcs[id][field]).toEqual(old.npcs[id][field]);
     expect(after.tasks).toEqual(old.tasks); expect(after.resources).toEqual(old.resources);
-    expect(after.version).toBe(3); expect(migrated.hasResident('chris')).toBe(true);
+    expect(after.version).toBe(4); expect(migrated.hasResident('chris')).toBe(true);
     expect(migrated.frame.decisionBudget.used).toBe(envelope.requests);
   });
   it.each(['recipient','capacity','evidence'] as const)('rejects corrupt social/registry %s checkpoints', kind => {

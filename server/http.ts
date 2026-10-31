@@ -22,7 +22,7 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
       const port = (server.address() as { port: number }).port;
       if (![ `127.0.0.1:${port}`, `localhost:${port}`, '127.0.0.1:5173', 'localhost:5173' ].includes(req.headers.host ?? '')) throw new SessionError(403, 'Invalid host');
       const url = new URL(req.url ?? '/', 'http://127.0.0.1');
-      if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { status: 'ready', mode: session.mode });
+      if (req.method === 'GET' && url.pathname === '/api/health') return json(res, session.operational?200:503, { status: session.operational?'ready':'unavailable', mode: session.mode });
       if (!url.pathname.startsWith('/api/')) {
         if (req.method !== 'GET' || !options.dist || !(url.pathname === '/' || url.pathname === '/THIRD_PARTY_NOTICES.txt' || /^\/assets\/[\w.-]+\.(js|css)$/.test(url.pathname))) throw new SessionError(404, 'Not found');
         const file = await readFile(resolve(options.dist, url.pathname === '/' ? 'index.html' : `.${url.pathname}`));
@@ -42,7 +42,9 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
       }
       const supplied = req.headers.cookie?.split(';').map(item => item.trim()).find(item => item.startsWith('citylab='))?.slice(8) ?? '';
       if (authenticatedUntil < Date.now() || !timingSafeEqual(digest(supplied), digest(cookie))) throw new SessionError(401, 'Controlled demonstration sign-in required');
+      if(!session.operational)throw new SessionError(503,'Session stopped; the last visible snapshot is frozen');
       if (req.method === 'GET' && url.pathname === '/api/session') { limit('read', 180); return json(res, 200, session.frame); }
+      if(req.method==='GET' && url.pathname==='/api/phone'){limit('read',180);const actorId=url.searchParams.get('actorId');if(!actorId || !session.hasResident(actorId))throw new SessionError(400,'Unknown resident');return json(res,200,session.phone(actorId));}
       if (req.method === 'GET' && url.pathname === '/api/events') {
         if (req.headers.origin && ![`http://127.0.0.1:${port}`, `http://localhost:${port}`, 'http://127.0.0.1:5173', 'http://localhost:5173'].includes(req.headers.origin)) throw new SessionError(403, 'Invalid event origin');
         limit('stream', 20); if (streams.size >= 2) throw new SessionError(429, 'Observer limit reached');
@@ -56,7 +58,15 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
       }
       if (req.method !== 'POST') throw new SessionError(404, 'Not found');
       limit('write', 60);
+      if(url.pathname==='/api/phone/control'){
+        exact(body,body.operation==='acquire'?['worldId','actorId','operation']:['worldId','actorId','operation','leaseId']);
+        if(typeof body.worldId!=='string' || typeof body.actorId!=='string' || !['acquire','renew','release'].includes(body.operation) || body.operation!=='acquire' && (typeof body.leaseId!=='string' || body.leaseId.length>80))throw new SessionError(400,'Invalid phone control');
+        return json(res,200,await session.controlPhone(body as any));
+      }
       if (typeof body.id !== 'string' || typeof body.worldId !== 'string') throw new SessionError(400, 'Request and world identifiers required');
+      if(url.pathname==='/api/phone/actions'){
+        exact(body,['id','worldId','actorId','leaseId','action']);if(typeof body.actorId!=='string' || typeof body.leaseId!=='string' || body.leaseId.length>80)throw new SessionError(400,'Invalid phone action');return json(res,200,await session.phoneAction(body as any));
+      }
       if (url.pathname === '/api/commands') {
         const keys = body.type === 'pause' ? ['id', 'worldId', 'type', 'paused'] : body.type === 'speed' ? ['id', 'worldId', 'type', 'speed'] : body.type === 'road' ? ['id','worldId','type','edgeId','blocked'] : ['id', 'worldId', 'type', 'experiment']; exact(body, keys);
         if (!(body.type === 'pause' && typeof body.paused === 'boolean') && !(body.type === 'speed' && [1,2,4].includes(body.speed)) && !(body.type === 'road' && typeof body.edgeId === 'string' && body.edgeId.length <= 80 && typeof body.blocked === 'boolean') && !(body.type === 'reset' && ['cooperate','decline','wait','self-collect','reduce-sales'].includes(body.experiment))) throw new SessionError(400, 'Invalid control');
@@ -74,7 +84,7 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
   server.requestTimeout = 25_000; server.headersTimeout = 10_000; server.maxHeadersCount = 32;
   const timer = setInterval(() => {
     if (options.tick === false || (session.mode === 'live-meta' && !streams.size)) return;
-    void progression.pulse().catch(() => { console.error('Authoritative progression stopped after an error; inspect the checkpoint before restarting.'); });
+    void progression.pulse().catch(error => { console.error(error instanceof SessionError?error.message:'Authoritative progression stopped; inspect the checkpoint before restarting.');for(const stream of streams)stream.end(); });
   }, 250); timer.unref();
   return { server, async close() { clearInterval(timer); await progression.stop().catch(() => {}); for (const stream of streams) stream.end(); await new Promise<void>(resolve => server.close(() => resolve())); await session.close(); } };
 }

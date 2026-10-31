@@ -70,3 +70,7 @@ Both TypeScript configurations and production build pass. The neighbourhood chun
 There are no live costs from this milestone's testing. Communication actions consume existing offline decision allowances; delivery/deadline mechanics do not request inference. Live Meta can choose the same actions only within the existing separately approved mode, observer gate, plan, input/output/token limits and spending ledger. The expanded schema/instructions have offline coverage only. Input preflight still fails closed above the existing token ceiling; the ceiling and spending allowances were not raised.
 
 The 1,800 simulated-second server allowance, 2,048 routine decisions, finite production inputs, work funding, bounded memories/events and population safety ceiling of 32 remain. Communication is registry-driven; explicit starting contacts are seed data rather than behavior branches around sixteen IDs. Thirty-day operation, archival beyond retained history and longer unattended budgets are not established. The next priority is submission rehearsal and recovery/performance polish around the integrated town, rather than adding governance or more population systems. Any live evaluation still needs separate approval.
+
+## Integrated follow-up
+
+[Milestone 7E](milestone-7e.md) integrates communication into addressed districts and a scoped, operable resident handset. Its snapshot v4 and presentation v2 supersede the versions reported above; this report remains the historical 7D record.

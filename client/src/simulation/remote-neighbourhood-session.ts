@@ -1,6 +1,7 @@
 import type { NeighbourhoodFrame, NeighbourhoodSession, SessionCommand, CommandReceipt } from '../../../shared/neighbourhood/presentation.js';
 import type { ConversationInput, ConversationResult, ConversationTurn } from '../../../shared/neighbourhood/conversation.js';
 import type { NpcId } from '../../../shared/neighbourhood/types.js';
+import type { PhoneView,PhoneLease,PhoneControlInput,PhoneActionInput } from '../../../shared/neighbourhood/phone.js';
 
 export type Connection = 'connecting' | 'ready' | 'unauthorized' | 'offline';
 export class RemoteNeighbourhoodSession implements NeighbourhoodSession {
@@ -31,6 +32,9 @@ export class RemoteNeighbourhoodSession implements NeighbourhoodSession {
   }
   subscribe(listener: (frame: NeighbourhoodFrame) => void): () => void { this.listeners.add(listener); if (this.latest) listener(structuredClone(this.latest)); return () => this.listeners.delete(listener); }
   send(command: SessionCommand): Promise<CommandReceipt> { return this.request('commands', command); }
+  phone(actorId:string):Promise<PhoneView>{return this.request(`phone?actorId=${encodeURIComponent(actorId)}`);}
+  controlPhone(input:PhoneControlInput):Promise<PhoneLease|null>{return this.request('phone/control',input);}
+  phoneAction(input:PhoneActionInput):Promise<CommandReceipt>{return this.request('phone/actions',input);}
   converse(input: ConversationInput): Promise<ConversationResult> { return this.request('conversations', input); }
   history(actorId: NpcId): Promise<ConversationTurn[]> { return this.request(`conversations?actorId=${actorId}`); }
   confirm(input: { id: string; worldId: string; proposalId: string }): Promise<CommandReceipt> { return this.request('proposals', input); }

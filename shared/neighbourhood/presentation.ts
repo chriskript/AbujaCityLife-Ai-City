@@ -1,6 +1,6 @@
-import { edges, nodes } from '../world/neighbourhood.js';
+import { mapFor, buildingFor, addressFor, type MapId } from '../world/town-layout.js';
 import { type NpcId, type WorldState, type WorldEvent, type TaskStatus, type Encounter, type Communication } from './types.js';
-import { places } from './initial-state.js';
+import type { PhoneView,PhoneControlInput,PhoneLease,PhoneActionInput } from './phone.js';
 
 export interface ActorView {
   id: NpcId; name: string; occupation: string; node: string;
@@ -9,10 +9,13 @@ export interface ActorView {
   mobility: 'walk' | 'taxi';
   coins?: number; food?: number;
   contacts?: string[];
+  homeAddress?:string; workplaceAddress?:string; insideBuildingId?:string;
+  homeNode?:string;
 }
 export interface PublicTask { id: string; requester: NpcId; recipient: NpcId; quantity: number; status: TaskStatus }
 export type ObservableEvent = Pick<WorldEvent, 'id' | 'time' | 'type' | 'actor' | 'subject' | 'detail' | 'data'>;
 export interface NeighbourhoodView {
+  mapId:MapId;
   worldId: string; revision: number; time: number; actors: ActorView[];
   resources: { supplierGoods: number; marketGoods: number; salesOpen: boolean };
   tasks: PublicTask[]; blockedEdges: string[];
@@ -22,7 +25,7 @@ export interface NeighbourhoodView {
 }
 // Observer transport contract, deliberately distinct from persistence and NPC observations.
 export interface NeighbourhoodFrame {
-  version: 1; sessionId: string; sequence: number; mode: 'mock' | 'live-meta';
+  version: 2; sessionId: string; sequence: number; mode: 'mock' | 'live-meta';
   paused: boolean; speed: 1 | 2 | 4; conversationAvailable: boolean;
   decisionBudget: { used: number; limit: number };
   progression?: { used: number; limit: number; stopped: boolean };
@@ -37,6 +40,9 @@ export type SessionCommand = { id: string; worldId: string } & (
 );
 export interface CommandReceipt { accepted: boolean; reason: string }
 export interface NeighbourhoodSession {
+  phone(actorId:string):Promise<PhoneView>;
+  controlPhone(input:PhoneControlInput):Promise<PhoneLease|null>;
+  phoneAction(input:PhoneActionInput):Promise<CommandReceipt>;
   subscribe(listener: (frame: NeighbourhoodFrame) => void): () => void;
   send(command: SessionCommand): Promise<CommandReceipt>;
   // Local mock clock driver; a remote adapter receives authoritative frames instead.
@@ -55,6 +61,7 @@ const observableTypes = new Set([
 ]);
 
 export function projectNeighbourhood(state: WorldState): { snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null } {
+  const map=mapFor(state.mapId),{nodes,edges,places}=map;
   const actors = Object.keys(state.npcs).map(id => {
     const npc = state.npcs[id]!; const node = nodes.find(item => item.id === npc.node)!;
     const pose = { x: node.x, z: node.z, heading: Math.PI / 2 };
@@ -70,16 +77,22 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
       pose.heading = Math.atan2(next.x - node.x, next.z - node.z);
       activity = motion.leg === 'pickup' ? 'Travelling to collect supplies' : motion.leg === 'delivery' ? 'Transporting goods to the market' : npc.mobility === 'taxi' ? 'Driving through the neighbourhood' : `Walking to ${places.find(place=>place.id===motion.path.nodeIds.at(-1))?.name ?? motion.path.nodeIds.at(-1)}`;
     }
+    const indoor=node.kind==='home' || node.kind==='workplace' || motion.kind==='travel' && edges.find(edge=>edge.id===motion.path.edgeIds[motion.step])?.kind==='indoor';
+    const inside=indoor ? buildingFor(npc.node,state.mapId) ?? (motion.kind==='travel'?buildingFor(motion.path.nodeIds[motion.step+1]!,state.mapId):undefined):undefined;
+    if(inside && !['travel'].includes(motion.kind))activity=`${motion.kind==='work'?'Working':motion.kind==='wait' && motion.resting?'Resting':'Indoors'} · ${inside.name}`;
     return { id, name: npc.name, occupation: npc.occupation, node: npc.node, pose, mobility: npc.mobility ?? 'walk',
       moving: motion.kind === 'travel', activity,
       intention: npc.goals.find(goal => goal.id === npc.intention?.goalId)?.description ?? null,
       goods: npc.inventory.goods, rewards: npc.inventory.rewards,
       ...(state.town ? {coins:npc.inventory.coins!,food:npc.inventory.food!} : {}),
       ...(state.communication ? {contacts:[...npc.knowledge.contacts!]} : {}),
+      ...(npc.home?{homeAddress:addressFor(npc.home,state.mapId) ?? npc.home,homeNode:npc.home}:{}),
+      ...(npc.routine?{workplaceAddress:addressFor(npc.routine.workplace,state.mapId) ?? npc.routine.workplace}:{}),
+      ...(inside?{insideBuildingId:inside.id}:{}),
     };
   });
   return {
-    snapshot: { worldId: state.id, revision: state.revision, time: state.time, actors,
+    snapshot: { mapId:state.mapId,worldId: state.id, revision: state.revision, time: state.time, actors,
       resources: { supplierGoods: state.resources.supplierGoods, marketGoods: state.resources.marketGoods, salesOpen: state.resources.salesOpen },
       tasks: Object.values(state.tasks).map(({ id, requester, recipient, quantity, status }) => ({ id, requester, recipient, quantity, status })),
       encounters: Object.values(state.social.interactions).slice(-16).map(({id,initiator,recipient,purpose,status,createdAt}) => ({id,initiator,recipient,purpose,status,createdAt})),
@@ -97,7 +110,7 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
 export class PresentationStore {
   private current: NeighbourhoodFrame | null = null;
   accept(frame: NeighbourhoodFrame): boolean {
-    if (frame.version !== 1 || !Number.isSafeInteger(frame.sequence) || frame.sequence < 1) return false;
+    if (frame.version !== 2 || !Number.isSafeInteger(frame.sequence) || frame.sequence < 1) return false;
     if (this.current && (frame.sessionId !== this.current.sessionId || frame.sequence <= this.current.sequence)) return false;
     if (this.current?.snapshot.worldId === frame.snapshot.worldId && (frame.snapshot.revision < this.current.snapshot.revision || frame.snapshot.time < this.current.snapshot.time)) return false;
     this.current = structuredClone(frame); return true;

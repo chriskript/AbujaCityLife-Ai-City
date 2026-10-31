@@ -1,4 +1,5 @@
 import { destinations, edges, nodes } from '../world/neighbourhood.js';
+import type { TownMap } from '../world/town-layout.js';
 
 export interface Route {
   id: string;
@@ -9,7 +10,7 @@ export interface Route {
 }
 
 // Dijkstra with stable tie-breaking. Small graph: a sorted queue is sufficient.
-function shortestPath(start: string, end: string, blocked: ReadonlySet<string>): Omit<Route, 'id' | 'destinationId'> | null {
+function shortestPath(start: string, end: string, blocked: ReadonlySet<string>, graphEdges=edges): Omit<Route, 'id' | 'destinationId'> | null {
   const queue = [{ nodeIds: [start], edgeIds: [] as string[], distance: 0 }];
   const visited = new Set<string>();
   while (queue.length) {
@@ -19,7 +20,7 @@ function shortestPath(start: string, end: string, blocked: ReadonlySet<string>):
     if (visited.has(nodeId)) continue;
     if (nodeId === end) return current;
     visited.add(nodeId);
-    for (const edge of edges) {
+    for (const edge of graphEdges) {
       if (blocked.has(edge.id)) continue;
       const next = edge.from === nodeId ? edge.to : edge.to === nodeId ? edge.from : null;
       if (!next || visited.has(next)) continue;
@@ -30,9 +31,9 @@ function shortestPath(start: string, end: string, blocked: ReadonlySet<string>):
 }
 
 // General node routing for inhabitants; existing taxi destination routing is unchanged.
-export function pathToNode(start: string, end: string, blocked: ReadonlySet<string>): Omit<Route, 'id' | 'destinationId'> | null {
-  if (![start, end].every(id => nodes.some(node => node.id === id))) return null;
-  return shortestPath(start, end, blocked);
+export function pathToNode(start: string, end: string, blocked: ReadonlySet<string>,map?:TownMap): Omit<Route, 'id' | 'destinationId'> | null {
+  if (![start, end].every(id => (map?.nodes ?? nodes).some(node => node.id === id))) return null;
+  return shortestPath(start, end, blocked,map?.edges ?? edges);
 }
 
 export function routeCandidates(start: string, blocked: ReadonlySet<string>): Route[] {

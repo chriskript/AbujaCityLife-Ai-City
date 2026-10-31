@@ -1,6 +1,6 @@
-import { edges } from '../world/neighbourhood.js';
+import { mapFor, initialHomes, initialLocations, workSites, type MapId } from '../world/town-layout.js';
 import { pathToNode } from '../navigation/routes.js';
-import { initialState, places, defaultResidents } from './initial-state.js';
+import { initialState, defaultResidents } from './initial-state.js';
 import { isNpcDecision, isResidentId } from './decision-schema.js';
 import { type Inhabitant, type Action, type DecisionOutcome, type MemoryKind, type NpcDecisionRequest, type NpcId, type NpcObservation, type TransportTask, type WorldEvent, type WorldState } from './types.js';
 import { assertSnapshot, migrateSnapshot } from './snapshot.js';
@@ -37,6 +37,59 @@ export class Neighbourhood {
   hasResident(id: string): boolean { return Object.hasOwn(this.state.npcs, id); }
   serialize(): string { return JSON.stringify(this.state); }
   get hasTownEconomy(): boolean { return this.state.town !== undefined; }
+  get mapId():MapId{return this.state.mapId;}
+  private get map(){return mapFor(this.state.mapId);}
+  upgradeTownMap(options:{fresh?:boolean}={}):boolean {
+    if(!this.state.town)return false;
+    const candidate=copy(this.state),map=mapFor('town-v1');let changed=candidate.mapId!=='town-v1';
+    candidate.mapId='town-v1';if(changed && !options.fresh)candidate.mapUpgradedAt ??= candidate.time;
+    const occupied=new Set(Object.values(candidate.npcs).map(npc=>npc.home).filter((home):home is string=>!!home && map.nodes.some(n=>n.id===home && n.kind==='home')));
+    for(const npc of Object.values(candidate.npcs)) {
+      if(!npc.home || !occupied.has(npc.home)) {
+        const proposed=initialHomes[npc.id],home=proposed && !occupied.has(proposed)?proposed:map.nodes.find(n=>n.kind==='home' && !occupied.has(n.id))?.id;
+        if(!home)throw new Error('No vacant dwelling in this map');npc.home=home;occupied.add(home);changed=true;
+      }
+      npc.knowledge.places=[...new Set([...npc.knowledge.places,npc.home,'town-green'])];npc.knowledge.placeFacts={...npc.knowledge.placeFacts,...initialPlaceFacts([npc.home,'town-green'])};
+    }
+    for(const business of Object.values(candidate.town!.businesses)) {
+      const target=workSites[business.id];if(!target || business.node===target)continue;
+      for(const npc of Object.values(candidate.npcs)) {
+        if(npc.activity.kind==='work' && npc.activity.job?.businessId===business.id)npc.activity.job.siteNode ??= business.node;
+        const known=npc.knowledge.businesses?.[business.id];if(known)known.siteNode ??= business.node;
+      }
+      business.node=target;changed=true;
+    }
+    for(const npc of Object.values(candidate.npcs)) {
+      const oldWork=npc.routine!.workplace;
+      const primary=Object.values(candidate.town!.businesses).find(b=>b.staff.includes(npc.id) && b.skill!=='general');
+      const workplace=primary?.node ?? (npc.mobility==='taxi'?'stand':oldWork==='centre'?workSites['community-errands']!:oldWork);
+      npc.routine!.workplace=workplace;
+      const knownSites=Object.keys(npc.knowledge.businesses ?? {}).map(id=>candidate.town!.businesses[id]!.node);
+      npc.knowledge.places=[...new Set([...npc.knowledge.places,workplace,...knownSites])];
+      npc.knowledge.placeFacts={...npc.knowledge.placeFacts,...initialPlaceFacts([workplace,...knownSites])};
+    }
+    if(!changed)return false;
+    if(options.fresh){if(candidate.time!==0 || Object.keys(candidate.tasks).length || Object.values(candidate.npcs).some(npc=>npc.activity.kind!=='idle'))throw new Error('Starting locations are only valid for a fresh world');for(const npc of Object.values(candidate.npcs)){const location=initialLocations[npc.id];if(location)npc.node=location==='home'?npc.home!:location;}}
+    assertSnapshot(candidate);this.state=candidate;this.pending.clear();
+    // Setup refines addresses without evicting existing personal memories.
+    this.record('town-addresses-established',null,[],this.state.id,'Established distinct homes and workplace addresses');
+    if(options.fresh)for(const id of this.residentIds)this.perceive(id);
+    for(const id of this.residentIds)this.trigger(id,'addresses-established');return true;
+  }
+  invalidateActorDecisions(id:NpcId):void {
+    for(const request of [...this.pending.values()])if(request.actorId===id)this.abandonDecision(request.id);
+    this.trigger(id,'control-changed');
+  }
+  applyPhoneAction(id:NpcId,action:unknown):DecisionOutcome {
+    const actor=this.state.npcs[id];if(!actor)return {accepted:false,reason:'unknown-resident',duplicate:false};
+    const proposal={goalId:actor.goals[0]!.id,reason:'Player operating this resident’s phone',action};
+    if(!isNpcDecision(proposal) || !['communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'].includes(proposal.action.type))return {accepted:false,reason:'invalid-phone-action',duplicate:false};
+    if(proposal.action.type==='propose-transport' && !remoteExchange(this.state,id,proposal.action.recipient))return {accepted:false,reason:'accepted-discussion-required',duplicate:false};
+    if(proposal.action.type==='respond-transport' && (!this.state.tasks[proposal.action.taskId]?.communicationId || actor.knowledge.tasks[proposal.action.taskId]!=='proposed'))return {accepted:false,reason:'delivered-phone-offer-required',duplicate:false};
+    const reason=this.validate(id,proposal.action);if(reason)return {accepted:false,reason,duplicate:false};
+    const request=this.requestInteractionDecision(id);if(!request)return {accepted:false,reason:'actor-busy',duplicate:false};
+    return this.applyDecision(request.id,proposal,{mode:'player',model:'player-phone'});
+  }
   enableCommunications(): void {
     const candidate=copy(this.state);if(!enableCommunication(candidate))return;
     assertSnapshot(candidate);this.state=candidate;
@@ -183,6 +236,7 @@ export class Neighbourhood {
       if (newlyAdmitted) candidate.perceive(id);
     }
     if(state.communication)enableCommunication(state);
+    if(state.mapId==='town-v1'){candidate.upgradeTownMap();Object.assign(state,candidate.state);}
     assertSnapshot(state);
     this.state=copy(state); this.pending.clear();
   }
@@ -239,8 +293,8 @@ export class Neighbourhood {
     if (this.state.town) for (const business of Object.values(this.state.town.businesses)) if (business.node === npc.node) {
       const available = this.workAvailable(business.id), previous = npc.knowledge.businesses?.[business.id];
       npc.knowledge.businesses ??= {};
-      if (!previous || previous.available !== available) {
-        npc.knowledge.businesses[business.id] = {available,observedAt:this.state.time};
+      if (!previous || previous.available !== available || previous.siteNode && previous.siteNode!==business.node) {
+        npc.knowledge.businesses[business.id] = {available,observedAt:this.state.time,siteNode:business.node};
         this.record('work-observed',id,[id],business.id,available ? 'Observed a funded work opening' : 'Observed no current work opening',{available},'observed');
         this.trigger(id,'work-availability-changed');
       }
@@ -258,7 +312,7 @@ export class Neighbourhood {
       visible.supplierGoods = this.state.resources.supplierGoods;
       this.record('supplies-observed', id, [id], 'centre', `Observed ${visible.supplierGoods} supplies at the desk`, { quantity: visible.supplierGoods }, 'observed');
     }
-    for (const edge of edges) if (edge.from === npc.node || edge.to === npc.node) {
+    for (const edge of this.map.edges) if (edge.from === npc.node || edge.to === npc.node) {
       const blocked = this.state.roads.blockedEdges.includes(edge.id);
       const known = npc.knowledge.blockedEdges.includes(edge.id);
       if (blocked === known) continue;
@@ -292,8 +346,8 @@ export class Neighbourhood {
       remainingCarryingCapacity: Math.max(0, transportCapacity - npc.inventory.goods),
     };
     return copy({
-      actor: npc, time: this.state.time,
-      places: places.filter(place => npc.knowledge.places.includes(place.id)),
+      actor: npc, time: this.state.time,mapId:this.state.mapId,
+      places: this.map.places.filter(place => npc.knowledge.places.includes(place.id)),
       placeKnowledge: projectPlaceKnowledge(npc, this.state.events, this.state.time),
       memoryEvidence: npc.memories.map(memory => ({ id: memory.id, interpretation:
         this.state.events.find(event => event.id === memory.eventId)?.type === 'conversation' && memory.source === id ? 'speech-only' :
@@ -313,7 +367,7 @@ export class Neighbourhood {
         work:Object.entries(npc.knowledge.businesses ?? {}).flatMap(([key,knowledge])=>{
           const business=this.state.town!.businesses[key];
           return business && npc.skills?.includes(business.skill) ? [{id:business.id,name:business.name,node:business.node,skill:business.skill,wage:business.wage,seconds:business.seconds,
-            available:npc.node===business.node && this.atNode(id) ? this.workAvailable(key) : knowledge.available,observedAt:npc.node===business.node && this.atNode(id) ? this.state.time : knowledge.observedAt}] : [];
+            available:npc.node===business.node && this.atNode(id) ? this.workAvailable(key) : knowledge.siteNode && knowledge.siteNode!==business.node?null:knowledge.available,observedAt:npc.node===business.node && this.atNode(id) ? this.state.time : knowledge.siteNode && knowledge.siteNode!==business.node?null:knowledge.observedAt}] : [];
         }),
       }} : {}),
       resources: npc.knowledge.resources,
@@ -360,7 +414,7 @@ export class Neighbourhood {
     // No automatic retry loop. A subsequent meaningful event can trigger a new decision.
   }
 
-  applyDecision(requestId: string, proposal: unknown, provenance: { mode: 'mock' | 'meta'; model: string }): DecisionOutcome {
+  applyDecision(requestId: string, proposal: unknown, provenance: { mode: 'mock' | 'meta' | 'player'; model: string }): DecisionOutcome {
     const previous = this.processed.get(requestId);
     if (previous) return { ...previous, duplicate: true };
     const request = this.pending.get(requestId);
@@ -428,7 +482,8 @@ export class Neighbourhood {
     }
     if (action.type === 'travel') {
       if (!npc.knowledge.places.includes(action.destination)) return 'unknown-place';
-      if (!pathToNode(npc.node, action.destination, new Set(npc.knowledge.blockedEdges))) return 'no-known-route';
+      if(this.map.nodes.find(node=>node.id===action.destination)?.kind==='home' && action.destination!==npc.home)return 'private-dwelling';
+      if (!pathToNode(npc.node, action.destination, new Set(npc.knowledge.blockedEdges),this.map)) return 'no-known-route';
     } else if (action.type === 'propose-transport') {
       if (Object.keys(this.state.tasks).length >= 64) return 'task-capacity';
       if (!npc.knowledge.people.includes(action.recipient) || !this.nearby(id, action.recipient) && !remoteExchange(this.state,id,action.recipient)) return 'recipient-not-nearby';
@@ -449,7 +504,7 @@ export class Neighbourhood {
       } else {
         if (!['accepted', 'collected'].includes(task.status)) return 'task-not-active';
         if (task.status === 'collected' && npc.inventory.goods < task.quantity) return 'missing-cargo';
-        if (!pathToNode(npc.node, task.status === 'accepted' ? task.pickup : task.destination, new Set(npc.knowledge.blockedEdges))) return 'no-known-route';
+        if (!pathToNode(npc.node, task.status === 'accepted' ? task.pickup : task.destination, new Set(npc.knowledge.blockedEdges),this.map)) return 'no-known-route';
       }
     } else if (action.type === 'collect-self') {
       if (npc.node !== 'centre') return 'not-at-supplier';
@@ -568,7 +623,7 @@ export class Neighbourhood {
 
   private travel(id: NpcId, destination: string, taskId: string | null, leg: 'pickup' | 'delivery' | null): void {
     const npc = this.state.npcs[id]!;
-    const path = pathToNode(npc.node, destination, new Set(npc.knowledge.blockedEdges));
+    const path = pathToNode(npc.node, destination, new Set(npc.knowledge.blockedEdges),this.map);
     if (!path) { this.fail(id, 'No route in current knowledge'); return; }
     npc.activity = { kind: 'travel', path, step: 0, progress: 0, taskId, leg };
     this.record('travel-started', id, [id], destination, 'Started validated graph travel', { taskId });
@@ -622,7 +677,7 @@ export class Neighbourhood {
 
   setRoadBlocked(edgeId: string, blocked: boolean): boolean {
     if (typeof blocked !== 'boolean') return false;
-    if (!edges.some(edge => edge.id === edgeId)) return false;
+    if (!this.map.edges.some(edge => edge.id === edgeId)) return false;
     if (this.residentIds.some(id => { const activity = this.state.npcs[id]!.activity; return activity.kind === 'travel' && activity.path.edgeIds[activity.step] === edgeId && activity.progress > 0; })) return false;
     if (this.state.roads.blockedEdges.includes(edgeId) === blocked) return false;
     this.state.roads.blockedEdges = blocked ? [...this.state.roads.blockedEdges, edgeId] : this.state.roads.blockedEdges.filter(id => id !== edgeId);
@@ -666,7 +721,7 @@ export class Neighbourhood {
         } else if (activity.kind === 'travel') {
           let distance = (npc.mobility === 'taxi' ? 14 : 4) * dt;
           while (distance > 0 && npc.activity === activity) {
-            const edge = edges.find(item => item.id === activity.path.edgeIds[activity.step]);
+            const edge = this.map.edges.find(item => item.id === activity.path.edgeIds[activity.step]);
             if (!edge) { this.arrive(id); break; }
             if (this.state.roads.blockedEdges.includes(edge.id)) {
               this.fail(id, `Encountered blocked edge ${edge.id}`); this.perceive(id); break;

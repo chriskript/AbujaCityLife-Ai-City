@@ -82,6 +82,9 @@ describe('bounded authoritative progression',()=>{
   const {session,checkpoint}=await openSession();const clock=new ServerProgression(session);
   await rm(checkpoint);await mkdir(checkpoint);
   await expect(clock.pulse()).rejects.toThrow('Checkpoint write failed');const sequence=session.frame.sequence;await clock.pulse();expect(session.frame.sequence).toBe(sequence);
+  expect(session.operational).toBe(false);
+  const http=createNeighbourhoodHttp(session,'test-only-token-with-at-least-32-characters',{tick:false});await new Promise<void>(resolve=>http.server.listen(0,'127.0.0.1',resolve));cleanup.push(()=>http.close());
+  const health=await fetch(`http://127.0.0.1:${(http.server.address() as {port:number}).port}/api/health`);expect(health.status).toBe(503);expect(await health.json()).toMatchObject({status:'unavailable'});
  });
 });
 
@@ -94,7 +97,7 @@ describe('persistent environmental consequences',()=>{
  });
  it('locally discovers a closure and autonomously reroutes a paid delivery, delaying stock and payment until actual completion',async()=>{
   // Preserve the 7C timing baseline; 7D remote-policy trajectories have separate tests.
-  const normal=new HeadlessTownRunner(createTown('comparison',16,{communication:false})),closed=new HeadlessTownRunner(createTown('comparison',16,{communication:false}));
+  const normal=new HeadlessTownRunner(createTown('comparison',16,{communication:false,map:'legacy-v1'})),closed=new HeadlessTownRunner(createTown('comparison',16,{communication:false,map:'legacy-v1'}));
   expect(closed.world.setRoadBlocked('centre-market',true)).toBe(true);
   expect(closed.world.observe('amina').knownBlockedEdges).toContain('centre-market');
   expect(closed.world.observe('musa').knownBlockedEdges).not.toContain('centre-market');

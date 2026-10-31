@@ -4,10 +4,13 @@ import { LocalNeighbourhoodSession } from './simulation/local-neighbourhood-sess
 import { RemoteNeighbourhoodSession } from './simulation/remote-neighbourhood-session.js';
 import { PresentationStore, type NeighbourhoodSession, type NeighbourhoodFrame, type ObservableEvent, type Experiment, type SessionCommand } from '../../shared/neighbourhood/presentation.js';
 import type { NpcId } from '../../shared/neighbourhood/types.js';
+import { ResidentPhone } from './resident-phone.js';
+import { mapFor,buildingFor } from '../../shared/world/town-layout.js';
 
 document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = 'Observe the residents working, travelling and cooperating in an original miniature neighbourhood inspired by Abuja.';
 document.querySelector('#experience')!.innerHTML = `
   <div id="world" aria-label="Living 3D neighbourhood with autonomous mock residents"></div>
+  <div id="building-labels" aria-label="Select a town building"></div>
   <div id="labels" aria-hidden="true"></div><div id="inhabitant-labels" aria-label="Select an inhabitant in the scene"></div>
   <div class="scene-caption"><span class="eyebrow">INDEPENDENT LIVES. ONE SHARED WORLD.</span><h1>Life happens<br />around you.</h1><p>Watch their day unfold. Choose someone to get closer.</p></div>
   <section class="inhabitant-panel" aria-label="Inhabitants">
@@ -17,6 +20,8 @@ document.querySelector('#experience')!.innerHTML = `
     <div class="activity-line"><span></span><strong id="person-activity" role="status">Starting the day</strong></div>
     <p id="person-intention" class="intention">The neighbourhood is waking up.</p>
     <div class="person-facts"><span id="person-location">Market Square</span><span id="person-goods">No goods carried</span></div><p id="person-wallet" class="intention" hidden></p>
+    <p id="person-address" class="intention"></p><div class="resident-tools"><button id="open-phone">Open phone</button><button id="show-home">Show home</button></div>
+    <details id="town-buildings" class="conversation"><summary>Town buildings</summary><label for="building-picker">Choose a building</label><select id="building-picker"><option value="">Choose…</option></select><section id="building-inspector" hidden><h3 id="building-name"></h3><p id="building-address" class="intention"></p><div id="building-residents"></div></section><p class="intention">Drag to pan · scroll or pinch to zoom</p><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button></details>
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
     <details id="resident-communications" class="conversation"><summary>Calls &amp; messages <span id="communication-count"></span></summary><p id="resident-contacts" class="intention"></p><p class="intention">Observer history. Residents receive only their own delivered messages. Discussion is separate from a job commitment.</p><ol id="communication-history" class="person-recent"></ol></details>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
@@ -33,6 +38,8 @@ const el = <T extends HTMLElement>(selector: string): T => document.querySelecto
 const local = new URLSearchParams(location.search).get('authority') === 'local';
 const remote = local ? null : new RemoteNeighbourhoodSession();
 const session: NeighbourhoodSession = remote ?? new LocalNeighbourhoodSession();
+const phone=new ResidentPhone(session);
+let selectedBuilding:string|null=null;let buildingMap='';
 let proposalId: string | null = null;
 let conversationBusy = false;
 const store = new PresentationStore();
@@ -105,8 +112,10 @@ export function describeObservable(event: ObservableEvent): string {
 function timeLabel(time: number): string { return `${String(Math.floor(time / 60)).padStart(2, '0')}:${String(Math.floor(time % 60)).padStart(2, '0')}`; }
 
 function select(id: NpcId): void {
+  void phone.close();
   selected = id; focused = true; proposalId = null; el('#confirm-proposal').hidden = true; scene.setFollow(true); updateUi(true); void loadHistory();
 }
+function selectBuilding(id:string):void {selectedBuilding=id;focused=false;scene.focusBuilding(id);el<HTMLDetailsElement>('#town-buildings').open=true;updateUi(true);el('#building-inspector').scrollIntoView({block:'nearest'});}
 function updateUi(force = false): void {
   if (!frame) return;
   const view = frame.snapshot;
@@ -126,6 +135,20 @@ function updateUi(force = false): void {
     }
   }
   const actor = view.actors.find(actor => actor.id === selected)!;
+  for(const place of mapFor(view.mapId).places)locations[place.id]=place.name;
+  el('#person-address').textContent=actor.homeAddress?`Home: ${actor.homeAddress} · Work: ${actor.workplaceAddress ?? 'Mobile work'}`:'';
+  el<HTMLButtonElement>('#open-phone').disabled=!actor.contacts;
+  const buildings=mapFor(view.mapId).buildings;
+  if(buildingMap!==view.mapId){buildingMap=view.mapId;el<HTMLSelectElement>('#building-picker').replaceChildren(new Option('Choose a building',''),...buildings.map(building=>new Option(building.name,building.id)));selectedBuilding=null;}
+  const building=buildings.find(item=>item.id===selectedBuilding);el('#building-inspector').hidden=!building;
+  if(building){
+    const assigned=view.actors.filter(person=>person.homeNode && building.units.includes(person.homeNode)).length;
+    el('#building-name').textContent=building.name;el('#building-address').textContent=`${building.address}${building.units.length?` · ${building.units.length} homes · ${assigned} occupied · ${building.units.length-assigned} vacant`:''}`;
+    el<HTMLSelectElement>('#building-picker').value=building.id;const residents=el('#building-residents');residents.replaceChildren();
+    const occupants=view.actors.filter(person=>person.insideBuildingId===building.id || person.homeNode && buildingFor(person.homeNode,view.mapId)?.id===building.id);
+    for(const person of occupants){const button=document.createElement('button');button.textContent=`${person.name} · ${person.insideBuildingId===building.id?'indoors':person.homeAddress ?? person.activity}`;button.addEventListener('click',()=>select(person.id));residents.append(button);}
+    if(!occupants.length)residents.textContent='No residents currently inside.';
+  }
   el('#person-name').textContent = actor.name; el('#person-role').textContent = actor.occupation;
   el('#person-activity').textContent = actor.activity;
   el('#person-intention').textContent = actor.intention ?? 'Choosing an activity from personal priorities.';
@@ -202,7 +225,7 @@ async function loadHistory(): Promise<void> {
 let unsubscribe = (): void => {};
 function dispose(): void {
   if (disposed) return; disposed = true;
-  listeners.abort(); unsubscribe(); session.dispose(); scene?.dispose();
+  phone.dispose();listeners.abort(); unsubscribe(); session.dispose(); scene?.dispose();
 }
 
 try {
@@ -210,13 +233,17 @@ try {
     lostContext = lost; lastTime = 0; session.setVisible(!lost && !document.hidden);
     el('#notice').textContent = lost ? 'Graphics paused. Waiting for the scene to recover…' : 'Activities use scripted mock decisions. No Meta requests are made.';
   });
-  scene.enableInhabitants(select);
+  scene.enableInhabitants(select,selectBuilding,()=>{focused=false;updateUi(true);});
   unsubscribe = session.subscribe(next => {
     if (!store.accept(next)) return; frame = store.frame!;
     if (previousWorld !== frame.snapshot.worldId) { scene.resetPresentation(); previousWorld = frame.snapshot.worldId; proposalId = null; el('#confirm-proposal').hidden = true; void loadHistory(); }
     updateUi();
   });
   const options = { signal: listeners.signal };
+  el('#open-phone').addEventListener('click',()=>{void phone.open(selected);},options);
+  el('#show-home').addEventListener('click',()=>{const actor=frame?.snapshot.actors.find(person=>person.id===selected);if(actor?.homeNode && frame){const building=buildingFor(actor.homeNode,frame.snapshot.mapId);if(building)selectBuilding(building.id);}},options);
+  el('#building-picker').addEventListener('change',()=>{const id=el<HTMLSelectElement>('#building-picker').value;if(id)selectBuilding(id);},options);
+  el('#zoom-in').addEventListener('click',()=>scene.zoom(.8),options);el('#zoom-out').addEventListener('click',()=>scene.zoom(1.25),options);
   remote?.onConnection(state => {
     el('#backend-access').hidden = state === 'ready';
     el('#demo-token').hidden = state !== 'unauthorized'; el('#sign-in').hidden = state !== 'unauthorized';

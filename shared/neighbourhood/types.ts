@@ -1,4 +1,5 @@
 import type { PlaceFacts, PlaceKnowledge } from './knowledge.js';
+import type { MapId } from '../world/town-layout.js';
 export const legacyNpcIds = ['musa', 'amina', 'zainab'] as const;
 // Legacy fixture IDs are retained for compatibility; runtime membership is world-owned.
 export type NpcId = string;
@@ -27,7 +28,7 @@ export interface Inhabitant {
     transporters?: NpcId[];
     contacts?: NpcId[];
     sharedContacts?: NpcId[];
-    businesses?: Record<string, { available: boolean | null; observedAt: number | null }>;
+    businesses?: Record<string, { available: boolean | null; observedAt: number | null; siteNode?:string }>;
     placeFacts?: Record<string, PlaceFacts>;
     tasks: Record<string, TaskStatus>;
     resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
@@ -50,7 +51,7 @@ export interface WorldEvent {
   data: Record<string, string | number | boolean | null>;
 }
 export interface WorldState {
-  version: 3; id: string; revision: number; time: number;
+  version: 4; mapId:MapId; mapUpgradedAt?:number; id: string; revision: number; time: number;
   // The original residents remain required for the preserved supply scenario.
   npcs: Record<NpcId, Inhabitant> & { musa: Inhabitant; amina: Inhabitant; zainab: Inhabitant };
   initialGoods: number;
@@ -89,6 +90,7 @@ export interface Encounter {
   createdAt: number; expiresAt: number;
 }
 export interface NpcObservation {
+  mapId:MapId;
   actor: Inhabitant; time: number;
   places: { id: string; node: string; name: string }[];
   placeKnowledge: PlaceKnowledge[];
@@ -128,7 +130,7 @@ export interface NpcDecisionRequest {
 export interface NpcInferenceResult { mode: 'mock' | 'meta'; model: string; decision: unknown }
 export interface NpcDecisionProvider { decide(request: NpcDecisionRequest): Promise<NpcInferenceResult> }
 export interface DecisionOutcome { accepted: boolean; reason: string; duplicate: boolean }
-export interface WorkBooking { businessId: string; wage: number; inputs: number; output: number }
+export interface WorkBooking { businessId: string; wage: number; inputs: number; output: number; siteNode?:string }
 export interface Business {
   id: string; name: string; node: string; owner: NpcId; staff: NpcId[]; coins: number;
   skill: string; wage: number; seconds: number; slots: number; output: number;

@@ -1,4 +1,6 @@
 import { randomUUID, createHash } from 'node:crypto';
+import { PhoneControl,projectPhone,type PhoneControlInput,type PhoneActionInput,type PhoneLease,type PhoneView } from '../shared/neighbourhood/phone.js';
+import type { MapId } from '../shared/world/town-layout.js';
 import { mkdir, open, readFile, rename } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { Neighbourhood } from '../shared/neighbourhood/world.js';
@@ -37,6 +39,7 @@ export class NeighbourhoodServerSession {
   private proposals = new Map<string, { request: NpcDecisionRequest; decision: unknown; expires: number }>();
   private listeners = new Set<(frame: NeighbourhoodFrame) => void>();
   private provider: NeighbourhoodProvider;
+  private readonly phoneControl=new PhoneControl(()=>this.now());
   private constructor(private readonly options: ConstructorParametersInternal) { this.provider = options.provider ?? new MockNeighbourhoodProvider(); }
   static async open(options: ConstructorParametersInternal): Promise<NeighbourhoodServerSession> {
     const session = new NeighbourhoodServerSession(options);
@@ -72,12 +75,17 @@ export class NeighbourhoodServerSession {
       for (const receipt of Object.values(data.receipts)) if (receipt.status === 'pending') { receipt.status = 'failed'; receipt.value = 'Interrupted by restart; request will not be repeated'; }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-      session.world = options.initialWorld ? Neighbourhood.restore(options.initialWorld) : options.townPopulation===false ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,options.townPopulation ?? prototypePopulation);
+      session.world = options.initialWorld ? Neighbourhood.restore(options.initialWorld) : options.townPopulation===false ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,options.townPopulation ?? prototypePopulation,{map:options.townMap ?? 'town-v1'});
       session.data = { version: 1, sessionId: randomUUID(), sequence: 0, world: '', paused: false, speed: 2, requests: 0, recent: [], last: {}, receipts: {}, history: Object.fromEntries(session.world.residentIds.map(id => [id, []])), metrics: [], plan: null };
     }
     if (options.plan) {
       if (session.data.plan && session.data.plan.id !== options.plan.id) throw new Error('Different live plan requires reviewed session migration');
       session.data.plan ??= { id: options.plan.id, used: 0, reservedUsd: 0 };
+    }
+    if(session.world.hasTownEconomy && options.townMap!=='legacy-v1' && session.world.mapId!=='town-v1') {
+      try {const prior=await readFile(options.checkpoint,'utf8'),backup=await open(options.checkpoint+'.pre-7e-backup','wx',0o600);try{await backup.writeFile(prior);await backup.sync();}finally{await backup.close();}}
+      catch(error){if(!['ENOENT','EEXIST'].includes((error as NodeJS.ErrnoException).code ?? ''))throw error;}
+      session.world.upgradeTownMap();
     }
     if(session.world.hasTownEconomy && !session.world.snapshot.communication) {
       // Retain the original durable world before adding contacts and new capabilities.
@@ -101,6 +109,7 @@ export class NeighbourhoodServerSession {
   hasResident(id: string): boolean { return this.world.hasResident(id); }
   get mode(): 'mock' | 'live-meta' { return this.provider.mode; }
   get paused(): boolean { return this.data.paused; }
+  get operational():boolean{return !this.failed && !this.closed;}
   history(id: NpcId): ConversationTurn[] { if (this.failed) throw new SessionError(503, 'Session unavailable'); if (!this.hasResident(id)) throw new SessionError(400, 'Unknown resident'); return structuredClone(this.committedHistory[id] ?? []); }
   subscribe(listener: (frame: NeighbourhoodFrame) => void): () => void { this.listeners.add(listener); listener(this.frame); return () => this.listeners.delete(listener); }
   private transaction<T>(work: () => Promise<T>): Promise<T> {
@@ -115,10 +124,10 @@ export class NeighbourhoodServerSession {
       const file = await open(temporary, 'wx', 0o600);
       try { await file.writeFile(JSON.stringify(this.data)); await file.sync(); } finally { await file.close(); }
       await rename(temporary, this.options.checkpoint);
-    } catch { this.failed = true; throw new SessionError(503, 'Checkpoint write failed; session stopped'); }
+    } catch(error) { this.failed = true;const code=(error as NodeJS.ErrnoException).code;throw new SessionError(503, `Checkpoint write failed${code?` (${code})`:''}; session stopped`); }
     const projection = projectNeighbourhood(this.world.snapshot);
     this.committedHistory = structuredClone(this.data.history);
-    this.current = { version: 1, sessionId: this.data.sessionId, sequence: this.data.sequence, mode: this.provider.mode, paused: this.data.paused, speed: this.data.speed, conversationAvailable: true, decisionBudget: this.mode==='mock' && this.world.hasTownEconomy ? {used:this.data.routineRequests ?? 0,limit:offlineTownLimits.maximumDecisions} : { used: this.data.requests, limit: 48 }, ...projection };
+    this.current = { version: 2, sessionId: this.data.sessionId, sequence: this.data.sequence, mode: this.provider.mode, paused: this.data.paused, speed: this.data.speed, conversationAvailable: true, decisionBudget: this.mode==='mock' && this.world.hasTownEconomy ? {used:this.data.routineRequests ?? 0,limit:offlineTownLimits.maximumDecisions} : { used: this.data.requests, limit: 48 }, ...projection };
     if (this.mode === 'mock') this.current.progression = { used: this.data.progression!.used, limit: this.data.progression!.limit, stopped: this.data.progression!.used >= this.data.progression!.limit };
     for (const listener of this.listeners) listener(this.frame);
   }
@@ -136,6 +145,24 @@ export class NeighbourhoodServerSession {
     this.data.receipts[id] = { hash, status: 'pending', value: null }; return null;
   }
   private requireWorld(id: string): void { if (id !== this.world.id) throw new SessionError(409, 'World changed'); }
+  phone(actorId:string):PhoneView {if(this.failed || this.closed)throw new SessionError(503,'Session unavailable');try{return projectPhone(this.world,actorId,this.data.paused,this.phoneControl.status(this.world.id));}catch{throw new SessionError(400,'Phone unavailable for this resident');}}
+  async controlPhone(input:PhoneControlInput):Promise<PhoneLease|null> {
+    return this.transaction(async()=>{
+      this.requireWorld(input.worldId);let lease:PhoneLease|null;
+      try{lease=this.phoneControl.change(this.world,input);}catch(error){throw new SessionError(409,(error as Error).message);}
+      if(input.operation==='acquire')for(const [id,proposal]of this.proposals)if(proposal.request.actorId===input.actorId){this.world.abandonDecision(proposal.request.id);this.proposals.delete(id);}
+      if(input.operation!=='renew')await this.commit();return lease;
+    });
+  }
+  async phoneAction(input:PhoneActionInput):Promise<CommandReceipt> {
+    return this.transaction(async()=>{
+      this.requireWorld(input.worldId);if(Object.hasOwn(this.data.receipts,input.id)){const old=this.receipt(input.id,input);if(old)return old.value as CommandReceipt;}
+      if(!this.phoneControl.owns(this.world.id,input.actorId,input.leaseId))throw new SessionError(409,'Phone control expired or belongs to another observer');
+      this.receipt(input.id,input);
+      const outcome=this.data.paused?{accepted:false,reason:'The town is paused'}:this.world.applyPhoneAction(input.actorId,input.action);
+      const value={accepted:outcome.accepted,reason:outcome.reason};Object.assign(this.data.receipts[input.id]!,{status:'done',value});await this.commit();return value;
+    });
+  }
   private reserveRequest(id: NpcId, routine = false): void {
     const now = this.now(); this.data.recent = this.data.recent.filter(time => time > now - 60_000);
     // Only deterministic autonomous mock mechanics use simulation-time scheduling.
@@ -171,7 +198,7 @@ export class NeighbourhoodServerSession {
         const value = { accepted, reason: accepted ? 'accepted' : 'Road unchanged, invalid or currently occupied' };
         Object.assign(this.data.receipts[command.id]!, { status: 'done', value }); await this.commit(); return value;
       } else {
-        this.world = this.options.townPopulation===false || this.options.initialWorld && !this.world.hasTownEconomy ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,this.options.townPopulation || prototypePopulation); this.proposals.clear(); this.epoch++;
+        this.world = this.options.townPopulation===false || this.options.initialWorld && !this.world.hasTownEconomy ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,this.options.townPopulation || prototypePopulation,{map:this.options.townMap ?? 'town-v1'}); this.proposals.clear(); this.epoch++;
         this.data.routineRecent = [];
         this.data.history = Object.fromEntries(this.world.residentIds.map(id => [id, []])); this.data.paused = this.mode === 'mock' && (this.data.progression!.used >= this.data.progression!.limit || this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions);
         if (this.mode === 'mock') this.provider = mockExperiment(command.experiment);
@@ -195,7 +222,7 @@ export class NeighbourhoodServerSession {
     });
   }
   async decide(actorId?: NpcId, triggerOnly = false): Promise<void> {
-    let request: NpcDecisionRequest | null = null; let origin: Neighbourhood; let epoch = 0;
+    let request: NpcDecisionRequest | null = null; let origin: Neighbourhood; let epoch = 0;let controlGeneration=0;
     await this.transaction(async () => {
       if (this.data.paused || this.busy) return;
       if (!actorId && this.mode === 'live-meta' && !this.options.plan?.allowAutonomy) return;
@@ -204,12 +231,13 @@ export class NeighbourhoodServerSession {
       if (actorId && !this.hasResident(actorId)) throw new SessionError(400, 'Unknown resident');
       for (let i = 0; i < (actorId ? 1 : npcIds.length); i++) {
         const id = actorId ?? npcIds[(this.cursor++ % npcIds.length)]!;
+        if(this.phoneControl.controlled(this.world.id,id))continue;
         const previousLast = this.data.last[id];
         if (!actorId && (previousLast?.worldId === undefined || previousLast.worldId === this.world.id) && this.world.time - (previousLast?.simulation ?? -Infinity) < 20) continue;
         try { this.reserveRequest(id, routine); } catch (error) { if (actorId) throw error; continue; }
         request = actorId && !triggerOnly ? this.world.requestInteractionDecision(id) : this.world.requestDecision(id);
         if (!request) { this.busy = false; if (routine && this.world.hasTownEconomy) this.data.routineRequests!--; else this.data.requests--; if (routine) this.data.routineRecent!.pop(); else this.data.recent.pop(); if (previousLast) this.data.last[id] = previousLast; else delete this.data.last[id]; if (this.mode === 'live-meta') { this.data.plan!.used--; this.data.plan!.reservedUsd -= maximumGenerationUsd; } continue; }
-        origin = this.world; epoch = this.epoch; await this.commit(); return;
+        origin = this.world; epoch = this.epoch;controlGeneration=this.phoneControl.generation(id); await this.commit(); return;
       }
     });
     if (!request) return;
@@ -217,7 +245,7 @@ export class NeighbourhoodServerSession {
     try {
       const result = await this.provider.decide(pending);
       await this.transaction(async () => {
-        if (origin! !== this.world || this.data.paused || epoch !== this.epoch) origin!.abandonDecision(pending.id);
+        if (origin! !== this.world || this.data.paused || epoch !== this.epoch || controlGeneration!==this.phoneControl.generation(pending.actorId)) origin!.abandonDecision(pending.id);
         else this.world.applyDecision(pending.id, result.decision, { mode: result.mode, model: result.model });
         this.captureMetrics(pending.id, pending.actorId); await this.commit();
       });
@@ -230,7 +258,7 @@ export class NeighbourhoodServerSession {
     let oldResult: ConversationResult | null = null; let revision = 0; let origin!: Neighbourhood; let epoch = 0;
     let context!: Parameters<NeighbourhoodProvider['converse']>[0];
     await this.transaction(async () => {
-      this.requireWorld(input.worldId); if (!this.hasResident(input.actorId)) throw new SessionError(400, 'Unknown resident'); const old = this.receipt(input.id, input); if (old) { oldResult = old.value as ConversationResult; return; }
+      this.requireWorld(input.worldId); if (!this.hasResident(input.actorId)) throw new SessionError(400, 'Unknown resident');if(this.phoneControl.controlled(this.world.id,input.actorId))throw new SessionError(409,'Release phone control before requesting another inference'); const old = this.receipt(input.id, input); if (old) { oldResult = old.value as ConversationResult; return; }
       this.reserveRequest(input.actorId);
       for (const [id, proposal] of this.proposals) if (proposal.request.actorId === input.actorId) { this.world.abandonDecision(proposal.request.id); this.proposals.delete(id); }
       this.world.recordConversation(input.actorId, 'player', input.message);
@@ -270,7 +298,7 @@ export class NeighbourhoodServerSession {
   }
   async close(): Promise<void> { await this.tail; this.closed = true; this.listeners.clear(); }
 }
-type ConstructorParametersInternal = { checkpoint: string; provider?: NeighbourhoodProvider; plan?: LivePlan; now?: () => number; initialWorld?: string; townPopulation?: false | 8 | 16 };
+type ConstructorParametersInternal = { checkpoint: string; provider?: NeighbourhoodProvider; plan?: LivePlan; now?: () => number; initialWorld?: string; townPopulation?: false | 8 | 16;townMap?:MapId };
 function mockExperiment(experiment: Experiment): NeighbourhoodProvider {
   return new MockNeighbourhoodProvider(new NeighbourhoodMockProvider({ trader: experiment === 'cooperate' || experiment === 'decline' ? 'cooperate' : experiment, driver: experiment === 'decline' ? 'decline' : 'accept' }));
 }

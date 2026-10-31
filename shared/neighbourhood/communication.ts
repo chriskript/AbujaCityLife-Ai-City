@@ -22,7 +22,7 @@ export function enableCommunication(state:WorldState):boolean {
 export function remoteExchange(state:WorldState,a:string,b:string):Communication|undefined {
  return Object.values(state.communication?.threads ?? {}).find(item=>item.initiator===a && item.recipient===b && item.purpose==='request-help' && item.taskId===null && item.response==='accept' && item.responseNotified && ['accepted','connected'].includes(item.status) && state.time<item.expiresAt);
 }
-export function communicationObservation(state:WorldState,id:string):NpcObservation['communication'] {
+export function communicationObservation(state:WorldState,id:string,historyLimit=6):NpcObservation['communication'] {
  if(!state.communication)return undefined;const npc=state.npcs[id]!;
  const relevant=Object.values(state.communication.threads).filter(item=>item.initiator===id || item.recipient===id && item.delivered);
  // Keep current exchanges even if older than recent completed conversations.
@@ -36,7 +36,7 @@ export function communicationObservation(state:WorldState,id:string):NpcObservat
   if(item.recipient===id && item.taskId && state.time<state.tasks[item.taskId]!.availableAt!)view.taskId=null;
   return view;
  });
- const threads=views.filter(item=>['queued','pending','connected','ignored'].includes(item.status)).concat(views.filter(item=>!['queued','pending','connected','ignored'].includes(item.status)).slice(-6));
+ const threads=views.filter(item=>['queued','pending','connected','ignored'].includes(item.status)).concat(views.filter(item=>!['queued','pending','connected','ignored'].includes(item.status)).slice(-historyLimit));
  const contacts=(npc.knowledge.contacts ?? []).map(other=>({id:other,name:state.npcs[other]!.name,canTransport:npc.knowledge.transporters?.includes(other) ?? false}));
  const canContact=contacts.filter(other=>validateCommunication(state,id,{type:'communicate',recipient:other.id,channel:'text',purpose:'chat',message:'Check availability',memoryId:null})===null).map(other=>other.id);
  const canCall=contacts.filter(other=>validateCommunication(state,id,{type:'communicate',recipient:other.id,channel:'call',purpose:'chat',message:'Check availability',memoryId:null})===null).map(other=>other.id);

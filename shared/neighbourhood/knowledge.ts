@@ -1,10 +1,12 @@
 import type { Inhabitant, WorldEvent } from './types.js';
+import { townMap } from '../world/town-layout.js';
 
 export type ServiceId = 'food-retail' | 'stock-collection' | 'taxi-pickup' | 'scenic-view';
 export type ProductId = 'food-portion' | 'stall-supplies';
 export interface PlaceFacts { services: ServiceId[]; products: ProductId[]; source: 'established'; complete: boolean }
 // World definitions, never a substitute for what a particular inhabitant knows.
 export const placeCatalogue: Record<string, PlaceFacts> = {
+  ...Object.fromEntries(townMap.places.map(place=>[place.id,{services:place.id==='town-green'?['scenic-view'] as ServiceId[]:[],products:[],source:'established' as const,complete:true}])),
   market: { services: ['food-retail'], products: ['food-portion'], source: 'established', complete: true },
   centre: { services: ['stock-collection'], products: ['stall-supplies'], source: 'established', complete: true },
   stand: { services: ['taxi-pickup'], products: [], source: 'established', complete: true },

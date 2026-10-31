@@ -66,7 +66,9 @@ Open http://127.0.0.1:8787/ and sign in with the token in the ignored runtime/de
 
 The mock backend continues without a browser while its process runs, within a persisted 1,800 simulated-second allowance and the existing separate routine-decision cap. Pause stops advancement; restart and reset preserve allowance consumption. Neighbourhood experiments also lets you close/reopen the supply–market road and observe local discovery, detours and delivery consequences. See [Milestone 7C](docs/milestone-7c.md). Live Meta mode remains observer-gated and separately approved.
 
-Residents can also exchange contacts, send delayed texts and make simulated phone calls. Recipients independently answer, refuse, defer or ignore; a discussion can lead to a separately validated supply offer and paid physical delivery. Select a resident and open **Calls & messages** to inspect contacts and outcomes. These are bounded offline policy exchanges without voice audio. Existing checkpoints receive rollback copies before upgrade; see [Milestone 7D](docs/milestone-7d.md).
+Residents can also exchange contacts, send delayed texts and make simulated phone calls. Recipients independently answer, refuse, defer or ignore; a discussion can lead to a separately validated supply offer and paid physical delivery. Select a resident and choose **Open phone** for Chats, Calls and Contacts. Inspection leaves autonomy running; **Take phone control** temporarily pauses only that resident?s new decisions. These are bounded offline policy exchanges without voice audio. Existing checkpoints receive rollback copies before upgrade; see [Milestone 7D](docs/milestone-7d.md).
+
+The normal town now has addressed apartment blocks, standalone homes and distinct workplaces around the retained core. Residents commute and rest indoors; select them through the roster or building inspector. Pan/zoom the fixed-angle view and focus buildings or residents. Existing saves receive an exclusive `.pre-7e-backup` before upgrade. Rebuild/restart the backend and reload browsers together for snapshot v4 / presentation v2. See [Milestone 7E](docs/milestone-7e.md) for phone controls, recovery, measurements and acceptance evidence.
 
 For frontend development, keep the backend running and launch npm run dev in another terminal (port 5173). See the [backend guide](docs/backend.md).
 
@@ -101,6 +103,7 @@ API keys belong only in local backend configuration, never in browser code or Gi
 - [Milestone 7B: Population, economy, and recovery](docs/milestone-7b.md)
 - [Milestone 7C: Bounded unattended progression and road closure](docs/milestone-7c.md)
 - [Milestone 7D: Autonomous calls and delayed messaging](docs/milestone-7d.md)
+- [Milestone 7E: Addressed town and resident phones](docs/milestone-7e.md)
 - [Simulation architecture](docs/architecture.md)
 - [Backend and local operation](docs/backend.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)

@@ -27,6 +27,10 @@ try {
       catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
       world.enableCommunications();
     }
+    if(world.mapId!=='town-v1'){
+      try{const backup=await open(checkpoint+'.pre-7e-backup','wx',0o600);try{await backup.writeFile(saved);await backup.sync();}finally{await backup.close();}}catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
+      world.upgradeTownMap();
+    }
   }
   catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; world = createTown('headless-town',population); }
   const runner = new HeadlessTownRunner(world);

@@ -78,7 +78,7 @@ describe('authoritative resources and financial consequences',()=>{
     expect(world.applyDecision(request.id,response.decision,provenance).accepted).toBe(true);conservation(world.snapshot);
   });
   it('reserves a wage and finite production inputs, then completes exactly once after recovery',()=>{
-    const world=createTown('production',8);apply(world,'ibrahim',{type:'travel',destination:'centre'});world.advance(60);
+    const world=createTown('production',8);apply(world,'ibrahim',{type:'travel',destination:'centre'});world.advance(60);world.advance(10);
     const before=world.snapshot;
     const {request}=apply(world,'ibrahim',{type:'take-work',businessId:'supply-desk'});
     expect(world.snapshot.npcs.ibrahim!.inventory.coins).toBe(before.npcs.ibrahim!.inventory.coins);
@@ -124,7 +124,8 @@ describe('authoritative resources and financial consequences',()=>{
     expect(world.snapshot.npcs.fatima!.needs.rest).toBeLessThan(.2);
   });
   it('observes that a resting vendor cannot serve another buyer',()=>{
-    const world=createTown('closed-for-rest',8);apply(world,'zainab',{type:'travel',destination:'market'});world.advance(10);
+    // Original fixture: the vendor's home and stall share one anchor.
+    const world=createTown('closed-for-rest',8,{map:'legacy-v1'});apply(world,'zainab',{type:'travel',destination:'market'});world.advance(10);
     apply(world,'amina',{type:'rest',seconds:60});
     expect(world.observe('zainab').town!.marketServing).toBe(false);
     expect(apply(world,'zainab',{type:'buy',quantity:1}).result.reason).toBe('trader-not-nearby');conservation(world.snapshot);
@@ -155,6 +156,7 @@ describe('authoritative resources and financial consequences',()=>{
     const before=restored.snapshot;
     before.town!.initialMoney-=before.town!.businesses['community-errands']!.coins;before.town!.businesses['community-errands']!.coins=0;
     const unfunded=Neighbourhood.restore(JSON.stringify(before));
+    apply(unfunded,'zainab',{type:'travel',destination:unfunded.snapshot.town!.businesses['community-errands']!.node});unfunded.advance(30);
     expect(apply(unfunded,'zainab',{type:'take-work',businessId:'community-errands'}).result.reason).toBe('work-unavailable');conservation(unfunded.snapshot);
   });
   it('reserves the requester’s real credits and pays a delivery only on physical completion',()=>{
@@ -181,7 +183,7 @@ describe('authoritative resources and financial consequences',()=>{
     expect(obs.town!.work.find(job=>job.id==='supply-desk')!.available).toBeNull();
     expect(JSON.stringify(obs.town)).not.toContain('initialMoney');expect(JSON.stringify(obs.town)).not.toContain('coins');
     expect(obs).not.toHaveProperty('npcs');expect(obs.actor.inventory.coins).toBe(3);
-    apply(world,'ibrahim',{type:'travel',destination:'centre'});world.advance(40);
+    apply(world,'ibrahim',{type:'travel',destination:'centre'});world.advance(60);world.advance(10);
     expect(world.observe('ibrahim').town!.work.find(job=>job.id==='supply-desk')!.available).toBe(true);
   });
   it.each(['money','goods','inputs','booking','business','needs'] as const)('rejects corrupt %s checkpoint state',kind=>{

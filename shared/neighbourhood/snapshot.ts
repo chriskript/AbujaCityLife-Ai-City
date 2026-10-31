@@ -1,5 +1,5 @@
-import { edges, nodes } from '../world/neighbourhood.js';
-import { initialState, places, maximumResidents } from './initial-state.js';
+import { mapFor } from '../world/town-layout.js';
+import { initialState, maximumResidents } from './initial-state.js';
 import { actionTypes, type WorldState } from './types.js';
 import { placeCatalogue } from './knowledge.js';
 import { quantityBounds, transportCapacity } from './action-limits.js';
@@ -15,7 +15,9 @@ const text = (value: unknown, limit = 500): boolean => typeof value === 'string'
 
 export function assertSnapshot(value: unknown): asserts value is WorldState {
   check(object(value)); const state = value as WorldState;
-  check(state.version === 3 && text(state.id, 120) && integer(state.revision) && Number.isFinite(state.time) && state.time >= 0);
+  check(state.version === 4 && ['legacy-v1','town-v1'].includes(state.mapId) && text(state.id, 120) && integer(state.revision) && Number.isFinite(state.time) && state.time >= 0);
+  const {nodes,edges,places}=mapFor(state.mapId);
+  check(state.mapUpgradedAt===undefined || state.mapId==='town-v1' && Number.isFinite(state.mapUpgradedAt) && state.mapUpgradedAt>=0 && state.mapUpgradedAt<=state.time);
   check(object(state.npcs) && Object.keys(state.npcs).length >= 3 && Object.keys(state.npcs).length <= maximumResidents && object(state.resources) && object(state.roads) && object(state.tasks) && object(state.triggers));
   const npcIds = Object.keys(state.npcs);
   check(npcIds.every(isResidentId) && ['amina','musa','zainab'].every(id => Object.hasOwn(state.npcs,id)));
@@ -46,6 +48,7 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
     check(npc.circumstances === undefined || text(npc.circumstances,500));
     check(npc.mobility === undefined || ['walk','taxi'].includes(npc.mobility));
     check(nodes.some(node => node.id === npc.node) && integer(npc.revision) && object(npc.inventory) && integer(npc.inventory.goods) && integer(npc.inventory.rewards));
+    check(nodes.find(node=>node.id===npc.node)?.kind!=='home' || npc.node===npc.home);
     check(object(npc.needs) && Object.keys(npc.needs).sort().join(',') === (state.town ? 'food,income,rest,stock' : 'food,income,stock') && Object.values(npc.needs).every(need => Number.isFinite(need) && need >= 0 && need <= 1));
     check(npc.intention === null || object(npc.intention) && npc.goals.some(goal => goal.id === npc.intention?.goalId) && text(npc.intention.reason, 400));
     check(object(npc.knowledge) && Array.isArray(npc.knowledge.places) && npc.knowledge.places.every(place => places.some(item => item.id === place)));
@@ -85,6 +88,7 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
         check(edge && ((edge.from === activity.path.nodeIds[step] && edge.to === activity.path.nodeIds[step + 1]) || (edge.to === activity.path.nodeIds[step] && edge.from === activity.path.nodeIds[step + 1])));
         distance += edge.distance;
       }
+      check(activity.path.nodeIds.every(id=>nodes.find(node=>node.id===id)?.kind!=='home' || id===npc.home));
       const edge = edges.find(item => item.id === activity.path.edgeIds[activity.step])!;
       check(Number.isFinite(activity.progress) && activity.progress >= 0 && activity.progress < edge.distance && Math.abs(activity.path.distance - distance) < 0.001);
       check(activity.progress === 0 || !state.roads.blockedEdges.includes(edge.id));
@@ -150,11 +154,12 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
 // Explicit shape migration: identities, inventories, tasks, relationships, memories,
 // accounting IDs and historical evidence are retained. No new resident is invented here.
 export function migrateSnapshot(value: unknown): unknown {
-  if (!object(value) || ![1,2].includes((value as {version:number}).version)) return value;
-  if ((value as {version:number}).version === 2) return {...structuredClone(value as Record<string,unknown>),version:3};
+  if (!object(value) || ![1,2,3].includes((value as {version:number}).version)) return value;
+  if ((value as {version:number}).version === 3) return {...structuredClone(value as Record<string,unknown>),version:4,mapId:'legacy-v1'};
+  if ((value as {version:number}).version === 2) return migrateSnapshot({...structuredClone(value as Record<string,unknown>),version:3});
   const state = structuredClone(value) as WorldState;
   check(object(state.npcs) && Object.keys(state.npcs).sort().join(',') === 'amina,musa,zainab');
-  state.version = 3; state.initialGoods = 9;
+  state.version = 4; state.mapId='legacy-v1';state.initialGoods = 9;
   state.social = { nextInteraction: 1, interactions: {}, noticed: {}, cooldowns: {} };
   for (const npc of Object.values(state.npcs)) {
     check(object(npc) && Array.isArray(npc.capabilities));
