@@ -1,33 +1,52 @@
-﻿# Abuja City Life: AI City Lab
+# Abuja City Life: AI Town
 
-**An experimental urban simulation exploring how AI agents understand their surroundings, make decisions, and act in a virtual environment.**
+A miniature living society where autonomous residents make decisions, build relationships, work, and shape their shared world.
 
-Built for the **Meta Global AI Developer Hackathon 2026** — Indie Developer track, *Push the Frontier* theme.
+Built for the Meta Global AI Developer Hackathon 2026, Indie Developer track, Push the Frontier theme.
 
-## Overview
+## The idea
 
-Abuja City Life: AI City Lab is building a compact, fictional 3D neighbourhood inspired by Abuja, Nigeria. Its goal is to connect Meta's AI models to inhabitants with personal priorities, local knowledge, natural conversations, and decisions that affect their shared world.
+AI Town is a browser-based 3D neighbourhood inspired by Abuja, Nigeria. Instead of making the player the centre of every story, it explores what happens when residents have their own priorities, limited knowledge, memories, resources, and choices.
 
-Every model-proposed action must pass through a deterministic validation and execution layer. The neighbourhood is designed to demonstrate autonomous activities, cooperation, and adaptation with observable consequences.
+A shopkeeper might need a delivery. A neighbour might offer help, refuse, or make another plan. Their decisions can affect work, supplies, money, and future interactions. The player can observe residents and their consequences rather than directing every action.
 
-## Capabilities and status
+We create the world, its rules, and its possibilities. The residents create their own stories.
 
-**Implemented:** a playable Three.js town with sixteen residents, including Musa, Amina, Zainab and Chris. Residents independently pursue funded work, earn/spend demo credits, rest, buy/eat food, produce supplies from finite inputs and coordinate physical deliveries. Optional encounters receive independent responses. Select residents and inspect real activity, resource and payment outcomes. Original taxi and Amina–Musa supply fixtures remain available.
+AI Town expands the autonomous simulation work already underway. It is a separate hackathon entry from the pre-existing Abuja City Life game, not a replacement for that game.
 
-The browser now connects to a **controlled, authoritative Node backend**, with persistent world state, validated decisions, and conversation requests. Development defaults to a **scripted mock provider** with labelled conversation fixtures and no inference charges. Controlled Muse Spark 1.3 evaluations include a successful taxi destination selection, a partially grounded conversation, and an autonomous transport proposal rejected for an excessive quantity. The quantity contract is now corrected offline; successful live cooperation remains unproven.
+## What works today
 
-The same headless foundation powers the browser: independent goals, limited knowledge, event-driven activities, inventory consequences, and structured memories. The original instruction-driven mock taxi demonstrations remain available in **Taxi lab**. Consequential conversation actions require separate confirmation and simulation validation.
+- Sixteen residents in a playable Three.js neighbourhood, including Amina, Musa, and Zainab, with activities, needs, and resource routines.
+- Independent simulation behaviour: residents pursue work, rest, buy and eat food, produce supplies from finite inputs, and coordinate deliveries.
+- Social encounters: nearby residents can meet, share scoped information, and give independent responses to optional interactions.
+- A small economy: demo credits, payments, inventory, stock, and resource changes have observable consequences.
+- Authoritative world rules: proposed actions are validated before they can change gameplay state. Residents do not receive unrestricted knowledge of the world.
+- State and recovery: a controlled Node backend maintains persistent world state; a bounded offline headless runner can advance and save a town without a browser or Meta API calls.
+- Inspectable outcomes: select residents in the browser and follow activities, events, resources, and payments. The original taxi and Amina–Musa supply demonstrations remain available.
 
-**Evolution toward Abuja City Life: AI Town:** [Milestone 7B](docs/milestone-7b.md) expands the [7A foundation](docs/milestone-7a.md) to sixteen residents with connected personal/resource routines and a conserved credit economy. The [accepted assessment](docs/ai-town-assessment.md) remains the broader direction. Continuous unattended service operation, phone/text channels and longer-horizon systems remain future work. Further live Meta evaluation requires separate approval.
+Development runs by default with a scripted mock provider that does not incur inference charges. The Meta Model API integration has been evaluated with Muse Spark 1.3, but reliable live AI-to-AI cooperation is not yet demonstrated. A previously rejected transport proposal exposed a quantity-limit mismatch; the contract has since been corrected and tested offline, not yet reverified against the live API.
+
+## Where we're going
+
+The next step is to connect residents' lives more deeply, not simply add more characters:
+
+- Contacts, phone calls, text messages, and communication across locations.
+- More flexible friendships, disagreements, trust, commitments, and shared decisions.
+- Environmental disruptions, such as road closures, that have lasting consequences for different residents.
+- Longer unattended town progression and an accessible history of what changed and why.
+- Eventually, community organisation, leadership elections, new businesses, families, and generations.
+
+These are goals, not claims of completed functionality. The immediate focus is a small, observable society whose everyday decisions have real consequences.
 
 ## Technology
 
-- **Current:** TypeScript, Three.js, Vite, Node.js, Vitest, and tsx.
-- **Integration foundation:** Meta Model API, with Muse Spark and Muse Wonder as runtime candidates.
+- App and simulation: TypeScript, Three.js, Vite, Node.js, and tsx.
+- Testing: Vitest.
+- AI integration: Meta Model API; Muse Spark and Muse Wonder are integration candidates. Model decisions remain subject to authoritative validation.
 
-## Getting started
+## Run locally
 
-Requires **Node.js 22.12 or newer** and npm.
+Requires Node.js 22.12+ and npm.
 
 ```bash
 git clone https://github.com/chriskript/AbujaCityLife-Ai-City.git
@@ -35,7 +54,7 @@ cd AbujaCityLife-Ai-City
 npm ci
 ```
 
-Initialize local demo access once, build, and start the mock backend:
+Initialize local demo access, build, and start the backend:
 
 ```bash
 npm run backend:init
@@ -43,33 +62,23 @@ npm run build
 npm run backend
 ```
 
-Open **http://127.0.0.1:8787/** and sign in using the token in ignored `runtime/demo-access.json`. Select characters, observe their activities, and try the clearly labelled mock conversation fixtures. **Neighbourhood experiments** offers alternative mock policies on reset. For frontend development, keep the backend running and use `npm run dev` in another terminal (port 5173). See the [backend guide](docs/backend.md) for access, persistence and operating limits.
+Open http://127.0.0.1:8787/ and sign in with the token in the ignored runtime/demo-access.json file. Explore residents, inspect their activities, and try clearly labelled mock conversation fixtures. Neighbourhood experiments offers alternative mock policies on reset.
 
-For the original journeys, open **Taxi lab** in the navigation (or `/?experience=taxi`). Try **Find a lake view**, **Visit the market**, or **Take a detour**. Its text input recognises market/lake fixtures; it is not general natural-language understanding.
+For frontend development, keep the backend running and launch npm run dev in another terminal (port 5173). See the [backend guide](docs/backend.md).
 
-Run the headless simulation:
-
-```bash
-npm run demo
-```
-
-Run the shared neighbourhood scenario with three inhabitants:
+## Other demos
 
 ```bash
-npm run demo:neighbourhood
-```
-
-The original demo runs three taxi scenarios; the neighbourhood demo runs a cooperative restocking fixture. Both print event traces without API keys or inference calls.
-
-Advance and save the normal sixteen-resident town without a browser or Meta requests:
-
-```bash
+npm run demo                 # Original taxi scenarios
+npm run demo:neighbourhood   # Three-resident restocking fixture
 npm run town:headless -- --seconds=240
 ```
 
-This bounded offline runner uses its own recovery file, `runtime/town-headless.json`. Use `--population=8` for the smaller starting/growth target. Existing residents are preserved when expanding a checkpoint. See [7B operation and limits](docs/milestone-7b.md).
+The bounded headless runner saves its own state in runtime/town-headless.json. Add --population=8 for a smaller population; existing residents are preserved when expanding a checkpoint. See [Milestone 7B](docs/milestone-7b.md) for operating limits.
 
-Run tests and static checks:
+The original Taxi lab remains accessible in the app or at /?experience=taxi. Its sample inputs use predefined fixtures, not unrestricted natural-language understanding.
+
+## Validate
 
 ```bash
 npm test
@@ -77,25 +86,25 @@ npm run typecheck
 npm run build
 ```
 
-The backend serves the production build locally. `npm run preview` serves static files only; it does not proxy the API. A recent browser with WebGL 2 is required for the 3D scene.
+The backend serves the production build. npm run preview serves static files only and does not proxy the API. The 3D scene requires a WebGL 2-capable browser.
 
-For server-side API setup and an offline configuration check, see the [Meta API guide](docs/meta-api.md). Keep credentials in local backend configuration; never put them in browser code or Git.
+API keys belong only in local backend configuration, never in browser code or Git. See [Meta API setup](docs/meta-api.md). Further live Meta evaluations require separate approval.
 
 ## Documentation
 
-- [AI Town assessment, quantity fix, and proposed milestones](docs/ai-town-assessment.md)
-- [Milestone 7A implementation, evidence, and remaining limits](docs/milestone-7a.md)
-- [Milestone 7B population, economy, recovery, and verification](docs/milestone-7b.md)
+- [AI Town assessment and roadmap](docs/ai-town-assessment.md)
+- [Milestone 7A: Extensible residents and encounters](docs/milestone-7a.md)
+- [Milestone 7B: Population, economy, and recovery](docs/milestone-7b.md)
 - [Simulation architecture](docs/architecture.md)
-- [Controlled backend and local execution](docs/backend.md)
+- [Backend and local operation](docs/backend.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)
 - [Visible inhabitants and session contract](docs/visible-inhabitants.md)
 - [Browser verification and limitations](docs/browser-verification.md)
-- [Meta API setup and verification](docs/meta-api.md)
-- [Project provenance and third-party attribution](docs/provenance.md)
+- [Meta API setup](docs/meta-api.md)
+- [Project provenance and attribution](docs/provenance.md)
 
-Developed for the October 26–November 4, 2026 hackathon. This entry is independent of the pre-existing Abuja City Life game.
+Developed for the October 26–November 4, 2026 hackathon.
 
 ## License
 
-No project license has been selected yet. Third-party dependencies retain their own licenses; see [attribution](docs/provenance.md#direct-development-dependencies).
+No project license has been selected. Third-party dependencies retain their own licenses; see [attribution](docs/provenance.md#direct-development-dependencies).
