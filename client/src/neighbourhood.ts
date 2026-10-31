@@ -20,7 +20,7 @@ document.querySelector('#experience')!.innerHTML = `
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
     <section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
-    <details class="experiments"><summary>Neighbourhood experiments</summary><label for="experiment">Mock decision policy</label><select id="experiment"><option value="cooperate">Cooperation</option><option value="decline">Driver declines</option><option value="wait">Trader waits</option><option value="self-collect">Trader collects supplies herself</option><option value="reduce-sales">Trader pauses sales</option></select><p>Choose an alternative, then reset. These are labelled mock policies, not guaranteed live AI outcomes.</p></details>
+    <details class="experiments"><summary>Neighbourhood experiments</summary><button id="town-road">Close supply–market road</button><p id="road-status">Residents learn about closures locally. Occupied roads cannot close.</p><p id="progression-status"></p><label for="experiment">Mock decision policy</label><select id="experiment"><option value="cooperate">Cooperation</option><option value="decline">Driver declines</option><option value="wait">Trader waits</option><option value="self-collect">Trader collects supplies herself</option><option value="reduce-sales">Trader pauses sales</option></select><p>Choose an alternative, then reset. These are labelled mock policies, not guaranteed live AI outcomes.</p></details>
   </section>
   <div class="view-controls" role="group" aria-label="Neighbourhood controls"><button id="focus" aria-pressed="false">◎ Focus Amina</button><button id="pause" aria-pressed="false">Ⅱ Pause</button></div>
   <div class="compass" aria-hidden="true"><span>↑</span>N</div>
@@ -82,7 +82,8 @@ export function describeObservable(event: ObservableEvent): string {
     'sales-changed': event.data.open ? `${name} reopened the stall.` : `${name} paused sales.`,
     'action-failed': `${name} stopped: ${event.detail}.`,
     'offer-expired': 'An unanswered transport offer expired.',
-    'road-changed': event.detail,
+    'road-changed': `${event.subject}: ${event.detail}.`,
+    'road-observed': `${name}: ${event.detail.toLowerCase()} (${event.subject}).`,
     'arrived': `${name} arrived at ${locations[event.subject] ?? event.subject}.`,
     'activity-started': `${name} ${event.subject === 'wait' ? 'is waiting' : 'started a local activity'}.`,
     'activity-completed': `${name} finished an activity.`,
@@ -124,6 +125,10 @@ function updateUi(force = false): void {
   el('#talk-name').textContent = actor.name;
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-person]')) button.setAttribute('aria-pressed', String(button.dataset.person === selected));
   const pause = el<HTMLButtonElement>('#pause'); pause.setAttribute('aria-pressed', String(frame.paused)); pause.textContent = frame.paused ? '▷ Resume' : 'Ⅱ Pause';
+  const roadClosed = view.blockedEdges.includes('centre-market');
+  el('#town-road').textContent = roadClosed ? 'Reopen supply–market road' : 'Close supply–market road';
+  el('#road-status').textContent = roadClosed ? 'Supply–market road closed. Residents can discover it and seek another route.' : 'Supply–market road open. Occupied roads cannot close.';
+  el('#progression-status').textContent = frame.progression ? `Server advances without an observer: ${Math.floor(frame.progression.used)} / ${frame.progression.limit} simulated seconds used. Pause stops the clock; restart and reset preserve this allowance.` : '';
   const focus = el<HTMLButtonElement>('#focus'); focus.setAttribute('aria-pressed', String(focused)); focus.textContent = focused ? '◎ Whole neighbourhood' : `◎ Focus ${actor.name}`;
   el<HTMLSelectElement>('#speed').value = String(frame.speed);
   el('#market-stock').textContent = `${view.resources.marketGoods} ${view.resources.marketGoods === 1 ? 'portion' : 'portions'}${view.resources.salesOpen ? ' available' : ' · sales paused'}`;
@@ -155,10 +160,11 @@ function updateUi(force = false): void {
   el<HTMLButtonElement>('#send-message').disabled = !remote || conversationBusy;
   el<HTMLTextAreaElement>('#conversation-input').disabled = !remote;
   if (frame.decisionBudget.used >= frame.decisionBudget.limit) el('#notice').textContent = 'Session decision limit reached. Reset preserves request and spending limits.';
+  if (frame.progression?.stopped) el('#notice').textContent = 'Controlled server advancement limit reached. The town is paused; reset and restart preserve this allowance.';
   else el('#notice').textContent = frame.mode === 'live-meta' ? 'Live Meta decisions. Actions are validated by the authoritative backend.' : local ? 'Local mock test mode. No backend or Meta requests.' : 'Authoritative backend · mock activities and labelled conversation fixtures · no Meta requests.';
 }
 
-async function command(payload: Omit<Extract<SessionCommand, { type: 'pause' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'speed' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'reset' }>, 'id' | 'worldId'>): Promise<void> {
+async function command(payload: Omit<Extract<SessionCommand, { type: 'pause' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'speed' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'reset' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'road' }>, 'id' | 'worldId'>): Promise<void> {
   if (!frame) return;
   try {
     const receipt = await session.send({ ...payload, id: `ui-${crypto.randomUUID()}`, worldId: frame.snapshot.worldId });
@@ -219,6 +225,7 @@ try {
   }, options);
 
   el('#pause').addEventListener('click', () => { void command({ type: 'pause', paused: !(frame?.paused ?? true) }); }, options);
+  el('#town-road').addEventListener('click', () => { if (frame) void command({ type: 'road', edgeId: 'centre-market', blocked: !frame.snapshot.blockedEdges.includes('centre-market') }); }, options);
   el('#reset').addEventListener('click', () => {
     focused = false; scene.setFollow(false);
     void command({ type: 'reset', experiment: el<HTMLSelectElement>('#experiment').value as Experiment });

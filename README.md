@@ -64,6 +64,8 @@ npm run backend
 
 Open http://127.0.0.1:8787/ and sign in with the token in the ignored runtime/demo-access.json file. Explore residents, inspect their activities, and try clearly labelled mock conversation fixtures. Neighbourhood experiments offers alternative mock policies on reset.
 
+The mock backend continues without a browser while its process runs, within a persisted 1,800 simulated-second allowance and the existing separate routine-decision cap. Pause stops advancement; restart and reset preserve allowance consumption. Neighbourhood experiments also lets you close/reopen the supply–market road and observe local discovery, detours and delivery consequences. See [Milestone 7C](docs/milestone-7c.md). Live Meta mode remains observer-gated and separately approved.
+
 For frontend development, keep the backend running and launch npm run dev in another terminal (port 5173). See the [backend guide](docs/backend.md).
 
 ## Other demos
@@ -95,6 +97,7 @@ API keys belong only in local backend configuration, never in browser code or Gi
 - [AI Town assessment and roadmap](docs/ai-town-assessment.md)
 - [Milestone 7A: Extensible residents and encounters](docs/milestone-7a.md)
 - [Milestone 7B: Population, economy, and recovery](docs/milestone-7b.md)
+- [Milestone 7C: Bounded unattended progression and road closure](docs/milestone-7c.md)
 - [Simulation architecture](docs/architecture.md)
 - [Backend and local operation](docs/backend.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)

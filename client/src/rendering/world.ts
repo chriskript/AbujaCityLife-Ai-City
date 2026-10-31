@@ -148,10 +148,10 @@ export function createWorld(): { group: THREE.Group; taxi: THREE.Group; closure:
   const taxiHalo = mesh(cylinder, '#f3d271', 0, 0.39, 0, 3.8, 0.04, 3.8, taxi);
   taxiHalo.material = new THREE.MeshBasicMaterial({ color: '#f3d271', transparent: true, opacity: 0.32, depthWrite: false });
 
-  const closure = new THREE.Group(); closure.visible = false; group.add(closure);
-  for (const x of [85.7, 86.3]) {
-    box('#f0cf89', x, 1.4, 40, 0.28, 2.2, 6.5, closure);
-    for (const z of [37.5, 42.5]) box('#bd643f', x, 0.7, z, 1, 1.3, 0.7, closure);
+  const closure = new THREE.Group(); closure.visible = false; closure.position.set(86,0,40); group.add(closure);
+  for (const x of [-.3, .3]) {
+    box('#f0cf89', x, 1.4, 0, 0.28, 2.2, 6.5, closure);
+    for (const z of [-2.5, 2.5]) box('#bd643f', x, 0.7, z, 1, 1.3, 0.7, closure);
   }
   // Batch static scenery by material; keep graph roads and moving objects separate.
   const batches = new Map<THREE.Material, THREE.BufferGeometry[]>();

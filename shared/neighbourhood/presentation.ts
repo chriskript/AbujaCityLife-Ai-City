@@ -23,6 +23,7 @@ export interface NeighbourhoodFrame {
   version: 1; sessionId: string; sequence: number; mode: 'mock' | 'live-meta';
   paused: boolean; speed: 1 | 2 | 4; conversationAvailable: boolean;
   decisionBudget: { used: number; limit: number };
+  progression?: { used: number; limit: number; stopped: boolean };
   snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null;
 }
 export type Experiment = 'cooperate' | 'decline' | 'wait' | 'self-collect' | 'reduce-sales';
@@ -45,7 +46,7 @@ export interface NeighbourhoodSession {
 const observableTypes = new Set([
   'activity-started', 'activity-completed', 'arrived', 'transport-proposed', 'transport-accepted',
   'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy', 'transport-clarification-requested',
-  'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
+  'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'road-observed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
   'encounter-noticed', 'encounter-invited', 'encounter-accepted', 'encounter-declined', 'encounter-deferred', 'encounter-clarified', 'encounter-expired', 'resident-introduced', 'information-shared',
   'paid-work-started','paid-work-completed','purchase-paid','food-consumed','rest-started','rest-completed','transport-paid',
 ]);

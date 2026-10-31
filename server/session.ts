@@ -20,6 +20,7 @@ interface Checkpoint {
   metrics: (GenerationMetrics & { requestId: string; actorId: NpcId; recordedAt: number })[]; plan: { id: string; used: number; reservedUsd: number } | null;
   routineRecent?: number[];
   routineRequests?: number;
+  progression?: { used: number; limit: number; cursor: number };
 }
 export interface LivePlan { id: string; approved: true; expiresAt: string; maxGenerations: number; maxEstimatedUsd: number; allowAutonomy: boolean }
 export function validateLivePlan(value: unknown): asserts value is LivePlan {
@@ -78,6 +79,11 @@ export class NeighbourhoodServerSession {
       if (session.data.plan && session.data.plan.id !== options.plan.id) throw new Error('Different live plan requires reviewed session migration');
       session.data.plan ??= { id: options.plan.id, used: 0, reservedUsd: 0 };
     }
+    if (session.data.progression === undefined) session.data.progression = { used: 0, limit: 1800, cursor: 0 };
+    const progression = session.data.progression;
+    if (!progression || !Number.isFinite(progression.used) || progression.used < 0 || progression.used > progression.limit || progression.limit !== 1800 || !Number.isSafeInteger(progression.cursor) || progression.cursor < 0) throw new Error('Invalid progression checkpoint');
+    session.cursor = progression.cursor;
+    if (session.mode === 'mock' && (progression.used >= progression.limit || session.world.hasTownEconomy && (session.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions)) session.data.paused = true;
     if (session.provider.mode === 'live-meta') session.data.speed = 1;
     await session.commit(); return session;
   }
@@ -85,6 +91,7 @@ export class NeighbourhoodServerSession {
   get frame(): NeighbourhoodFrame { return structuredClone(this.current); }
   hasResident(id: string): boolean { return this.world.hasResident(id); }
   get mode(): 'mock' | 'live-meta' { return this.provider.mode; }
+  get paused(): boolean { return this.data.paused; }
   history(id: NpcId): ConversationTurn[] { if (this.failed) throw new SessionError(503, 'Session unavailable'); if (!this.hasResident(id)) throw new SessionError(400, 'Unknown resident'); return structuredClone(this.committedHistory[id] ?? []); }
   subscribe(listener: (frame: NeighbourhoodFrame) => void): () => void { this.listeners.add(listener); listener(this.frame); return () => this.listeners.delete(listener); }
   private transaction<T>(work: () => Promise<T>): Promise<T> {
@@ -93,6 +100,7 @@ export class NeighbourhoodServerSession {
   }
   private async commit(): Promise<void> {
     this.data.sequence++; this.data.world = this.world.serialize();
+    if (this.data.progression) this.data.progression.cursor = this.cursor;
     const temporary = `${this.options.checkpoint}.${randomUUID()}.pending`;
     try {
       const file = await open(temporary, 'wx', 0o600);
@@ -102,6 +110,7 @@ export class NeighbourhoodServerSession {
     const projection = projectNeighbourhood(this.world.snapshot);
     this.committedHistory = structuredClone(this.data.history);
     this.current = { version: 1, sessionId: this.data.sessionId, sequence: this.data.sequence, mode: this.provider.mode, paused: this.data.paused, speed: this.data.speed, conversationAvailable: true, decisionBudget: this.mode==='mock' && this.world.hasTownEconomy ? {used:this.data.routineRequests ?? 0,limit:offlineTownLimits.maximumDecisions} : { used: this.data.requests, limit: 48 }, ...projection };
+    if (this.mode === 'mock') this.current.progression = { used: this.data.progression!.used, limit: this.data.progression!.limit, stopped: this.data.progression!.used >= this.data.progression!.limit };
     for (const listener of this.listeners) listener(this.frame);
   }
   private receipt(id: string, payload: unknown): Receipt | null {
@@ -141,7 +150,10 @@ export class NeighbourhoodServerSession {
   async command(command: SessionCommand): Promise<CommandReceipt> {
     return this.transaction(async () => {
       this.requireWorld(command.worldId); const old = this.receipt(command.id, command); if (old) return old.value as CommandReceipt;
-      if (command.type === 'pause') { this.data.paused = command.paused; this.epoch++; }
+      if (command.type === 'pause') {
+        if (!command.paused && this.mode === 'mock' && (this.data.progression!.used >= this.data.progression!.limit || this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions)) throw new SessionError(429, 'Controlled advancement or decision allowance exhausted; reset and restart do not replenish it');
+        this.data.paused = command.paused; this.epoch++;
+      }
       else if (command.type === 'speed') {
         if (this.mode === 'live-meta' && command.speed !== 1) throw new SessionError(400, 'Live evaluation uses normal time');
         this.data.speed = command.speed;
@@ -152,7 +164,7 @@ export class NeighbourhoodServerSession {
       } else {
         this.world = this.options.townPopulation===false || this.options.initialWorld && !this.world.hasTownEconomy ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,this.options.townPopulation || prototypePopulation); this.proposals.clear(); this.epoch++;
         this.data.routineRecent = [];
-        this.data.history = Object.fromEntries(this.world.residentIds.map(id => [id, []])); this.data.paused = false;
+        this.data.history = Object.fromEntries(this.world.residentIds.map(id => [id, []])); this.data.paused = this.mode === 'mock' && (this.data.progression!.used >= this.data.progression!.limit || this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions);
         if (this.mode === 'mock') this.provider = mockExperiment(command.experiment);
         // Spending, request counters, wall cooldowns, and receipt history NEVER reset.
       }
@@ -160,9 +172,17 @@ export class NeighbourhoodServerSession {
     });
   }
   async tick(seconds: number): Promise<void> {
+    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 60) throw new SessionError(400, 'Clock step must be between zero and sixty real seconds');
     await this.transaction(async () => {
       for (const [id, proposal] of this.proposals) if (proposal.expires < this.now()) { this.world.abandonDecision(proposal.request.id); this.proposals.delete(id); }
-      if (!this.data.paused) { this.world.advance(seconds * this.data.speed); await this.commit(); }
+      if (this.mode === 'mock' && this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions && !this.data.paused) { this.data.paused = true; await this.commit(); }
+      if (!this.data.paused) {
+        const progression = this.data.progression!;
+        const advance = this.mode === 'mock' ? Math.min(seconds * this.data.speed, progression.limit - progression.used) : seconds * this.data.speed;
+        for (let remaining = advance; remaining > 0.000001;) { const step=Math.min(60,remaining); this.world.advance(step); remaining-=step; }
+        if (this.mode === 'mock') { progression.used += advance; if (progression.used >= progression.limit) this.data.paused = true; }
+        await this.commit();
+      }
     });
   }
   async decide(actorId?: NpcId, triggerOnly = false): Promise<void> {

@@ -1,8 +1,8 @@
 # Controlled neighbourhood backend
 
-The normal backend now defaults to the [sixteen-resident 7B town](milestone-7b.md), with version-three world recovery and a separate bounded offline routine allowance. Older checkpoints receive rollback copies before expansion. Live/conversation wall-clock and spending controls below remain unchanged; the HTTP clock still requires an observer.
+The normal backend defaults to the [sixteen-resident 7B town](milestone-7b.md), with version-three recovery and a separate bounded offline routine allowance. Older checkpoints receive rollback copies before expansion. [Milestone 7C](milestone-7c.md) adds mock server progression without an observer, within a persisted 1,800 simulated-second allowance. Pause stops advancement; reset and restart preserve allowance usage. Live Meta mode still requires an observer and separate approval. Live/conversation wall-clock and spending controls below remain unchanged.
 
-For current resident-registry migration, autonomous encounters and mock routine scheduling, see [Milestone 7A](milestone-7a.md). Live requests and all conversations retain the wall-clock/spending safeguards below; autonomous mock routines now use a separate persisted simulation-time rate window, with the same bounded session allowance. The HTTP observer clock remains unchanged; a bounded offline headless driver is available separately.
+For resident-registry migration and autonomous encounters, see [Milestone 7A](milestone-7a.md). Autonomous mock routines use a separate persisted simulation-time rate window. The bounded standalone headless driver remains available with its own checkpoint; do not run it against the authoritative server checkpoint.
 
 Milestone 5 adds a single authoritative Node service around the existing `Neighbourhood` core. The default browser receives public snapshots through SSE; it sends controls, messages and confirmations over HTTP. Rendering never applies inventory, task or memory changes. The original local taxi lab remains an explicitly mock regression experience; `/?authority=local` selects the previous local neighbourhood test adapter.
 

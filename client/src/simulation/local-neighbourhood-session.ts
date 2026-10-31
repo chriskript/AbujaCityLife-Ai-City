@@ -47,6 +47,9 @@ export class LocalNeighbourhoodSession implements NeighbourhoodSession {
     if (command.type === 'pause' && typeof command.paused === 'boolean') this.paused = command.paused;
     else if (command.type === 'speed' && [1, 2, 4].includes(command.speed)) this.speed = command.speed;
     else if (command.type === 'reset' && ['cooperate', 'decline', 'wait', 'self-collect', 'reduce-sales'].includes(command.experiment)) this.reset(command.experiment);
+    else if (command.type === 'road') {
+      if (!this.world.setRoadBlocked(command.edgeId,command.blocked)) return { accepted:false,reason:'Road unchanged, invalid or currently occupied' };
+    }
     else return { accepted: false, reason: 'unsupported-command' };
     this.accumulator = 0; this.publish();
     const receipt = { accepted: true, reason: 'accepted' };

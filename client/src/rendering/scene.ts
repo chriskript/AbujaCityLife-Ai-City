@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createWorld, landmarkLabels } from './world.js';
 import type { TaxiPose } from '../simulation/taxi-journey.js';
 import type { Route } from '../../../shared/navigation/routes.js';
-import { nodes } from '../../../shared/world/neighbourhood.js';
+import { nodes, edges } from '../../../shared/world/neighbourhood.js';
 import { createInhabitants } from './inhabitants.js';
 import type { NeighbourhoodView } from '../../../shared/neighbourhood/presentation.js';
 import { type NpcId } from '../../../shared/neighbourhood/types.js';
@@ -106,6 +106,7 @@ export class NeighbourhoodScene {
 
   renderInhabitants(view: NeighbourhoodView, selected: NpcId, seconds: number): void {
     const population = this.population; if (!population) return;
+    this.setClosure(view.blockedEdges.includes('centre-market'),'centre-market');
     const ease = this.populationPlaced ? 1 - Math.exp(-Math.min(seconds, 0.05) * 14) : 1;
     for (const [index,actor] of view.actors.entries()) {
       const model = population.ensureResident(actor.id);
@@ -153,7 +154,13 @@ export class NeighbourhoodScene {
     this.populationPlaced = true;
   }
   resetPresentation(): void { this.populationPlaced = false; }
-  setClosure(closed: boolean): void { this.world.closure.visible = closed; }
+  setClosure(closed: boolean, edgeId = 'bridge-overlook'): void {
+    this.world.closure.visible = closed;
+    const edge=edges.find(item=>item.id===edgeId); if (!closed || !edge) return;
+    const from=nodes.find(node=>node.id===edge.from)!,to=nodes.find(node=>node.id===edge.to)!;
+    this.world.closure.position.set((from.x+to.x)/2,0,(from.z+to.z)/2);
+    this.world.closure.rotation.y=-Math.atan2(to.z-from.z,to.x-from.x);
+  }
   setRoute(route: Route | null): void {
     if ((route?.id ?? null) === this.routeId) return;
     this.routeId = route?.id ?? null;

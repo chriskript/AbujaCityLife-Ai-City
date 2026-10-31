@@ -1,5 +1,7 @@
 # Milestone 7B: sixteen residents, personal routines and a connected resource economy
 
+Follow-up: [Milestone 7C](milestone-7c.md) adds bounded server progression without an observer and an integrated road-closure control. The observer-clock limitation below describes the 7B checkpoint in development.
+
 Implemented offline on October 30, 2026, following the accepted AI Town direction. Eight residents were validated before enabling the sixteen-resident default. This extends the existing registry, authoritative executor, activities, scheduler, observations, memories, transport and Three.js presentation. No live Meta generation, commit, push, deployment or repository rename was performed.
 
 ## What is integrated

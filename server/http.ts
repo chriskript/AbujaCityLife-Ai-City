@@ -3,6 +3,7 @@ import { randomBytes, timingSafeEqual, createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { NeighbourhoodServerSession, SessionError } from './session.js';
+import { ServerProgression } from './progression.js';
 
 const digest = (value: string): Buffer => createHash('sha256').update(value).digest();
 export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, accessToken: string, options: { dist?: string; tick?: boolean } = {}) {
@@ -10,7 +11,7 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
   const cookie = randomBytes(32).toString('hex');
   let authenticatedUntil = 0;
   const streams = new Set<ServerResponse>(); const rates = new Map<string, number[]>();
-  let ticking = false;
+  const progression = new ServerProgression(session);
   function limit(key: string, maximum: number): void {
     const now = Date.now(); const recent = (rates.get(key) ?? []).filter(time => time > now - 60_000);
     if (recent.length >= maximum) throw new SessionError(429, 'Request throttled'); recent.push(now); rates.set(key, recent);
@@ -72,11 +73,10 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
   });
   server.requestTimeout = 25_000; server.headersTimeout = 10_000; server.maxHeadersCount = 32;
   const timer = setInterval(() => {
-    if (options.tick === false || !streams.size || ticking) return;
-    ticking = true;
-    void session.tick(.25).then(() => { void session.decide().catch(() => {}); }).catch(() => {}).finally(() => { ticking = false; });
+    if (options.tick === false || (session.mode === 'live-meta' && !streams.size)) return;
+    void progression.pulse().catch(() => { console.error('Authoritative progression stopped after an error; inspect the checkpoint before restarting.'); });
   }, 250); timer.unref();
-  return { server, async close() { clearInterval(timer); for (const stream of streams) stream.end(); await new Promise<void>(resolve => server.close(() => resolve())); await session.close(); } };
+  return { server, async close() { clearInterval(timer); await progression.stop().catch(() => {}); for (const stream of streams) stream.end(); await new Promise<void>(resolve => server.close(() => resolve())); await session.close(); } };
 }
 function json(res: ServerResponse, status: number, value: unknown): void { res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(value)); }
 function exact(value: object, keys: string[]): void { if (Object.keys(value).sort().join(',') !== keys.sort().join(',')) throw new SessionError(400, 'Invalid request fields'); }
