@@ -271,7 +271,7 @@ export class NeighbourhoodServerSession {
       this.world.recordConversation(input.actorId, 'player', input.message);
       this.data.history[input.actorId]!.push({ speaker: 'player', text: input.message, mode: this.mode });
       this.data.history[input.actorId]! = this.data.history[input.actorId]!.slice(-12);
-      context = { observation: this.world.observe(input.actorId), message: input.message, history: structuredClone(this.data.history[input.actorId]!.slice(-6)) };
+      context = { observation: this.world.observe(input.actorId, input.message), message: input.message, history: structuredClone(this.data.history[input.actorId]!.slice(-6)) };
       revision = context.observation.actor.revision; origin = this.world; epoch = this.epoch; await this.commit();
     });
     if (oldResult) return oldResult;

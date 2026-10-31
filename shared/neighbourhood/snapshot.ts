@@ -7,6 +7,7 @@ import { quantityBounds, transportCapacity } from './action-limits.js';
 import { assertTownEconomy } from './town-validation.js';
 import { isResidentId } from './decision-schema.js';
 import { assertCommunication } from './communication-validation.js';
+import { neighbourhoodHistory, residentHistories } from './social-context.js';
 
 function check(condition: unknown): asserts condition { if (!condition) throw new Error('Invalid neighbourhood snapshot'); }
 const object = (value: unknown): boolean => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -20,6 +21,17 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
   check(state.mapUpgradedAt===undefined || state.mapId==='town-v1' && Number.isFinite(state.mapUpgradedAt) && state.mapUpgradedAt>=0 && state.mapUpgradedAt<=state.time);
   check(object(state.npcs) && Object.keys(state.npcs).length >= 3 && Object.keys(state.npcs).length <= maximumResidents && object(state.resources) && object(state.roads) && object(state.tasks) && object(state.triggers));
   const npcIds = Object.keys(state.npcs);
+  if (state.socialContext !== undefined) {
+    const context = state.socialContext;
+    check(state.town && object(context) && Object.keys(context).sort().join(',') === 'canon,residents,version');
+    check(context.version === 1 && context.canon === 'unity-gardens-v1' && object(context.residents));
+    check(Object.keys(context.residents).length <= npcIds.length);
+    for (const [id, grant] of Object.entries(context.residents)) {
+      check(npcIds.includes(id) && object(grant) && Object.keys(grant).sort().join(',') === 'ownHistory,publicFacts');
+      check(typeof grant.ownHistory === 'boolean' && (!grant.ownHistory || Object.hasOwn(residentHistories, id)));
+      check(Array.isArray(grant.publicFacts) && grant.publicFacts.length <= Object.keys(neighbourhoodHistory).length && new Set(grant.publicFacts).size === grant.publicFacts.length && grant.publicFacts.every(key => Object.hasOwn(neighbourhoodHistory, key)));
+    }
+  }
   check(npcIds.every(isResidentId) && ['amina','musa','zainab'].every(id => Object.hasOwn(state.npcs,id)));
   check(integer(state.initialGoods) && object(state.social));
   check([state.nextEvent, state.nextTask, state.nextRequest].every(item => Number.isSafeInteger(item) && item > 0));

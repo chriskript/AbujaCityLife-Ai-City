@@ -23,7 +23,8 @@
     "society:evaluate": "tsx scripts/society-evaluation.ts --live",
     "probe:meta": "tsx scripts/probe-meta.ts",
     "meta:check": "tsx scripts/check-meta.ts",
-    "autonomy:dry-run": "tsx scripts/autonomy-dry-run.ts"
+    "autonomy:dry-run": "tsx scripts/autonomy-dry-run.ts",
+    "social-context:compare": "tsx scripts/compare-social-context.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

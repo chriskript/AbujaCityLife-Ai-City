@@ -6,7 +6,9 @@ Built for the Meta Global AI Developer Hackathon 2026, Indie Developer track, Pu
 
 ## The idea
 
-AI Town is a browser-based 3D neighbourhood inspired by Abuja, Nigeria. Instead of making the player the centre of every story, it explores what happens when residents have their own priorities, limited knowledge, memories, resources, and choices.
+AI Town is a browser-based 3D simulation of **Unity Gardens**, a fictional residential neighbourhood in Abuja, Nigeria. Instead of making the player the centre of every story, it explores what happens when residents have their own priorities, limited knowledge, memories, resources, and choices.
+
+Unity Gardens grew from a modest development into a mixed residential and commercial community. Its authored past informs residents through scoped knowledge; future friendships, cooperation and community decisions must emerge from validated events. See [Unity Gardens history, compatibility and offline evaluation](docs/unity-gardens.md).
 
 A shopkeeper might need a delivery. A neighbour might offer help, refuse, or make another plan. Their decisions can affect work, supplies, money, and future interactions. The player can observe residents and their consequences rather than directing every action.
 

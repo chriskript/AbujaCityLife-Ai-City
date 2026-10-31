@@ -5,6 +5,7 @@ import { isNpcDecision, isResidentId } from './decision-schema.js';
 import { type Inhabitant, type Action, type DecisionOutcome, type MemoryKind, type NpcDecisionRequest, type NpcId, type NpcObservation, type TransportTask, type WorldEvent, type WorldState } from './types.js';
 import { assertSnapshot, migrateSnapshot } from './snapshot.js';
 import { projectPlaceKnowledge } from './knowledge.js';
+import { ensureSocialContext, projectSocialContext } from './social-context.js';
 import { quantityBounds, transportCapacity, selfCollectionCapacity } from './action-limits.js';
 import { residentPlan, townBusinesses } from './population.js';
 import { initialPlaceFacts } from './knowledge.js';
@@ -100,6 +101,7 @@ export class Neighbourhood {
   private communicationHost() { return {state:this.state,record:this.record.bind(this),trigger:this.trigger.bind(this)}; }
   static restore(serialized: string): Neighbourhood {
     const state: unknown = migrateSnapshot(JSON.parse(serialized)); assertSnapshot(state);
+    ensureSocialContext(state); assertSnapshot(state);
     const world = new Neighbourhood(state.id); world.state = copy(state);
     // No in-flight response survives restoration; new request IDs continue monotonically.
     for (const id of world.residentIds) if (['idle', 'wait'].includes(world.state.npcs[id]!.activity.kind)) world.trigger(id, 'restored');
@@ -236,6 +238,7 @@ export class Neighbourhood {
       candidate.record('routine-established',id,[id],id,'Learned personal work opportunities and the town credit/food rules',{},newlyAdmitted ? 'fact' : undefined);
       if (newlyAdmitted) candidate.perceive(id);
     }
+    ensureSocialContext(state, admitted);
     if(state.communication)enableCommunication(state);
     if(state.mapId==='town-v1'){candidate.upgradeTownMap();Object.assign(state,candidate.state);}
     assertSnapshot(state);
@@ -331,9 +334,10 @@ export class Neighbourhood {
     }
   }
 
-  observe(id: NpcId): NpcObservation {
+  observe(id: NpcId, topic = ''): NpcObservation {
     if (!this.hasResident(id)) throw new Error('Unknown resident');
     const npc = this.state.npcs[id]!;
+    const socialContext = projectSocialContext(this.state, id, topic);
     const actionConstraints: NpcObservation['actionConstraints'] = {};
     for (const type of ['propose-transport', 'collect-self', 'stock-stall', 'buy', 'eat'] as const) {
       if (npc.capabilities.includes(type)) actionConstraints[type] = { quantity: { ...quantityBounds } };
@@ -348,6 +352,7 @@ export class Neighbourhood {
     };
     return copy({
       actor: npc, time: this.state.time,mapId:this.state.mapId,
+      ...(socialContext ? { socialContext } : {}),
       places: this.map.places.filter(place => npc.knowledge.places.includes(place.id)),
       placeKnowledge: projectPlaceKnowledge(npc, this.state.events, this.state.time),
       memoryEvidence: npc.memories.map(memory => ({ id: memory.id, interpretation:

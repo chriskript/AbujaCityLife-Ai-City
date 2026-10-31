@@ -1,0 +1,399 @@
+{
+  "mode": "offline-input-comparison",
+  "generations": 0,
+  "liveEvidence": false,
+  "conclusion": "Additional scoped information is present. Whether Muse uses it well requires the separately approved twelve-generation live evaluation.",
+  "cases": [
+    {
+      "dimension": "choosing-whom-to-approach",
+      "actorId": "chris",
+      "possibleRelevance": "Recent arrival and taxi acquaintance give personal context without revealing other biographies.",
+      "withoutContextCharacters": 9900,
+      "withContextCharacters": 11165,
+      "addedCharacters": 1265,
+      "baselineSha256": "c8cbb6eb53690bba779b2227f59909e9935240e4faca9df05e071efec5eed2f4",
+      "addedContext": {
+        "neighbourhood": "Unity Gardens",
+        "historySource": "authored-pre-simulation",
+        "historyAsOf": "simulation-start",
+        "publicFacts": [
+          {
+            "id": "history:unity-v1:origins",
+            "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+          },
+          {
+            "id": "history:unity-v1:character",
+            "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+          }
+        ],
+        "background": {
+          "id": "history:unity-v1:self:chris",
+          "public": "A recent arrival combining repair apprenticeship with supply courier work.",
+          "private": "Moved into rented lodging near Hill Garden while finding local work. A taxi ride introduced him to Musa; he arrived without having met the market trader. Repair errands and paid work both compete for his time."
+        },
+        "connections": [
+          {
+            "id": "musa",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": true,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          }
+        ]
+      },
+      "existingPriorities": [
+        "honour accepted work",
+        "find work",
+        "meet local people"
+      ],
+      "existingNeeds": {
+        "food": 0,
+        "stock": 0,
+        "income": 0.7,
+        "rest": 0.1
+      },
+      "deliveredRequests": []
+    },
+    {
+      "dimension": "interpreting-relationships",
+      "actorId": "tunde",
+      "possibleRelevance": "Known Chris remains an acquaintance without an automatic phone number or earned trust.",
+      "withoutContextCharacters": 8208,
+      "withContextCharacters": 9899,
+      "addedCharacters": 1691,
+      "baselineSha256": "a4dca7f29fb9ab0e51dc4bbdb4c85d5c5040d008dcd9c3323ff7abe2ee795f96",
+      "addedContext": {
+        "neighbourhood": "Unity Gardens",
+        "historySource": "authored-pre-simulation",
+        "historyAsOf": "simulation-start",
+        "publicFacts": [
+          {
+            "id": "history:unity-v1:origins",
+            "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+          },
+          {
+            "id": "history:unity-v1:concerns",
+            "detail": "Ordinary unresolved questions at the start include how to care for shared spaces, keep access roads maintained and make everyday services dependable and affordable. These are background concerns, not reports of failures or urgent tasks."
+          },
+          {
+            "id": "history:unity-v1:character",
+            "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+          }
+        ],
+        "background": {
+          "id": "history:unity-v1:self:tunde",
+          "public": "Built a small repair workshop serving the neighbourhood transport and repair trade.",
+          "private": "Workshop experience made repeat custom important to him. He weighs helping others against the time and resources needed to keep repair work dependable."
+        },
+        "connections": [
+          {
+            "id": "chris",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": false,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          },
+          {
+            "id": "musa",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": true,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          }
+        ]
+      },
+      "existingPriorities": [
+        "honour accepted commitments",
+        "Maintain the workshop and build a reliable customer base",
+        "keep food and rest manageable"
+      ],
+      "existingNeeds": {
+        "food": 0.2,
+        "stock": 0,
+        "income": 0.5,
+        "rest": 0.15
+      },
+      "deliveredRequests": []
+    },
+    {
+      "dimension": "responding-to-requests",
+      "actorId": "musa",
+      "possibleRelevance": "A delivered request can be considered alongside transport experience; acceptance remains optional.",
+      "withoutContextCharacters": 7832,
+      "withContextCharacters": 9049,
+      "addedCharacters": 1217,
+      "baselineSha256": "b938315cee1129fa13e49d3911319758afe534e29abc235b2d9daf3d6376edbb",
+      "addedContext": {
+        "neighbourhood": "Unity Gardens",
+        "historySource": "authored-pre-simulation",
+        "historyAsOf": "simulation-start",
+        "publicFacts": [
+          {
+            "id": "history:unity-v1:origins",
+            "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+          },
+          {
+            "id": "history:unity-v1:character",
+            "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+          }
+        ],
+        "background": {
+          "id": "history:unity-v1:self:musa",
+          "public": "Built familiarity with local routes through taxi work as the neighbourhood grew.",
+          "private": "Experience with variable transport demand taught him to weigh a job against time and capacity; reliable earnings matter more than accepting every request."
+        },
+        "connections": [
+          {
+            "id": "amina",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": true,
+            "relationshipRecorded": false,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          }
+        ]
+      },
+      "existingPriorities": [
+        "honour accepted jobs",
+        "earn income",
+        "avoid overload"
+      ],
+      "existingNeeds": {
+        "food": 0,
+        "stock": 0,
+        "income": 0.8,
+        "rest": 0.1
+      },
+      "deliveredRequests": [
+        {
+          "id": "communication-1",
+          "initiator": "amina",
+          "recipient": "musa",
+          "channel": "text",
+          "purpose": "request-help",
+          "message": "Could we discuss a delivery when you have time?",
+          "report": null,
+          "response": null,
+          "reply": null,
+          "replyReport": null,
+          "status": "pending",
+          "createdAt": 0,
+          "availableAt": 5,
+          "expiresAt": 300,
+          "delivered": true,
+          "responseAt": null,
+          "responseNotified": false,
+          "taskId": null
+        }
+      ]
+    },
+    {
+      "dimension": "assessing-competing-priorities",
+      "actorId": "fatima",
+      "possibleRelevance": "Care experience adds a reason to weigh dependability against the existing need for rest.",
+      "withoutContextCharacters": 7744,
+      "withContextCharacters": 9450,
+      "addedCharacters": 1706,
+      "baselineSha256": "f363b14dde0afc2e69cee3ce1354e663a0e1c282312fc15808cee748b445b88d",
+      "addedContext": {
+        "neighbourhood": "Unity Gardens",
+        "historySource": "authored-pre-simulation",
+        "historyAsOf": "simulation-start",
+        "publicFacts": [
+          {
+            "id": "history:unity-v1:origins",
+            "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+          },
+          {
+            "id": "history:unity-v1:concerns",
+            "detail": "Ordinary unresolved questions at the start include how to care for shared spaces, keep access roads maintained and make everyday services dependable and affordable. These are background concerns, not reports of failures or urgent tasks."
+          },
+          {
+            "id": "history:unity-v1:character",
+            "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+          }
+        ],
+        "background": {
+          "id": "history:unity-v1:self:fatima",
+          "public": "Brought nursing experience to a local care desk as neighbourhood services developed.",
+          "private": "Care work taught her the value of dependability and the cost of neglecting rest. She wants a sustainable working day rather than an unlimited obligation to help."
+        },
+        "connections": [
+          {
+            "id": "halima",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": true,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          },
+          {
+            "id": "zainab",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": false,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          }
+        ]
+      },
+      "existingPriorities": [
+        "honour accepted commitments",
+        "Keep the neighbourhood care desk dependable without neglecting rest",
+        "keep food and rest manageable"
+      ],
+      "existingNeeds": {
+        "food": 0.35,
+        "stock": 0,
+        "income": 0.3,
+        "rest": 0.65
+      },
+      "deliveredRequests": []
+    },
+    {
+      "dimension": "discovering-cooperation",
+      "actorId": "halima",
+      "possibleRelevance": "Supply experience adds context for considering work and budgets, without creating partners or jobs.",
+      "withoutContextCharacters": 8794,
+      "withContextCharacters": 10204,
+      "addedCharacters": 1410,
+      "baselineSha256": "60ae12bdd0dccfc4a9baa738b58a4f1444420201637ec3b2e32c68ecf08f6bda",
+      "addedContext": {
+        "neighbourhood": "Unity Gardens",
+        "historySource": "authored-pre-simulation",
+        "historyAsOf": "simulation-start",
+        "publicFacts": [
+          {
+            "id": "history:unity-v1:origins",
+            "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+          },
+          {
+            "id": "history:unity-v1:character",
+            "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+          }
+        ],
+        "background": {
+          "id": "history:unity-v1:self:halima",
+          "public": "Helped organise practical supply work around the community centre cooperative.",
+          "private": "Coordinating finite inputs taught her to consider budgets as well as demand. Keeping supplies useful need not mean agreeing to every proposed arrangement."
+        },
+        "connections": [
+          {
+            "id": "fatima",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": true,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          },
+          {
+            "id": "ibrahim",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": true,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          }
+        ]
+      },
+      "existingPriorities": [
+        "honour accepted commitments",
+        "Keep useful supplies moving while protecting the cooperative budget",
+        "keep food and rest manageable"
+      ],
+      "existingNeeds": {
+        "food": 0.4,
+        "stock": 0,
+        "income": 0.55,
+        "rest": 0.2
+      },
+      "deliveredRequests": []
+    },
+    {
+      "dimension": "reacting-to-neighbourhood-concerns",
+      "actorId": "maryam",
+      "possibleRelevance": "Shared concerns become available background; bookkeeping creates no duty to organise neighbours.",
+      "withoutContextCharacters": 7022,
+      "withContextCharacters": 8750,
+      "addedCharacters": 1728,
+      "baselineSha256": "0befff8076fe1b7cbec9bae33d6f0706af380bc53ccfe4abd760205eebad5c51",
+      "addedContext": {
+        "neighbourhood": "Unity Gardens",
+        "historySource": "authored-pre-simulation",
+        "historyAsOf": "simulation-start",
+        "publicFacts": [
+          {
+            "id": "history:unity-v1:origins",
+            "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+          },
+          {
+            "id": "history:unity-v1:concerns",
+            "detail": "Ordinary unresolved questions at the start include how to care for shared spaces, keep access roads maintained and make everyday services dependable and affordable. These are background concerns, not reports of failures or urgent tasks."
+          },
+          {
+            "id": "history:unity-v1:character",
+            "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+          }
+        ],
+        "background": {
+          "id": "history:unity-v1:self:maryam",
+          "public": "Brought bookkeeping experience to local work, including an existing connection with Halima.",
+          "private": "Keeping accounts taught her to weigh useful work against savings and personal time. She has preferred weighing each new responsibility against her time and personal priorities."
+        },
+        "connections": [
+          {
+            "id": "fatima",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": false,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          },
+          {
+            "id": "halima",
+            "identityKnown": true,
+            "seenInSimulation": false,
+            "metInSimulation": false,
+            "hasPhoneNumber": true,
+            "relationshipRecorded": true,
+            "successfulJobs": 0,
+            "trust": "not-established-by-history"
+          }
+        ]
+      },
+      "existingPriorities": [
+        "honour accepted commitments",
+        "Balance useful community work, savings and personal time",
+        "keep food and rest manageable"
+      ],
+      "existingNeeds": {
+        "food": 0.2,
+        "stock": 0,
+        "income": 0.35,
+        "rest": 0.45
+      },
+      "deliveredRequests": []
+    }
+  ]
+}

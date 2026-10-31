@@ -1,5 +1,6 @@
 import type { PlaceFacts, PlaceKnowledge } from './knowledge.js';
 import type { MapId } from '../world/town-layout.js';
+import type { SocialContextState, SocialObservation } from './social-context.js';
 export const legacyNpcIds = ['musa', 'amina', 'zainab'] as const;
 // Legacy fixture IDs are retained for compatibility; runtime membership is world-owned.
 export type NpcId = string;
@@ -56,6 +57,7 @@ export interface WorldState {
   npcs: Record<NpcId, Inhabitant> & { musa: Inhabitant; amina: Inhabitant; zainab: Inhabitant };
   initialGoods: number;
   town?: TownEconomy;
+  socialContext?: SocialContextState;
   communication?: { nextId: number; threads: Record<string, Communication>; cooldowns: Record<string, number> };
   social: { nextInteraction: number; interactions: Record<string, Encounter>; noticed: Record<string, number>; cooldowns: Record<string, number> };
   resources: { supplierGoods: number; marketGoods: number; salesOpen: boolean; revision: number };
@@ -90,6 +92,7 @@ export interface Encounter {
   createdAt: number; expiresAt: number;
 }
 export interface NpcObservation {
+  socialContext?: SocialObservation;
   mapId:MapId;
   actor: Inhabitant; time: number;
   places: { id: string; node: string; name: string }[];

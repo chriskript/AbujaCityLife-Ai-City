@@ -7,12 +7,12 @@ import type { NpcId } from '../../shared/neighbourhood/types.js';
 import { ResidentPhone } from './resident-phone.js';
 import { mapFor,buildingFor } from '../../shared/world/town-layout.js';
 
-document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = 'Observe the residents working, travelling and cooperating in an original miniature neighbourhood inspired by Abuja.';
+document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = 'Observe life in Unity Gardens, a fictional residential community in Abuja.';
 document.querySelector('#experience')!.innerHTML = `
   <div id="world" aria-label="Living 3D neighbourhood with autonomous mock residents"></div>
   <div id="building-labels" aria-label="Select a town building"></div>
   <div id="labels" aria-hidden="true"></div><div id="inhabitant-labels" aria-label="Select an inhabitant in the scene"></div>
-  <div class="scene-caption"><span class="eyebrow">INDEPENDENT LIVES. ONE SHARED WORLD.</span><h1>Life happens<br />around you.</h1><p>Watch their day unfold. Choose someone to get closer.</p></div>
+  <div class="scene-caption"><span class="eyebrow">UNITY GARDENS · ABUJA</span><h1>Life happens<br />around you.</h1><p>Watch their day unfold. Choose someone to get closer.</p></div>
   <section class="inhabitant-panel" aria-label="Inhabitants">
     <div class="people" role="group" aria-label="Choose an inhabitant">
     </div>

@@ -4,6 +4,7 @@ import type { NpcDecisionRequest, NpcInferenceResult, NpcObservation } from '../
 import type { ConversationContext, ConversationDecision, GenerationMetrics } from '../../shared/neighbourhood/conversation.js';
 import { inferenceCost } from './meta-probe.js';
 import { withProbeBudget } from '../controls/probe-budget.js';
+import { socialContextInstructions } from '../../shared/neighbourhood/social-context.js';
 
 export interface NeighbourhoodProvider {
   mode: 'mock' | 'live-meta';
@@ -30,6 +31,9 @@ export const conversationSchema = {
 export function validateConversation(value: unknown, context: ConversationContext): asserts value is ConversationDecision {
   const data = value as ConversationDecision;
   const evidence = new Set([...context.observation.places.map(place => place.id), ...context.observation.actor.memories.map(memory => memory.id), context.observation.actor.id, ...context.observation.placeKnowledge.flatMap(place => place.factEvidenceId ? [place.factEvidenceId] : [])]);
+  for (const fact of context.observation.socialContext?.publicFacts ?? []) evidence.add(fact.id);
+  const background = context.observation.socialContext?.background;
+  if (background) evidence.add(background.id);
   const keys = data && typeof data === 'object' ? Object.keys(data).sort().join(',') : '';
   if (!data || typeof data !== 'object' || !['evidenceIds,proposedDecision,reply,uncertain','claims,evidenceIds,proposedDecision,reply,uncertain'].includes(keys) || typeof data.reply !== 'string' || !data.reply.trim() || data.reply.length > 800 || typeof data.uncertain !== 'boolean' || !Array.isArray(data.evidenceIds) || data.evidenceIds.length > 12 || data.evidenceIds.some(id => typeof id !== 'string' || !evidence.has(id)) || (!data.uncertain && !data.evidenceIds.length) || (data.proposedDecision !== null && !isNpcDecision(data.proposedDecision))) throw new Error('Invalid grounded conversation');
   // Four-field legacy fixtures/checkpoints remain readable; the live adapter requires claims.
@@ -76,7 +80,7 @@ export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
     this.metrics = null;
     this.attempt = {phase:'prepared'};
     const started = performance.now(); const signal = AbortSignal.timeout(20_000);
-    const body = { model, instructions: neighbourhoodInstructions + communicationInstructions + locationInstructions, input: JSON.stringify(input), reasoning: { effort: 'low' }, text: { format: { type: 'json_schema', name, strict: true, schema } } };
+    const body = { model, instructions: neighbourhoodInstructions + communicationInstructions + locationInstructions + socialContextInstructions, input: JSON.stringify(input), reasoning: { effort: 'low' }, text: { format: { type: 'json_schema', name, strict: true, schema } } };
     if (body.input.length > 24_000) throw new Error('Observation too large');
     const post = async (path: string, payload: unknown): Promise<any> => {
       const response = await (this.options.fetcher ?? fetch)(`https://api.meta.ai/v1/${path}`, { method: 'POST', redirect: 'error', signal, headers: { Authorization: `Bearer ${this.options.apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
