@@ -1,7 +1,8 @@
 import { randomUUID, createHash } from 'node:crypto';
 import { PhoneControl,projectPhone,type PhoneControlInput,type PhoneActionInput,type PhoneLease,type PhoneView } from '../shared/neighbourhood/phone.js';
 import type { MapId } from '../shared/world/town-layout.js';
-import { mkdir, open, readFile, rename } from 'node:fs/promises';
+import { mkdir, open, readFile } from 'node:fs/promises';
+import { replaceCheckpoint } from './persistence/replace-checkpoint.js';
 import { dirname } from 'node:path';
 import { Neighbourhood } from '../shared/neighbourhood/world.js';
 import { chrisResident } from '../shared/neighbourhood/initial-state.js';
@@ -120,11 +121,13 @@ export class NeighbourhoodServerSession {
     this.data.sequence++; this.data.world = this.world.serialize();
     if (this.data.progression) this.data.progression.cursor = this.cursor;
     const temporary = `${this.options.checkpoint}.${randomUUID()}.pending`;
+    let stage='create';
     try {
       const file = await open(temporary, 'wx', 0o600);
-      try { await file.writeFile(JSON.stringify(this.data)); await file.sync(); } finally { await file.close(); }
-      await rename(temporary, this.options.checkpoint);
-    } catch(error) { this.failed = true;const code=(error as NodeJS.ErrnoException).code;throw new SessionError(503, `Checkpoint write failed${code?` (${code})`:''}; session stopped`); }
+      try { stage='write';await file.writeFile(JSON.stringify(this.data));stage='sync'; await file.sync(); } finally { await file.close(); }
+      stage='replace';
+      await replaceCheckpoint(temporary, this.options.checkpoint);
+    } catch(error) { this.failed = true;const code=(error as NodeJS.ErrnoException).code;throw new SessionError(503, `Checkpoint write failed${code?` (${code}, ${stage})`:''}; session stopped`); }
     const projection = projectNeighbourhood(this.world.snapshot);
     this.committedHistory = structuredClone(this.data.history);
     this.current = { version: 2, sessionId: this.data.sessionId, sequence: this.data.sequence, mode: this.provider.mode, paused: this.data.paused, speed: this.data.speed, conversationAvailable: true, decisionBudget: this.mode==='mock' && this.world.hasTownEconomy ? {used:this.data.routineRequests ?? 0,limit:offlineTownLimits.maximumDecisions} : { used: this.data.requests, limit: 48 }, ...projection };
@@ -249,7 +252,8 @@ export class NeighbourhoodServerSession {
         else this.world.applyDecision(pending.id, result.decision, { mode: result.mode, model: result.model });
         this.captureMetrics(pending.id, pending.actorId); await this.commit();
       });
-    } catch {
+    } catch (error) {
+      if(this.failed)throw error;
       await this.transaction(async () => { if (origin! === this.world) this.world.abandonDecision(pending.id); this.captureMetrics(pending.id, pending.actorId); await this.commit(); });
     } finally { this.busy = false; }
   }
@@ -283,6 +287,7 @@ export class NeighbourhoodServerSession {
         Object.assign(this.data.receipts[input.id]!, { status: 'done', value }); this.captureMetrics(input.id, input.actorId); await this.commit(); return value;
       });
     } catch (error) {
+      if(this.failed)throw error;
       await this.transaction(async () => { Object.assign(this.data.receipts[input.id]!, { status: 'failed', value: 'Inference unavailable; no action executed' }); this.captureMetrics(input.id, input.actorId); await this.commit(); });
       throw error instanceof SessionError ? error : new SessionError(502, 'Inference unavailable; no mock substitution or retry');
     } finally { this.busy = false; }

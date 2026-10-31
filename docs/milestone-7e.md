@@ -2,6 +2,8 @@
 
 Implemented and verified offline on October 31, 2026. The normal sixteen-person town uses `town-v1`; the original taxi graph and explicit neighbourhood fixtures retain `legacy-v1`. No live Meta requests, commits, pushes or deployment were made.
 
+Follow-up: the [submission rehearsal](submission-rehearsal.md) records a full bounded server run, active-state restarts, browser checks and reproduction/handling of Windows checkpoint replacement contention. The results below remain the historical 7E measurements.
+
 ## Connected town
 
 `shared/world/town-layout.ts` is the shared catalogue for navigation, addresses, building footprints, public entrances, private units, workplaces and rendering. The expanded bounds are 390 by 320 metres. Original road edges, market, supplier, taxi stand, lake and garden remain. Four apartment blocks contain sixteen separate flats; twelve are occupied. Four standalone homes house the remaining four residents. Housing assignments live in mutable world state, rather than permanent identity rules. Eight existing businesses retain their owners, funding and work mechanics at distinct premises; taxi and courier work remain mobile.

@@ -86,6 +86,23 @@ describe('bounded authoritative progression',()=>{
   const http=createNeighbourhoodHttp(session,'test-only-token-with-at-least-32-characters',{tick:false});await new Promise<void>(resolve=>http.server.listen(0,'127.0.0.1',resolve));cleanup.push(()=>http.close());
   const health=await fetch(`http://127.0.0.1:${(http.server.address() as {port:number}).port}/api/health`);expect(health.status).toBe(503);expect(await health.json()).toMatchObject({status:'unavailable'});
  });
+ it.each(['decide','converse'] as const)('preserves the checkpoint diagnostic when %s fails while committing a provider result',async operation=>{
+  const provider=new MockNeighbourhoodProvider();
+  let entered!:()=>void,finish!:()=>void;
+  const ready=new Promise<void>(resolve=>{entered=resolve;}),release=new Promise<void>(resolve=>{finish=resolve;});
+  if(operation==='decide'){
+   const original=provider.decide.bind(provider);vi.spyOn(provider,'decide').mockImplementation(async request=>{entered();await release;return original(request);});
+  }else{
+   const original=provider.converse.bind(provider);vi.spyOn(provider,'converse').mockImplementation(async request=>{entered();await release;return original(request);});
+  }
+  const {session,checkpoint}=await openSession(provider);
+  const pending=operation==='decide'?session.decide('amina'):session.converse({id:'failed-result',worldId:session.frame.snapshot.worldId,actorId:'amina',message:'How are things?'});
+  await ready;const sequence=session.frame.sequence;
+  await rm(checkpoint);await mkdir(checkpoint);finish();
+  await expect(pending).rejects.toThrow(/Checkpoint write failed.*replace/);
+  expect(session.frame.sequence).toBe(sequence);expect(session.operational).toBe(false);
+  expect(provider[operation]).toHaveBeenCalledTimes(1);
+ });
 });
 
 describe('persistent environmental consequences',()=>{

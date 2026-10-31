@@ -92,6 +92,8 @@ npm run typecheck
 npm run build
 ```
 
+Run `npm run rehearse:town` for an isolated, bounded offline server/restart rehearsal. It leaves the operating save and inference budgets untouched. See the [submission rehearsal results and limitations](docs/submission-rehearsal.md).
+
 The backend serves the production build. npm run preview serves static files only and does not proxy the API. The 3D scene requires a WebGL 2-capable browser.
 
 API keys belong only in local backend configuration, never in browser code or Git. See [Meta API setup](docs/meta-api.md). Further live Meta evaluations require separate approval.
