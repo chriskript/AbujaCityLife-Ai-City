@@ -1,0 +1,10 @@
+{
+  "id": "7g-first-live-REPLACE-AFTER-APPROVAL",
+  "phase": "7g-b",
+  "approved": false,
+  "expiresAt": "SET-AFTER-EXPLICIT-APPROVAL",
+  "maxGenerations": 6,
+  "maxEstimatedUsd": 0.10,
+  "allowAutonomy": true,
+  "residents": ["amina", "musa"]
+}

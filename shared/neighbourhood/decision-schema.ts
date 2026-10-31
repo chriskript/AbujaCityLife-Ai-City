@@ -38,7 +38,7 @@ export function isNpcDecision(value: unknown): value is NpcDecision {
 export const npcDecisionSchema = {
   type: 'object', additionalProperties: false,
   properties: {
-    goalId: { type: 'string' }, reason: { type: 'string' },
+    goalId: { type: 'string', minLength: 1, maxLength: 120 }, reason: { type: 'string', minLength: 1, maxLength: 400 },
     action: { anyOf: [
       ['offer-contact', { recipient: { type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$' } }],
       ['communicate', { recipient: { type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$' },channel:{type:'string',enum:['text','call']},purpose:{type:'string',enum:['chat','request-help']},message:{type:'string',minLength:1,maxLength:160},memoryId:{anyOf:[{type:'string'},{type:'null'}]} }],
@@ -48,7 +48,7 @@ export const npcDecisionSchema = {
       ['rest', { seconds: { type: 'number', minimum: 10, maximum: 120 } }],
       ['eat', { quantity: { type: 'integer', ...quantityBounds } }],
       ['travel', { destination: { type: 'string' } }],
-      ['wait', { seconds: { type: 'number' } }], ['work', { seconds: { type: 'number' } }],
+      ['wait', { seconds: { type: 'number', minimum: 1, maximum: 120 } }], ['work', { seconds: { type: 'number', minimum: 1, maximum: 120 } }],
       ['propose-transport', { recipient: { type: 'string', pattern: '^[a-z][a-z0-9_-]{0,47}$' }, quantity: { type: 'integer', ...quantityBounds } }],
       ['respond-transport', { taskId: { type: 'string' }, accept: { type: 'boolean' } }],
       ['respond-transport', { taskId: { type: 'string' }, accept: { type: 'string', enum: ['clarify'] }, question: { type: 'string', minLength: 1, maxLength: 160 } }],

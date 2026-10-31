@@ -1,6 +1,6 @@
 import { npcDecisionSchema, isNpcDecision } from '../../shared/neighbourhood/decision-schema.js';
 import { NeighbourhoodMockProvider } from '../../shared/neighbourhood/mock-provider.js';
-import type { NpcDecisionRequest, NpcInferenceResult } from '../../shared/neighbourhood/types.js';
+import type { NpcDecisionRequest, NpcInferenceResult, NpcObservation } from '../../shared/neighbourhood/types.js';
 import type { ConversationContext, ConversationDecision, GenerationMetrics } from '../../shared/neighbourhood/conversation.js';
 import { inferenceCost } from './meta-probe.js';
 import { withProbeBudget } from '../controls/probe-budget.js';
@@ -10,6 +10,8 @@ export interface NeighbourhoodProvider {
   decide(request: NpcDecisionRequest): Promise<NpcInferenceResult>;
   converse(context: ConversationContext): Promise<ConversationDecision>;
   metrics: GenerationMetrics | null;
+  readonly routineDecisions?: boolean;
+  sourceFor?(observation: NpcObservation, triggers: string[]): 'mock' | 'live-meta';
 }
 export class MockNeighbourhoodProvider implements NeighbourhoodProvider {
   readonly mode = 'mock'; metrics = null;
@@ -57,9 +59,12 @@ export const neighbourhoodInstructions = 'You inhabit a fictional Abuja-inspired
 
 export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
   readonly mode = 'live-meta'; metrics: GenerationMetrics | null = null;
+  // Evaluation evidence contains only this invocation, never credentials or hidden model reasoning.
+  attempt: { phase: string; preflightTokens?: number; outputText?: string; proposal?: unknown } | null = null;
   constructor(private readonly options: { apiKey: string; ledgerPath: string; dailyUsd: number; totalUsd: number; fetcher?: typeof fetch }) {}
   async decide(request: NpcDecisionRequest): Promise<NpcInferenceResult> {
     const value = await this.generate('inhabitant_decision', npcDecisionSchema, request);
+    this.attempt!.proposal=value;
     if (!isNpcDecision(value)) throw new Error('Invalid Meta decision');
     return { mode: 'meta', model, decision: value };
   }
@@ -69,6 +74,7 @@ export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
   }
   private async generate(name: string, schema: unknown, input: unknown): Promise<unknown> {
     this.metrics = null;
+    this.attempt = {phase:'prepared'};
     const started = performance.now(); const signal = AbortSignal.timeout(20_000);
     const body = { model, instructions: neighbourhoodInstructions + communicationInstructions + locationInstructions, input: JSON.stringify(input), reasoning: { effort: 'low' }, text: { format: { type: 'json_schema', name, strict: true, schema } } };
     if (body.input.length > 24_000) throw new Error('Observation too large');
@@ -80,9 +86,12 @@ export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
     return withProbeBudget(this.options.ledgerPath, { dailyUsd: this.options.dailyUsd, totalUsd: this.options.totalUsd }, async reserve => {
       // Reserve the entire input ceiling before ANY provider HTTP request. Never refund failures.
       await reserve(maximumGenerationUsd);
+      this.attempt!.phase='reserved';
       const count = await post('responses/input_tokens', body);
+      this.attempt!.preflightTokens=count.input_tokens;this.attempt!.phase='preflight';
       if (!Number.isSafeInteger(count.input_tokens) || count.input_tokens < 1 || count.input_tokens > inputLimit) throw new Error('Input token limit exceeded');
       const response = await post('responses', { ...body, max_output_tokens: outputLimit, store: false });
+      this.attempt!.phase='response-received';
       if (response.model !== model || response.status !== 'completed' || !Array.isArray(response.output)) throw new Error('Unexpected Meta model or incomplete response');
       const content = response.output.filter((item: any) => item.type === 'message' && item.role === 'assistant').flatMap((item: any) => item.content ?? []);
       if (content.some((item: any) => item.type === 'refusal')) throw new Error('Meta refused');
@@ -90,7 +99,8 @@ export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
       const cost = inferenceCost(model, inputTokens, outputTokens);
       if (inputTokens > count.input_tokens || outputTokens > outputLimit) throw new Error('Usage exceeded reserved limits');
       this.metrics = { model, latencyMs: Math.round(performance.now() - started), inputTokens, outputTokens, estimatedCostUsd: cost };
-      return JSON.parse(content.filter((item: any) => item.type === 'output_text').map((item: any) => item.text).join(''));
+      this.attempt!.outputText=content.filter((item: any) => item.type === 'output_text').map((item: any) => item.text).join('');
+      return JSON.parse(this.attempt!.outputText!);
     });
   }
 }

@@ -94,6 +94,8 @@ npm run build
 
 Run `npm run rehearse:town` for an isolated, bounded offline server/restart rehearsal. It leaves the operating save and inference budgets untouched. See the [submission rehearsal results and limitations](docs/submission-rehearsal.md).
 
+Milestone 7G Phase A adds selective Muse routing and a one-shot society evaluation recorder. `npm run society:dry-run` exercises it with labelled synthetic offline fixtures and no API access. Live evaluation remains unapproved; the normal town stays offline by default. See the [7G readiness report and proposed first live test](docs/milestone-7g.md).
+
 The backend serves the production build. npm run preview serves static files only and does not proxy the API. The 3D scene requires a WebGL 2-capable browser.
 
 API keys belong only in local backend configuration, never in browser code or Git. See [Meta API setup](docs/meta-api.md). Further live Meta evaluations require separate approval.
@@ -106,6 +108,8 @@ API keys belong only in local backend configuration, never in browser code or Gi
 - [Milestone 7C: Bounded unattended progression and road closure](docs/milestone-7c.md)
 - [Milestone 7D: Autonomous calls and delayed messaging](docs/milestone-7d.md)
 - [Milestone 7E: Addressed town and resident phones](docs/milestone-7e.md)
+- [Submission rehearsal and checkpoint reliability](docs/submission-rehearsal.md)
+- [Milestone 7G: Selective Muse reasoning readiness](docs/milestone-7g.md)
 - [Simulation architecture](docs/architecture.md)
 - [Backend and local operation](docs/backend.md)
 - [Shared neighbourhood foundation](docs/neighbourhood-foundation.md)

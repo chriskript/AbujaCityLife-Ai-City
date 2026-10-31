@@ -19,6 +19,8 @@
     "demo:neighbourhood": "tsx scripts/demo-neighbourhood.ts",
     "town:headless": "tsx scripts/town-headless.ts",
     "rehearse:town": "tsx scripts/rehearse-town.ts",
+    "society:dry-run": "tsx scripts/society-evaluation.ts --offline",
+    "society:evaluate": "tsx scripts/society-evaluation.ts --live",
     "probe:meta": "tsx scripts/probe-meta.ts",
     "meta:check": "tsx scripts/check-meta.ts",
     "autonomy:dry-run": "tsx scripts/autonomy-dry-run.ts"

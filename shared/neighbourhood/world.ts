@@ -35,6 +35,7 @@ export class Neighbourhood {
   get id(): string { return this.state.id; }
   get residentIds(): NpcId[] { return Object.keys(this.state.npcs); }
   hasResident(id: string): boolean { return Object.hasOwn(this.state.npcs, id); }
+  decisionTriggers(id: NpcId): string[] { return [...(this.state.triggers[id] ?? [])]; }
   serialize(): string { return JSON.stringify(this.state); }
   get hasTownEconomy(): boolean { return this.state.town !== undefined; }
   get mapId():MapId{return this.state.mapId;}
