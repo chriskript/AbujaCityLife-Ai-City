@@ -42,6 +42,16 @@ describe('selective society reasoning readiness (offline only)',()=>{
   vi.mocked(muse.decide).mockResolvedValue({mode:'meta',model:'fake',decision:{goalId:'restock',reason:'Invalid boundary',action:{type:'propose-transport',recipient:'musa',quantity:8}}});
   const result=await selected.decide(request);expect(world.applyDecision(request.id,result.decision,result).reason).toBe('invalid-schema');expect(fallback).not.toHaveBeenCalled();expect(world.snapshot.tasks).toEqual({});
  });
+ it('finishes carrying and stocking already collected supplies without another Muse call',async()=>{
+  const world=createTown('stock-continuation');
+  const apply=(action:unknown)=>{const request=world.requestInteractionDecision('amina')!;expect(world.applyDecision(request.id,{goalId:request.observation.actor.goals[0]!.id,reason:'Offline setup',action},{mode:'mock',model:'fixture'}).accepted).toBe(true);};
+  apply({type:'travel',destination:'centre'});world.advance(20);apply({type:'collect-self',quantity:2});
+  const muse=fakeMuse(),provider=new SelectiveNeighbourhoodProvider(['amina'],muse);
+  let request=world.requestInteractionDecision('amina')!;expect(provider.sourceFor(request.observation,request.triggers)).toBe('mock');
+  let result=await provider.decide(request);expect(result.decision).toMatchObject({action:{type:'travel',destination:'market'}});expect(world.applyDecision(request.id,result.decision,result).accepted).toBe(true);world.advance(20);
+  request=world.requestInteractionDecision('amina')!;result=await provider.decide(request);expect(result.decision).toMatchObject({action:{type:'stock-stall',quantity:2}});expect(world.applyDecision(request.id,result.decision,result).accepted).toBe(true);
+  expect(muse.decide).not.toHaveBeenCalled();expect(world.snapshot.npcs.amina!.inventory.goods).toBe(0);expect(world.snapshot.resources.marketGoods).toBe(3);
+ });
  it('charges only selected reasoning to the live plan, persists routine accounting, and does not infer on recovery',async()=>{
   const checkpoint=join(await directory(),'session.json'),muse=fakeMuse(),provider=new SelectiveNeighbourhoodProvider(['amina','musa'],muse);let wall=Date.now();
   const options={checkpoint,provider,plan:plan(),now:()=>wall+=1000};const session=await NeighbourhoodServerSession.open(options);sessions.push(session);

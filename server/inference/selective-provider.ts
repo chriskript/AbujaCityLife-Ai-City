@@ -15,6 +15,9 @@ export function reasoningOpportunity(o: NpcObservation, triggers: string[]): str
   if (threads.some(t=>t.initiator===id && t.purpose==='request-help' && t.response==='accept' && t.taskId===null && ['accepted','connected'].includes(t.status) && t.expiresAt>o.time)) return 'follow-up-offer';
   if (o.tasks.some(t=>t.requester===id && ['proposed','accepted','collected'].includes(t.status)) || threads.some(t=>t.initiator===id && ['queued','pending'].includes(t.status))) return null;
   if (triggers.some(t=>['communication-reply','offer-resolved','clarification-requested','encounter-resolved'].includes(t))) return 'reconsider-response';
+  // Once stock is in hand, return/stock execution follows the existing routine policy.
+  // A historical shortage must not repeatedly charge reasoning for that continuation.
+  if(o.actor.capabilities.includes('stock-stall') && o.actor.inventory.goods-(o.actor.inventory.food ?? 0)>0)return null;
   if (o.actor.capabilities.includes('propose-transport') && o.resources.marketGoods!==null && o.resources.marketGoods<4 && !o.tasks.some(t=>t.requester===id && ['proposed','accepted','collected'].includes(t.status)) && !threads.some(t=>t.initiator===id && ['queued','pending'].includes(t.status))) return 'known-stock-shortage';
   if (o.nearbyPeople.some(p=>!p.known && o.encounterOpportunities.includes(p.id)) && (o.actor.routine?.sociability ?? 0)>=.55 && o.actor.needs.food<.75 && o.time-(o.encounters.at(-1)?.createdAt ?? -Infinity)>=180) return 'optional-encounter';
   if ((o.actor.inventory.coins ?? 0)<6 && o.town?.work.some(w=>w.node===o.actor.node && w.available===true)) return 'local-employment-choice';

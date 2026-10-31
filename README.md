@@ -94,7 +94,7 @@ npm run build
 
 Run `npm run rehearse:town` for an isolated, bounded offline server/restart rehearsal. It leaves the operating save and inference budgets untouched. See the [submission rehearsal results and limitations](docs/submission-rehearsal.md).
 
-Milestone 7G Phase A adds selective Muse routing and a one-shot society evaluation recorder. `npm run society:dry-run` exercises it with labelled synthetic offline fixtures and no API access. Live evaluation remains unapproved; the normal town stays offline by default. See the [7G readiness report and proposed first live test](docs/milestone-7g.md).
+Milestone 7G adds selective Muse routing and a one-shot society evaluation recorder. `npm run society:dry-run` exercises it with labelled synthetic offline fixtures and no API access. The [first approved live evaluation](docs/milestone-7g-first-live-evaluation.md) produced six accepted Amina decisions and real stock/purchase consequences, costing an estimated $0.045644; it did not establish two-resident Muse reasoning. The normal town stays offline by default, and further live runs require separate approval. See the [7G readiness report](docs/milestone-7g.md).
 
 The backend serves the production build. npm run preview serves static files only and does not proxy the API. The 3D scene requires a WebGL 2-capable browser.
 

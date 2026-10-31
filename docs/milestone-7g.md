@@ -1,6 +1,6 @@
 # Milestone 7G: Muse society reasoning — Phase A
 
-Integration readiness prepared October 31, 2026. **No live Meta call has been made for 7G. Phase B awaits explicit approval.** The offline contract rehearsal is synthetic and establishes plumbing, not Muse reasoning quality or a live cooperation success. Phases C and D remain subsequent evaluations after reviewing Phase B.
+Integration readiness prepared October 31, 2026. **Follow-up: the [first approved Phase B live evaluation](milestone-7g-first-live-evaluation.md) made six valid Amina decisions with persistent consequences, but did not meet the independent two-resident Muse criterion.** The sections below retain the Phase A readiness record. Its offline contract rehearsal is synthetic and establishes plumbing, not Muse reasoning quality or live cooperation success. Further live runs require a separately reviewed approval.
 
 ## Inspection and gaps
 
