@@ -22,6 +22,11 @@ try {
       catch(error) {if((error as NodeJS.ErrnoException).code!=='EEXIST') throw error;}
       world.enableTown(townResidents(population));
     }
+    if(!world.snapshot.communication) {
+      try {const backup=await open(checkpoint+'.pre-7d-backup','wx',0o600);try{await backup.writeFile(saved);await backup.sync();}finally{await backup.close();}}
+      catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
+      world.enableCommunications();
+    }
   }
   catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; world = createTown('headless-town',population); }
   const runner = new HeadlessTownRunner(world);
@@ -30,5 +35,6 @@ try {
   const state = world.snapshot;
   console.log(JSON.stringify({ mode: 'offline-mock', ...result, time: state.time, residents: world.residentIds,
     interactions: Object.values(state.social.interactions), tasks: Object.values(state.tasks), resources: state.resources,
+    communication:{texts:Object.values(state.communication?.threads ?? {}).filter(item=>item.channel==='text').length,calls:Object.values(state.communication?.threads ?? {}).filter(item=>item.channel==='call').length,remoteTasks:Object.values(state.tasks).filter(task=>task.communicationId).length},
     economy:state.town && {produced:state.town.produced,consumed:state.town.consumed,remainingInputs:state.town.rawInputs,initialMoney:state.town.initialMoney},checkpoint }, null, 2));
 } finally { await lock.close(); await unlink(checkpoint+'.lock'); }

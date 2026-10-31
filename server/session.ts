@@ -79,6 +79,15 @@ export class NeighbourhoodServerSession {
       if (session.data.plan && session.data.plan.id !== options.plan.id) throw new Error('Different live plan requires reviewed session migration');
       session.data.plan ??= { id: options.plan.id, used: 0, reservedUsd: 0 };
     }
+    if(session.world.hasTownEconomy && !session.world.snapshot.communication) {
+      // Retain the original durable world before adding contacts and new capabilities.
+      try {
+        const prior=await readFile(options.checkpoint,'utf8');
+        const backup=await open(options.checkpoint+'.pre-7d-backup','wx',0o600);
+        try {await backup.writeFile(prior);await backup.sync();}finally{await backup.close();}
+      } catch(error){if(!['ENOENT','EEXIST'].includes((error as NodeJS.ErrnoException).code ?? ''))throw error;}
+      session.world.enableCommunications();
+    }
     if (session.data.progression === undefined) session.data.progression = { used: 0, limit: 1800, cursor: 0 };
     const progression = session.data.progression;
     if (!progression || !Number.isFinite(progression.used) || progression.used < 0 || progression.used > progression.limit || progression.limit !== 1800 || !Number.isSafeInteger(progression.cursor) || progression.cursor < 0) throw new Error('Invalid progression checkpoint');

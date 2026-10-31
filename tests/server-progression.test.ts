@@ -93,7 +93,8 @@ describe('persistent environmental consequences',()=>{
   expect((await session.send({id:'open',worldId:frame.snapshot.worldId,type:'road',edgeId:'centre-market',blocked:false})).accepted).toBe(true);expect(frame.snapshot.blockedEdges).not.toContain('centre-market');session.dispose();
  });
  it('locally discovers a closure and autonomously reroutes a paid delivery, delaying stock and payment until actual completion',async()=>{
-  const normal=new HeadlessTownRunner(createTown('comparison')),closed=new HeadlessTownRunner(createTown('comparison'));
+  // Preserve the 7C timing baseline; 7D remote-policy trajectories have separate tests.
+  const normal=new HeadlessTownRunner(createTown('comparison',16,{communication:false})),closed=new HeadlessTownRunner(createTown('comparison',16,{communication:false}));
   expect(closed.world.setRoadBlocked('centre-market',true)).toBe(true);
   expect(closed.world.observe('amina').knownBlockedEdges).toContain('centre-market');
   expect(closed.world.observe('musa').knownBlockedEdges).not.toContain('centre-market');

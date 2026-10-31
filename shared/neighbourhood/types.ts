@@ -2,7 +2,7 @@ import type { PlaceFacts, PlaceKnowledge } from './knowledge.js';
 export const legacyNpcIds = ['musa', 'amina', 'zainab'] as const;
 // Legacy fixture IDs are retained for compatibility; runtime membership is world-owned.
 export type NpcId = string;
-export const actionTypes = ['travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat'] as const;
+export const actionTypes = ['travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat', 'offer-contact', 'communicate', 'respond-communication', 'end-call'] as const;
 export type MemoryKind = 'fact' | 'observed' | 'reported' | 'belief' | 'commitment' | 'outcome';
 export interface Memory {
   id: string; kind: MemoryKind; eventId: string; source: NpcId | 'world' | 'player';
@@ -25,6 +25,8 @@ export interface Inhabitant {
   knowledge: {
     places: string[]; people: NpcId[]; blockedEdges: string[];
     transporters?: NpcId[];
+    contacts?: NpcId[];
+    sharedContacts?: NpcId[];
     businesses?: Record<string, { available: boolean | null; observedAt: number | null }>;
     placeFacts?: Record<string, PlaceFacts>;
     tasks: Record<string, TaskStatus>;
@@ -39,6 +41,8 @@ export interface TransportTask {
   quantity: number; pickup: 'centre'; destination: 'market'; status: TaskStatus;
   expiresAt: number; reserved: number; rewardPaid: boolean;
   payment?: number; escrow?: number;
+  communicationId?: string; availableAt?: number; responseAt?: number; responseNotified?: boolean;
+  clarification?: {message:string;availableAt:number;notified:boolean};
 }
 export interface WorldEvent {
   id: string; revision: number; time: number; type: string;
@@ -51,6 +55,7 @@ export interface WorldState {
   npcs: Record<NpcId, Inhabitant> & { musa: Inhabitant; amina: Inhabitant; zainab: Inhabitant };
   initialGoods: number;
   town?: TownEconomy;
+  communication?: { nextId: number; threads: Record<string, Communication>; cooldowns: Record<string, number> };
   social: { nextInteraction: number; interactions: Record<string, Encounter>; noticed: Record<string, number>; cooldowns: Record<string, number> };
   resources: { supplierGoods: number; marketGoods: number; salesOpen: boolean; revision: number };
   roads: { blockedEdges: string[]; revision: number };
@@ -59,6 +64,10 @@ export interface WorldState {
   nextEvent: number; nextTask: number; nextRequest: number;
 }
 export type Action =
+  | { type: 'offer-contact'; recipient: NpcId }
+  | { type: 'communicate'; recipient: NpcId; channel: 'text' | 'call'; purpose: 'chat' | 'request-help'; message: string; memoryId: string | null }
+  | { type: 'respond-communication'; communicationId: string; response: 'accept' | 'decline' | 'defer' | 'clarify' | 'ignore'; message: string; memoryId: string | null }
+  | { type: 'end-call'; communicationId: string }
   | { type: 'take-work'; businessId: string }
   | { type: 'rest'; seconds: number }
   | { type: 'eat'; quantity: number }
@@ -87,12 +96,13 @@ export interface NpcObservation {
   nearbyPeople: { id: NpcId; name: string | null; occupation: string | null; activity: Activity['kind']; known: boolean; canTransport: boolean }[];
   encounters: Encounter[];
   encounterOpportunities: NpcId[];
+  communication?: { contacts: { id: NpcId; name: string; canTransport: boolean }[]; threads: Communication[]; canContact: NpcId[]; canCall: NpcId[]; contactOffers: NpcId[]; rules: {textDelay:number;callLifetime:number;textLifetime:number;cooldown:number;maximumThreads:number;maximumPending:number} };
   town?: {
     marketPrice: number; ownsMarket: boolean; transportPayment: number; marketServing: boolean | null;
     work: { id: string; name: string; node: string; skill: string; wage: number; seconds: number; available: boolean | null; observedAt: number | null }[];
   };
   resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
-  tasks: Pick<TransportTask, 'id' | 'requester' | 'recipient' | 'quantity' | 'pickup' | 'destination' | 'status' | 'expiresAt'>[]; knownBlockedEdges: string[];
+  tasks: Pick<TransportTask, 'id' | 'requester' | 'recipient' | 'quantity' | 'pickup' | 'destination' | 'status' | 'expiresAt' | 'communicationId'>[]; knownBlockedEdges: string[];
   permittedActions: Action['type'][];
   // Public action rules and the actor's own capacity, never another NPC's private state.
   // Bounds describe valid proposals; current stock, location and task checks still apply.
@@ -100,6 +110,16 @@ export interface NpcObservation {
     quantity?: { minimum: number; maximum: number };
     carryingCapacity?: number; remainingCarryingCapacity?: number;
   }>>;
+}
+export interface Communication {
+  id: string; initiator: NpcId; recipient: NpcId; channel: 'text' | 'call'; purpose: 'chat' | 'request-help';
+  message: string; report: { subject: string; detail: string } | null;
+  response: 'accept' | 'decline' | 'defer' | 'clarify' | 'ignore' | null; reply: string | null;
+  replyReport: { subject: string; detail: string } | null;
+  status: 'queued' | 'pending' | 'connected' | 'accepted' | 'declined' | 'deferred' | 'clarified' | 'ignored' | 'missed' | 'expired' | 'ended';
+  createdAt: number; availableAt: number; expiresAt: number; delivered: boolean;
+  responseAt: number | null; responseNotified: boolean;
+  taskId: string | null;
 }
 export interface NpcDecisionRequest {
   id: string; worldId: string; actorId: NpcId; actorRevision: number;

@@ -6,6 +6,7 @@ import { quantityBounds, transportCapacity } from './action-limits.js';
 
 import { assertTownEconomy } from './town-validation.js';
 import { isResidentId } from './decision-schema.js';
+import { assertCommunication } from './communication-validation.js';
 
 function check(condition: unknown): asserts condition { if (!condition) throw new Error('Invalid neighbourhood snapshot'); }
 const object = (value: unknown): boolean => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -122,6 +123,7 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
   check(state.resources.supplierGoods >= tasks.reduce((total, task) => total + task.reserved, 0));
   check(state.resources.supplierGoods + state.resources.marketGoods + npcIds.reduce((total, id) => total + state.npcs[id]!.inventory.goods, 0) === state.initialGoods + (state.town?.produced ?? 0) - (state.town?.consumed ?? 0));
   assertTownEconomy(state);
+  assertCommunication(state);
   const social = state.social;
   check(Number.isSafeInteger(social.nextInteraction) && social.nextInteraction > 0 && object(social.interactions) && Object.keys(social.interactions).length <= 128 && object(social.noticed) && object(social.cooldowns));
   for (const map of [social.noticed,social.cooldowns]) {

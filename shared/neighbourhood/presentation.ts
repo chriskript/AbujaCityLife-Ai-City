@@ -1,5 +1,5 @@
 import { edges, nodes } from '../world/neighbourhood.js';
-import { type NpcId, type WorldState, type WorldEvent, type TaskStatus, type Encounter } from './types.js';
+import { type NpcId, type WorldState, type WorldEvent, type TaskStatus, type Encounter, type Communication } from './types.js';
 import { places } from './initial-state.js';
 
 export interface ActorView {
@@ -8,6 +8,7 @@ export interface ActorView {
   moving: boolean; activity: string; intention: string | null; goods: number; rewards: number;
   mobility: 'walk' | 'taxi';
   coins?: number; food?: number;
+  contacts?: string[];
 }
 export interface PublicTask { id: string; requester: NpcId; recipient: NpcId; quantity: number; status: TaskStatus }
 export type ObservableEvent = Pick<WorldEvent, 'id' | 'time' | 'type' | 'actor' | 'subject' | 'detail' | 'data'>;
@@ -17,6 +18,7 @@ export interface NeighbourhoodView {
   tasks: PublicTask[]; blockedEdges: string[];
   encounters: Pick<Encounter,'id' | 'initiator' | 'recipient' | 'purpose' | 'status' | 'createdAt'>[];
   economy?: { population: number; produced: number; consumed: number; rawInputs: number; activeJobs: number; initialMoney: number };
+  communications?: Pick<Communication,'id'|'initiator'|'recipient'|'channel'|'purpose'|'message'|'reply'|'response'|'status'|'createdAt'|'taskId'>[];
 }
 // Observer transport contract, deliberately distinct from persistence and NPC observations.
 export interface NeighbourhoodFrame {
@@ -44,6 +46,7 @@ export interface NeighbourhoodSession {
 }
 
 const observableTypes = new Set([
+  'contact-offered','communication-sent','text-delivered','phone-ringing','communication-response-chosen','communication-replied','communication-report','call-ended','communication-closed','remote-task-received','remote-task-response',
   'activity-started', 'activity-completed', 'arrived', 'transport-proposed', 'transport-accepted',
   'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy', 'transport-clarification-requested',
   'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'road-observed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
@@ -72,6 +75,7 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
       intention: npc.goals.find(goal => goal.id === npc.intention?.goalId)?.description ?? null,
       goods: npc.inventory.goods, rewards: npc.inventory.rewards,
       ...(state.town ? {coins:npc.inventory.coins!,food:npc.inventory.food!} : {}),
+      ...(state.communication ? {contacts:[...npc.knowledge.contacts!]} : {}),
     };
   });
   return {
@@ -80,6 +84,7 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
       tasks: Object.values(state.tasks).map(({ id, requester, recipient, quantity, status }) => ({ id, requester, recipient, quantity, status })),
       encounters: Object.values(state.social.interactions).slice(-16).map(({id,initiator,recipient,purpose,status,createdAt}) => ({id,initiator,recipient,purpose,status,createdAt})),
       blockedEdges: [...state.roads.blockedEdges],
+      ...(state.communication ? {communications:Object.values(state.communication.threads).slice(-32).map(({id,initiator,recipient,channel,purpose,message,reply,response,status,createdAt,taskId})=>({id,initiator,recipient,channel,purpose,message,reply,response,status,createdAt,taskId}))} : {}),
       ...(state.town ? {economy:{population:actors.length,produced:state.town.produced,consumed:state.town.consumed,rawInputs:state.town.rawInputs,initialMoney:state.town.initialMoney,
         activeJobs:Object.values(state.npcs).filter(npc=>npc.activity.kind==='work' && npc.activity.job).length}} : {}),
     },

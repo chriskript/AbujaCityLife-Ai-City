@@ -1,5 +1,7 @@
 # Controlled neighbourhood backend
 
+[Milestone 7D](milestone-7d.md) integrates contact-based calls, delayed texts and remote transport discussions. Old town sessions receive `.pre-7d-backup` before adding communication state and capabilities; existing world assets, memories and spending/progression counters remain. All remote actions use the same authoritative validator and existing inference safeguards. This milestone was evaluated offline only.
+
 The normal backend defaults to the [sixteen-resident 7B town](milestone-7b.md), with version-three recovery and a separate bounded offline routine allowance. Older checkpoints receive rollback copies before expansion. [Milestone 7C](milestone-7c.md) adds mock server progression without an observer, within a persisted 1,800 simulated-second allowance. Pause stops advancement; reset and restart preserve allowance usage. Live Meta mode still requires an observer and separate approval. Live/conversation wall-clock and spending controls below remain unchanged.
 
 For resident-registry migration and autonomous encounters, see [Milestone 7A](milestone-7a.md). Autonomous mock routines use a separate persisted simulation-time rate window. The bounded standalone headless driver remains available with its own checkpoint; do not run it against the authoritative server checkpoint.

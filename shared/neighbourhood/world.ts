@@ -8,6 +8,7 @@ import { projectPlaceKnowledge } from './knowledge.js';
 import { quantityBounds, transportCapacity, selfCollectionCapacity } from './action-limits.js';
 import { residentPlan, townBusinesses } from './population.js';
 import { initialPlaceFacts } from './knowledge.js';
+import { enableCommunication, communicationObservation, validateCommunication, executeCommunication, advanceCommunications, remoteExchange, communicationRules } from './communication.js';
 
 let worldSequence = 0;
 const copy = <T>(value: T): T => structuredClone(value);
@@ -36,6 +37,13 @@ export class Neighbourhood {
   hasResident(id: string): boolean { return Object.hasOwn(this.state.npcs, id); }
   serialize(): string { return JSON.stringify(this.state); }
   get hasTownEconomy(): boolean { return this.state.town !== undefined; }
+  enableCommunications(): void {
+    const candidate=copy(this.state);if(!enableCommunication(candidate))return;
+    assertSnapshot(candidate);this.state=candidate;
+    this.record('communication-enabled',null,[],this.state.id,'Contact-based phone and text communication enabled');
+    for(const id of this.residentIds)this.trigger(id,'communication-available');
+  }
+  private communicationHost() { return {state:this.state,record:this.record.bind(this),trigger:this.trigger.bind(this)}; }
   static restore(serialized: string): Neighbourhood {
     const state: unknown = migrateSnapshot(JSON.parse(serialized)); assertSnapshot(state);
     const world = new Neighbourhood(state.id); world.state = copy(state);
@@ -174,6 +182,7 @@ export class Neighbourhood {
       candidate.record('routine-established',id,[id],id,'Learned personal work opportunities and the town credit/food rules',{},newlyAdmitted ? 'fact' : undefined);
       if (newlyAdmitted) candidate.perceive(id);
     }
+    if(state.communication)enableCommunication(state);
     assertSnapshot(state);
     this.state=copy(state); this.pending.clear();
   }
@@ -297,6 +306,7 @@ export class Neighbourhood {
       })),
       encounters: Object.values(this.state.social.interactions).filter(item => item.initiator === id || item.recipient === id).slice(-8),
       encounterOpportunities: this.residentIds.filter(other => this.canEncounter(id, other)),
+      ...(this.state.communication ? {communication:communicationObservation(this.state,id)!} : {}),
       ...(this.state.town ? { town: {
         marketPrice:this.state.town.marketPrice,ownsMarket:this.state.town.businesses.market?.owner===id,transportPayment:this.state.town.transportPayment,
         marketServing:npc.node==='market' && this.atNode(id) ? this.marketServing(id) : null,
@@ -309,7 +319,7 @@ export class Neighbourhood {
       resources: npc.knowledge.resources,
       tasks: Object.entries(npc.knowledge.tasks).flatMap(([taskId, status]) => {
         const task = this.state.tasks[taskId];
-        return task ? [{ id: task.id, requester: task.requester, recipient: task.recipient, quantity: task.quantity, pickup: task.pickup, destination: task.destination, status, expiresAt: task.expiresAt }] : [];
+        return task ? [{ id: task.id, requester: task.requester, recipient: task.recipient, quantity: task.quantity, pickup: task.pickup, destination: task.destination, status, expiresAt: task.expiresAt,...(task.communicationId?{communicationId:task.communicationId}:{}) }] : [];
       }),
       knownBlockedEdges: npc.knowledge.blockedEdges,
       permittedActions: npc.activity.kind === 'travel' || npc.activity.kind === 'work' || npc.activity.kind==='wait' && npc.activity.resting ? [] : npc.capabilities,
@@ -389,6 +399,7 @@ export class Neighbourhood {
     const npc = this.state.npcs[id]!;
     if (!npc.capabilities.includes(action.type)) return 'missing-capability';
     if (!this.available(id)) return 'actor-busy';
+    const communicationError=validateCommunication(this.state,id,action);if(communicationError)return communicationError;
     const town = this.state.town;
     if (action.type === 'take-work') {
       const business = town?.businesses[action.businessId];
@@ -420,7 +431,7 @@ export class Neighbourhood {
       if (!pathToNode(npc.node, action.destination, new Set(npc.knowledge.blockedEdges))) return 'no-known-route';
     } else if (action.type === 'propose-transport') {
       if (Object.keys(this.state.tasks).length >= 64) return 'task-capacity';
-      if (!npc.knowledge.people.includes(action.recipient) || !this.nearby(id, action.recipient)) return 'recipient-not-nearby';
+      if (!npc.knowledge.people.includes(action.recipient) || !this.nearby(id, action.recipient) && !remoteExchange(this.state,id,action.recipient)) return 'recipient-not-nearby';
       if (!this.state.npcs[action.recipient]!.capabilities.includes('fulfil-transport') || !this.state.npcs[action.recipient]!.capabilities.includes('respond-transport')) return 'recipient-cannot-transport';
       if (Object.values(this.state.tasks).some(task => task.requester === id && ['proposed', 'accepted', 'collected'].includes(task.status))) return 'existing-commitment';
       if (action.quantity > transportCapacity || this.availableSupplies() < action.quantity) return 'insufficient-supplies';
@@ -430,7 +441,7 @@ export class Neighbourhood {
       if (!task || task.recipient !== id) return 'wrong-task-recipient';
       if (action.type === 'respond-transport') {
         if (task.status !== 'proposed' || this.state.time >= task.expiresAt) return 'offer-not-open';
-        if (!this.nearby(id, task.requester)) return 'requester-not-nearby';
+        if (!this.nearby(id, task.requester) && !(task.communicationId && npc.knowledge.tasks[task.id]==='proposed' && this.state.time>=task.availableAt!)) return 'requester-not-nearby';
         if (action.accept === true && Object.values(this.state.tasks).some(other => other.recipient === id && ['accepted', 'collected'].includes(other.status))) return 'existing-commitment';
         if (action.accept === true && npc.inventory.goods + task.quantity > transportCapacity) return 'carrying-capacity';
         if (action.accept === true && this.availableSupplies() < task.quantity) return 'insufficient-supplies';
@@ -466,6 +477,7 @@ export class Neighbourhood {
 
   private execute(id: NpcId, action: Action): void {
     const npc = this.state.npcs[id]!; npc.activity = { kind: 'idle' };
+    if(executeCommunication(this.communicationHost(),id,action))return;
     if (action.type === 'encounter') { this.startEncounter(id, action); return; }
     if (action.type === 'respond-encounter') { this.respondEncounter(id, action); return; }
     if (action.type === 'take-work') {
@@ -496,23 +508,27 @@ export class Neighbourhood {
         expiresAt: this.state.time + 90, reserved: 0, rewardPaid: false,
       };
       if (this.state.town) { task.payment=this.state.town.transportPayment; task.escrow=0; }
+      const remote=remoteExchange(this.state,id,action.recipient);
+      if(remote){task.communicationId=remote.id;task.availableAt=this.state.time+communicationRules.textDelay;remote.taskId=task.id;}
       this.state.tasks[task.id] = task;
-      for (const participant of [id, task.recipient]) this.state.npcs[participant]!.knowledge.tasks[task.id] = 'proposed';
-      this.record('transport-proposed', id, [id, task.recipient], task.id, 'Requested help transporting supplies', { quantity: task.quantity }, 'observed');
-      this.trigger(task.recipient, 'transport-request'); this.trigger(id, 'offer-proposed');
+      for (const participant of remote?[id]:[id,task.recipient]) this.state.npcs[participant]!.knowledge.tasks[task.id] = 'proposed';
+      this.record('transport-proposed', id, remote?[id]:[id, task.recipient], task.id, 'Requested help transporting supplies', { quantity: task.quantity }, 'observed');
+      if(!remote)this.trigger(task.recipient, 'transport-request'); this.trigger(id, 'offer-proposed');
     } else if (action.type === 'respond-transport') {
       const task = this.state.tasks[action.taskId]!;
       if (action.accept === 'clarify') {
         task.revision++;
-        this.record('transport-clarification-requested', id, [id, task.requester], task.id, action.question, {}, 'reported', id, true);
-        this.trigger(task.requester, 'clarification-requested'); return;
+        this.record('transport-clarification-requested', id, task.communicationId?[id]:[id, task.requester], task.id, action.question, {}, 'reported', id, true);
+        if(task.communicationId)task.clarification={message:action.question,availableAt:this.state.time+communicationRules.textDelay,notified:false};
+        else this.trigger(task.requester, 'clarification-requested'); return;
       }
       task.status = action.accept ? 'accepted' : 'declined'; task.revision++;
       task.reserved = action.accept ? task.quantity : 0;
       if (action.accept === true && task.payment) { this.state.npcs[task.requester]!.inventory.coins!-=task.payment; task.escrow=task.payment; }
-      for (const participant of [id, task.requester]) this.state.npcs[participant]!.knowledge.tasks[task.id] = task.status;
-      this.record(`transport-${task.status}`, id, [id, task.requester], task.id, action.accept ? 'Accepted the transport commitment' : 'Declined the transport request', {}, action.accept ? 'commitment' : 'outcome');
-      this.trigger(id, 'offer-resolved'); this.trigger(task.requester, 'offer-resolved');
+      for (const participant of task.communicationId?[id]:[id,task.requester]) this.state.npcs[participant]!.knowledge.tasks[task.id] = task.status;
+      if(task.communicationId){task.responseAt=this.state.time+communicationRules.textDelay;task.responseNotified=false;}
+      this.record(`transport-${task.status}`, id, task.communicationId?[id]:[id, task.requester], task.id, action.accept ? 'Accepted the transport commitment' : 'Declined the transport request', {}, action.accept ? 'commitment' : 'outcome');
+      this.trigger(id, 'offer-resolved'); if(!task.communicationId)this.trigger(task.requester, 'offer-resolved');
     } else if (action.type === 'fulfil-transport') {
       const task = this.state.tasks[action.taskId]!;
       this.travel(id, task.status === 'accepted' ? task.pickup : task.destination, task.id, task.status === 'accepted' ? 'pickup' : 'delivery');
@@ -667,6 +683,7 @@ export class Neighbourhood {
         }
       }
       this.detectEncounters();
+      if(this.state.communication)advanceCommunications(this.communicationHost());
       this.townNeeds();
     }
   }

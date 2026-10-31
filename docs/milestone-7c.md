@@ -1,5 +1,7 @@
 # Milestone 7C: bounded unattended progression and road closure
 
+Follow-up: [Milestone 7D](milestone-7d.md) adds bounded contact-based calls and texts to this same town. References below to phones/messaging as future work describe the 7C development checkpoint.
+
 Implemented offline on October 31, 2026. The existing sixteen-resident town now advances through its authoritative server without an authenticated browser or event-stream observer. The same world, policies, executor, ledger, observations and checkpoint remain in use. No live Meta calls, commits, pushes, deployment or repository rename occurred.
 
 ## Clock and recovery

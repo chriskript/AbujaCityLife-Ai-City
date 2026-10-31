@@ -4,6 +4,7 @@ import { townDecision } from './town-policy.js';
 export interface MockChoices {
   trader: 'cooperate' | 'self-collect' | 'wait' | 'reduce-sales'; driver: 'accept' | 'decline';
   social?: 'engage' | 'ignore'; encounterResponse?: 'accept' | 'decline' | 'defer' | 'clarify' | 'ignore';
+  communicationResponse?: 'accept' | 'decline' | 'defer' | 'clarify' | 'ignore'; remoteChannel?: 'text' | 'call';
 }
 
 // Deterministic policies for repeatable tests, not language understanding or AI reasoning.

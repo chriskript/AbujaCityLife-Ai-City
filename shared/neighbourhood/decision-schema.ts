@@ -13,6 +13,10 @@ export function isNpcDecision(value: unknown): value is NpcDecision {
   if (!decision.action || typeof decision.action !== 'object' || Array.isArray(decision.action)) return false;
   const action = decision.action as Record<string, unknown>;
   switch (action.type) {
+    case 'offer-contact': return exact(action,['type','recipient']) && isResidentId(action.recipient);
+    case 'communicate': return exact(action,['type','recipient','channel','purpose','message','memoryId']) && isResidentId(action.recipient) && ['text','call'].includes(String(action.channel)) && ['chat','request-help'].includes(String(action.purpose)) && text(action.message,160) && (action.memoryId===null || text(action.memoryId));
+    case 'respond-communication': return exact(action,['type','communicationId','response','message','memoryId']) && text(action.communicationId) && ['accept','decline','defer','clarify','ignore'].includes(String(action.response)) && text(action.message,160) && (action.memoryId===null || text(action.memoryId));
+    case 'end-call': return exact(action,['type','communicationId']) && text(action.communicationId);
     case 'travel': return exact(action, ['type', 'destination']) && text(action.destination);
     case 'take-work': return exact(action, ['type','businessId']) && isResidentId(action.businessId);
     case 'rest': return exact(action, ['type','seconds']) && Number.isFinite(action.seconds) && Number(action.seconds) >= 10 && Number(action.seconds) <= 120;
@@ -36,6 +40,10 @@ export const npcDecisionSchema = {
   properties: {
     goalId: { type: 'string' }, reason: { type: 'string' },
     action: { anyOf: [
+      ['offer-contact', { recipient: { type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$' } }],
+      ['communicate', { recipient: { type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$' },channel:{type:'string',enum:['text','call']},purpose:{type:'string',enum:['chat','request-help']},message:{type:'string',minLength:1,maxLength:160},memoryId:{anyOf:[{type:'string'},{type:'null'}]} }],
+      ['respond-communication', { communicationId:{type:'string'},response:{type:'string',enum:['accept','decline','defer','clarify','ignore']},message:{type:'string',minLength:1,maxLength:160},memoryId:{anyOf:[{type:'string'},{type:'null'}]} }],
+      ['end-call', {communicationId:{type:'string'}}],
       ['take-work', { businessId: { type: 'string', pattern: '^[a-z][a-z0-9_-]{0,47}$' } }],
       ['rest', { seconds: { type: 'number', minimum: 10, maximum: 120 } }],
       ['eat', { quantity: { type: 'integer', ...quantityBounds } }],

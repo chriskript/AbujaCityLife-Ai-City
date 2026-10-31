@@ -18,6 +18,7 @@ document.querySelector('#experience')!.innerHTML = `
     <p id="person-intention" class="intention">The neighbourhood is waking up.</p>
     <div class="person-facts"><span id="person-location">Market Square</span><span id="person-goods">No goods carried</span></div><p id="person-wallet" class="intention" hidden></p>
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
+    <details id="resident-communications" class="conversation"><summary>Calls &amp; messages <span id="communication-count"></span></summary><p id="resident-contacts" class="intention"></p><p class="intention">Observer history. Residents receive only their own delivered messages. Discussion is separate from a job commitment.</p><ol id="communication-history" class="person-recent"></ol></details>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
     <section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
     <details class="experiments"><summary>Neighbourhood experiments</summary><button id="town-road">Close supply–market road</button><p id="road-status">Residents learn about closures locally. Occupied roads cannot close.</p><p id="progression-status"></p><label for="experiment">Mock decision policy</label><select id="experiment"><option value="cooperate">Cooperation</option><option value="decline">Driver declines</option><option value="wait">Trader waits</option><option value="self-collect">Trader collects supplies herself</option><option value="reduce-sales">Trader pauses sales</option></select><p>Choose an alternative, then reset. These are labelled mock policies, not guaranteed live AI outcomes.</p></details>
@@ -54,6 +55,17 @@ const locations: Record<string, string> = { stand: 'Taxi Stand', centre: 'Commun
 export function describeObservable(event: ObservableEvent): string {
   const name = event.actor ? names[event.actor] ?? 'Resident' : 'Neighbourhood';
   const descriptions: Record<string, string> = {
+    'contact-offered': `${name} shared their own phone contact with ${names[String(event.data.recipient)] ?? 'a neighbour'}.`,
+    'communication-sent': `${name} ${event.data.channel==='call'?'called':'texted'} ${names[String(event.data.recipient)] ?? 'a contact'}: ${event.detail}`,
+    'text-delivered': `A text from ${name} was delivered; reading and responding remain optional.`,
+    'phone-ringing': `${name}'s call is ringing. The recipient decides whether to answer.`,
+    'communication-response-chosen': `${name} chose ${event.data.response}: ${event.detail}`,
+    'communication-replied': `${name}'s reply arrived: ${event.detail}`,
+    'communication-report': `${name} shared an attributed report: ${event.detail}`,
+    'communication-closed': event.detail,
+    'call-ended': `${name} ended the call.`,
+    'remote-task-received': `${name}'s specific transport offer arrived. No commitment yet.`,
+    'remote-task-response': event.detail,
     'paid-work-started': `${name} accepted funded work; payment awaits completion.`,
     'paid-work-completed': `${name} completed work, earning ${event.data.wage} demo credits${event.data.quantity ? ` and producing ${event.data.quantity} supplies` : ''}.`,
     'purchase-paid': `${name} paid ${event.data.coins} demo credits for food.`,
@@ -148,7 +160,14 @@ function updateUi(force = false): void {
   if (!recent.children.length) { const item = document.createElement('li'); item.textContent = 'Their day is just beginning.'; recent.append(item); }
   const encounter = view.encounters.filter(item => item.initiator === selected || item.recipient === selected).at(-1);
   el('#person-social').textContent = encounter ? `Encounter with ${names[encounter.initiator === selected ? encounter.recipient : encounter.initiator]}: ${encounter.status}. Job commitments are recorded separately.` : 'Nearby encounters are optional.';
-  el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, events: frame.events }, null, 2);
+  const conversations=(view.communications ?? []).filter(item=>item.initiator===selected || item.recipient===selected).slice(-8);
+  el('#resident-communications').hidden=view.communications===undefined;
+  el('#communication-count').textContent=String(conversations.length);
+  el('#resident-contacts').textContent=`Phone contacts: ${actor.contacts?.map(id=>names[id] ?? id).join(', ') || 'none yet'}`;
+  el('#communication-history').replaceChildren(...conversations.map(item=>{
+    const line=document.createElement('li');line.textContent=`${timeLabel(item.createdAt)} · ${item.channel==='call'?'Call':'Text'} · ${names[item.initiator]} → ${names[item.recipient]} · ${item.status}: ${item.message}${item.reply ? ` Reply (${item.response}): ${item.reply}` : ''}${item.taskId ? ` Separate task: ${item.taskId} (${view.tasks.find(task=>task.id===item.taskId)?.status ?? 'recorded'}).` : ''}`;return line;
+  }));
+  el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, communications:view.communications,events: frame.events }, null, 2);
   const mode = el('.mode-pill'); mode.replaceChildren(); const dot = document.createElement('i');
   mode.title = frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
   mode.append(dot, document.createTextNode(frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Meta / backend'));
