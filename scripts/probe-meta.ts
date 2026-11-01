@@ -24,6 +24,7 @@ try {
       dailyUsd: Number(process.env.META_PROBE_DAILY_USD ?? '0.25'),
       totalUsd: Number(process.env.META_PROBE_TOTAL_USD ?? '1'),
       ...(process.env.META_PROBE_DAILY_USD_UNTIL ? {dailyUsdUntil:process.env.META_PROBE_DAILY_USD_UNTIL} : {}),
+      ...(process.env.META_PROBE_TOTAL_USD_UNTIL ? {totalUsdUntil:process.env.META_PROBE_TOTAL_USD_UNTIL} : {}),
     }, reserve => probeMeta({
       requestId: 'manual-contract-probe', scenarioId: 'A',
       goal: 'Take me to the nearest public place with a good view of the lake.', observation,

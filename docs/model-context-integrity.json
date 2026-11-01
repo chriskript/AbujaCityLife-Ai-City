@@ -1,0 +1,14 @@
+{
+  "mode": "offline-read-only",
+  "fileIntegrity": {
+    ".env": true,
+    "runtime/neighbourhood-session.json": true,
+    "runtime/town-headless.json": true
+  },
+  "phaseCEvidenceUnchanged": true,
+  "ledgerUnchanged": true,
+  "ledgerReservations": 21,
+  "reservedMicroUsd": 333958,
+  "phaseDApprovalCreated": false,
+  "liveRequestsThisTask": 0
+}

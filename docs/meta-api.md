@@ -38,6 +38,8 @@ Only `muse-spark-1.3` and `muse-wonder-1.0` Standard mode are allowed. Defaults 
 
 On October 31 the user authorised a temporary internal **$20/day** allowance through November 4, 2026. Local configuration pairs it with `META_PROBE_DAILY_USD_UNTIL=2026-11-04`; the shared ledger gate reverts to at most $0.25/day at November 5 Lagos midnight. Existing reservations, the separate $1 total limit, explicit live approval and all per-run ceilings remain. This changes no provider restriction or credential. The neighbourhood provider retains its stricter 6,000-input-token cap. See the [Phase B execution report](milestone-7g-phase-b-live-evaluation.md).
 
+On November 1 the user separately authorised **$5 cumulative through November 4**, using `META_PROBE_TOTAL_USD_UNTIL=2026-11-04`. This supersedes the prior $1 cumulative setting during that period only. The same gate restores at most $1 at November 5 Lagos midnight without erasing reservations; if retained spending reservations exceed $1, new calls fail closed. Every live run still requires its own approval and ceiling. See the [Phase C execution report](milestone-7g-phase-c-live-evaluation.md).
+
 The result reports provider identity, model, decision, validation, latency, token usage, and estimated cost. Raw exceptions are suppressed to protect credentials. A disabled probe prints a notice and makes no network calls:
 
 ```bash
@@ -64,3 +66,5 @@ The [backend](backend.md) reuses this same ledger, adding session limits, reques
 - A successful contract probe alone does not establish live completion of scenarios A, B, and C.
 
 See [simulation architecture](architecture.md) and [provenance](provenance.md) for the execution boundary and current development status.
+
+The [context investigation and policy](model-context-management.md) documents the Phase C preflight bottleneck, scoped input selection and measured offline reductions. The [proposed longer evaluation](milestone-7g-phase-d-plan.md) requires separate approval for an 8,000-token ceiling; existing profiles retain 6,000.

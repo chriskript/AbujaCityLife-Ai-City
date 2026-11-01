@@ -1,0 +1,12 @@
+{
+  "id": "REPLACE-with-unique-reviewed-run-id",
+  "approved": false,
+  "phase": "7g-d-context",
+  "residents": ["musa", "amina", "zainab", "chris", "fatima", "tunde", "halima", "ibrahim", "yusuf", "ngozi", "emeka", "grace", "ladi", "sadiq", "maryam", "bisi"],
+  "notBefore": "REPLACE-after-approval",
+  "expiresAt": "REPLACE-after-approval",
+  "maxGenerations": 48,
+  "maxEstimatedUsd": 0.90,
+  "inputTokenLimit": 8000,
+  "allowAutonomy": true
+}

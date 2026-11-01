@@ -8,6 +8,7 @@ import { employmentDecisionSchema, employmentInstructions } from '../server/infe
 import type { Action } from '../shared/neighbourhood/types.js';
 import { initializeProbeBudget } from '../server/controls/probe-budget.js';
 import { MetaNeighbourhoodProvider } from '../server/inference/neighbourhood-provider.js';
+import { prepareModelInput } from '../server/inference/model-context.js';
 
 function act(world:Neighbourhood,id:string,action:Action){const request=world.requestInteractionDecision(id)!;return world.applyDecision(request.id,{goalId:request.observation.actor.goals[0]!.id,reason:'Offline grounding regression',action},{mode:'mock',model:'offline-employment'});}
 const job=(world:Neighbourhood,id:string,businessId:string)=>world.observe(id).town!.work.find(work=>work.id===businessId)!;
@@ -23,13 +24,13 @@ describe('scoped employment knowledge and live proposal bounds',()=>{
       const provider=new MetaNeighbourhoodProvider({apiKey:'fake-only',ledgerPath,dailyUsd:.25,totalUsd:1,fetcher:fetcher as typeof fetch});
       await provider.decide(request);
       const body=JSON.parse(String(fetcher.mock.calls[0]![1]!.body));
-      expect(body.text.format.schema).toEqual(employmentDecisionSchema(request.observation));
+      expect(body.text.format.schema).toEqual(prepareModelInput(request,'decision').schema);
       expect(body.instructions).toContain('town.eligibleWorkIds');
-      expect(JSON.parse(body.input)).toEqual(request);
+      expect(JSON.parse(body.input)).toEqual(prepareModelInput(request,'decision').input);
       response.output[0]!.content[0]!.text=JSON.stringify({reply:'I can consider work I am qualified for.',evidenceIds:['chris'],uncertain:true,proposedDecision:null,claims:[]});
       await provider.converse({observation:request.observation,message:'What work could you do?',history:[]});
       const conversation=JSON.parse(String(fetcher.mock.calls[2]![1]!.body));
-      expect(conversation.text.format.schema.properties.proposedDecision.anyOf[0]).toEqual(employmentDecisionSchema(request.observation));
+      expect(conversation.text.format.schema.properties.proposedDecision.anyOf[0]).toEqual(prepareModelInput({observation:request.observation,message:'What work could you do?',history:[]},'conversation').schema);
       expect(fetcher).toHaveBeenCalledTimes(4);
     }finally{await rm(dir,{recursive:true,force:true});}
   });

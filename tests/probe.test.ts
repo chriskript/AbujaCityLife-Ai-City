@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { initializeProbeBudget, withProbeBudget, effectiveDailyProbeUsd } from '../server/controls/probe-budget.js';
+import { initializeProbeBudget, withProbeBudget, effectiveDailyProbeUsd, effectiveTotalProbeUsd } from '../server/controls/probe-budget.js';
 import { inferenceCost, probeMeta } from '../server/inference/meta-probe.js';
 import { TaxiAgent } from '../shared/agent/taxi-agent.js';
 import { MockProvider } from '../server/inference/mock-provider.js';
@@ -20,6 +20,19 @@ afterEach(async () => {
 
 describe('persistent probe spending gate', () => {
   const limits = { dailyUsd: 0.25, totalUsd: 1 };
+  it('expires the approved $5 cumulative allowance at Lagos midnight without resetting history',async()=>{
+    const until='2026-11-04';
+    expect(effectiveTotalProbeUsd(5,until,new Date('2026-11-04T22:59:59Z'))).toBe(5);
+    expect(effectiveTotalProbeUsd(5,until,new Date('2026-11-04T23:00:00Z'))).toBe(1);
+    expect(effectiveTotalProbeUsd(.5,until,new Date('2026-11-05T00:00:00Z'))).toBe(.5);
+    expect(()=>effectiveTotalProbeUsd(5,'2026-02-31')).toThrow('expiry');
+    const path=await budgetPath();await initializeProbeBudget(path);
+    const temporary={dailyUsd:20,totalUsd:5,totalUsdUntil:until};
+    await withProbeBudget(path,temporary,reserve=>reserve(1.1),new Date('2026-11-04T22:59:59Z'));
+    const before=await readFile(path,'utf8');
+    await expect(withProbeBudget(path,temporary,reserve=>reserve(.01),new Date('2026-11-04T23:00:00Z'))).rejects.toThrow('exhausted');
+    expect(await readFile(path,'utf8')).toBe(before);
+  });
   it('expires a temporary $20 daily allowance at Lagos midnight without changing the total limit', async () => {
     const until='2026-11-04';
     expect(effectiveDailyProbeUsd(20,until,new Date('2026-11-04T22:59:59Z'))).toBe(20);

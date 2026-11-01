@@ -1,6 +1,6 @@
 {
   "mode": "offline-read-only",
-  "checkedAt": "2026-10-31T11:06:19.075Z",
+  "checkedAt": "2026-11-01T09:09:41.508Z",
   "timezone": "Africa/Lagos",
   "model": "muse-spark-1.3",
   "keyConfigured": true,
@@ -11,16 +11,18 @@
   "configuredDailyUsd": 20,
   "dailyUsd": 20,
   "dailyUsdUntil": "2026-11-04",
-  "totalUsd": 1,
+  "configuredTotalUsd": 5,
+  "totalUsd": 5,
+  "totalUsdUntil": "2026-11-04",
   "ledgerLockPresent": false,
   "budget": {
-    "day": "2026-10-31",
+    "day": "2026-11-01",
     "perCallMicroUsd": 16204,
     "requiredMicroUsd": 583344,
-    "dailyReservedMicroUsd": 129632,
-    "totalReservedMicroUsd": 171918,
-    "dailyRemainingMicroUsd": 19870368,
-    "totalRemainingMicroUsd": 828082,
+    "dailyReservedMicroUsd": 162040,
+    "totalReservedMicroUsd": 333958,
+    "dailyRemainingMicroUsd": 19837960,
+    "totalRemainingMicroUsd": 4666042,
     "affordableGenerations": 36,
     "fullRunFits": true
   },
@@ -34,5 +36,5 @@
     "wallMs": 1200000
   },
   "recommendedCumulativeUsd": 5,
-  "cumulativeChangeApplied": false
+  "cumulativeChangeApplied": true
 }

@@ -1,6 +1,6 @@
 # Milestone 7G Phase C: employment grounding and proposed town evaluation
 
-Prepared October 31, 2026. **Offline preparation only; a new live run is not approved.** No Meta API requests, new live approvals, live claims, deployments, commits or pushes were made during this work. The [Phase B live report](milestone-7g-phase-b-live-evaluation.md) remains the latest live evidence. This document contains technical readiness details kept out of the public README.
+Prepared October 31, 2026. **Follow-up: the user approved execution and the temporary $5 cumulative allowance on November 1. The [Phase C live report](milestone-7g-phase-c-live-evaluation.md) records nine validated generations and an independent request/reply before the tenth token preflight stopped the run.** The sections below preserve the original offline preparation record; no live API calls or new live approvals were made during that preparation. This document contains technical readiness details kept out of the public README.
 
 ## Employment grounding
 

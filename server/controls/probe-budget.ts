@@ -14,6 +14,16 @@ export function effectiveDailyProbeUsd(dailyUsd: number, until?: string, now = n
   return day <= until ? dailyUsd : Math.min(dailyUsd, .25);
 }
 
+// Keep all lifetime reservations when the temporary cumulative allowance ends.
+// If they exceed the restored cap, new calls fail closed pending review.
+export function effectiveTotalProbeUsd(totalUsd:number, until?:string, now=new Date()):number {
+  usdToMicroUsd(totalUsd);
+  if(until===undefined)return totalUsd;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(until) || !Number.isFinite(Date.parse(until)) || new Date(until).toISOString().slice(0,10)!==until)throw new Error('Invalid total allowance expiry');
+  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Lagos',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  return day<=until?totalUsd:Math.min(totalUsd,1);
+}
+
 export function usdToMicroUsd(usd: number): number {
   if (!Number.isFinite(usd) || usd < 0 || usd > 150) throw new Error('Invalid budget amount');
   return Math.ceil(usd * 1_000_000);
@@ -30,12 +40,12 @@ export async function initializeProbeBudget(path: string): Promise<void> {
 // Keep the lock for the whole probe so multiple CLI processes cannot overlap calls.
 export async function withProbeBudget<T>(
   path: string,
-  limits: { dailyUsd: number; totalUsd: number; dailyUsdUntil?: string },
+  limits: { dailyUsd: number; totalUsd: number; dailyUsdUntil?: string; totalUsdUntil?:string },
   work: (reserve: (maximumUsd: number) => Promise<void>) => Promise<T>,
   now = new Date(),
 ): Promise<T> {
   const dailyLimit = usdToMicroUsd(effectiveDailyProbeUsd(limits.dailyUsd, limits.dailyUsdUntil, now));
-  const totalLimit = usdToMicroUsd(limits.totalUsd);
+  const totalLimit = usdToMicroUsd(effectiveTotalProbeUsd(limits.totalUsd, limits.totalUsdUntil, now));
   const lock = await open(`${path}.lock`, 'wx', 0o600);
   try {
     const ledger: Ledger = JSON.parse(await readFile(path, 'utf8'));

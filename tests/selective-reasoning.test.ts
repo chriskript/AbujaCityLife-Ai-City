@@ -10,6 +10,7 @@ import { MetaNeighbourhoodProvider, MockNeighbourhoodProvider, maximumGeneration
 import { initializeProbeBudget } from '../server/controls/probe-budget.js';
 import { runSocietyProbe } from '../server/evaluation/society-probe.js';
 import type { NpcDecisionRequest } from '../shared/neighbourhood/types.js';
+import { prepareModelInput } from '../server/inference/model-context.js';
 
 const directories:string[]=[],sessions:NeighbourhoodServerSession[]=[];
 afterEach(async()=>{for(const s of sessions.splice(0))await s.close();for(const d of directories.splice(0))await rm(d,{recursive:true,force:true});});
@@ -66,7 +67,7 @@ describe('selective society reasoning readiness (offline only)',()=>{
   const dir=await directory(),ledgerPath=join(dir,'ledger.json');await initializeProbeBudget(ledgerPath);
   const world=createTown('transport-contract'),request=world.requestDecision('amina')!,invalid={goalId:'restock',reason:'Boundary mistake',action:{type:'propose-transport',recipient:'musa',quantity:8}};
   const fetcher=vi.fn(async(url:unknown,init?:RequestInit)=>{
-   const body=JSON.parse(String(init?.body));expect(JSON.parse(body.input)).toEqual(request);expect(body).not.toHaveProperty('npcs');
+   const body=JSON.parse(String(init?.body));expect(JSON.parse(body.input)).toEqual(prepareModelInput(request,'decision').input);expect(body).not.toHaveProperty('npcs');
    return new Response(JSON.stringify(String(url).endsWith('input_tokens')?{input_tokens:5000}:{model:'muse-spark-1.3',status:'completed',usage:{input_tokens:5000,output_tokens:100},output:[{type:'message',role:'assistant',content:[{type:'output_text',text:JSON.stringify(invalid)}]}]}),{status:200});
   });
   const provider=new MetaNeighbourhoodProvider({apiKey:'offline-test-key',ledgerPath,dailyUsd:.25,totalUsd:1,fetcher:fetcher as typeof fetch});

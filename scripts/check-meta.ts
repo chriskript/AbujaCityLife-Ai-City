@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { loadEnvFile } from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { modelRates } from '../server/inference/meta-probe.js';
-import { usdToMicroUsd, effectiveDailyProbeUsd } from '../server/controls/probe-budget.js';
+import { usdToMicroUsd, effectiveDailyProbeUsd, effectiveTotalProbeUsd } from '../server/controls/probe-budget.js';
 
 // Offline only. Never import or invoke the live probe CLI from this check.
 function git(...args: string[]): number | null {
@@ -20,7 +20,7 @@ try {
   const model = process.env.META_MODEL ?? 'muse-spark-1.3';
   if (!Object.hasOwn(modelRates, model)) throw new Error('Unsupported model');
   usdToMicroUsd(effectiveDailyProbeUsd(Number(process.env.META_PROBE_DAILY_USD ?? '0.25'),process.env.META_PROBE_DAILY_USD_UNTIL));
-  usdToMicroUsd(Number(process.env.META_PROBE_TOTAL_USD ?? '1'));
+  usdToMicroUsd(effectiveTotalProbeUsd(Number(process.env.META_PROBE_TOTAL_USD ?? '1'),process.env.META_PROBE_TOTAL_USD_UNTIL));
   console.log('PASS: model and probe budget configuration are supported.');
   console.log(credentialConfigured ? 'PASS: MODEL_API_KEY is configured (value withheld).' : 'NOT READY: MODEL_API_KEY is not configured.');
   console.log('Offline check only: no Meta requests or paid inference. Authentication and model access are unverified.');

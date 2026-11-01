@@ -17,7 +17,7 @@ try {
     if (!env.MODEL_API_KEY) throw new Error('Missing key');
     const dailyUsd = Number(env.META_PROBE_DAILY_USD ?? '.25'); const totalUsd = Number(env.META_PROBE_TOTAL_USD ?? '1');
     if (![dailyUsd,totalUsd].every(value => Number.isFinite(value) && value > 0 && value <= 150)) throw new Error('Invalid budget');
-    provider = new MetaNeighbourhoodProvider({ apiKey: env.MODEL_API_KEY, ledgerPath: 'runtime/meta-probe-budget.json', dailyUsd, totalUsd, ...(env.META_PROBE_DAILY_USD_UNTIL ? {dailyUsdUntil:env.META_PROBE_DAILY_USD_UNTIL} : {}) });
+    provider = new MetaNeighbourhoodProvider({ apiKey: env.MODEL_API_KEY, ledgerPath: 'runtime/meta-probe-budget.json', dailyUsd, totalUsd, inputTokenLimit:plan.inputTokenLimit ?? 6000, ...(env.META_PROBE_DAILY_USD_UNTIL ? {dailyUsdUntil:env.META_PROBE_DAILY_USD_UNTIL} : {}), ...(env.META_PROBE_TOTAL_USD_UNTIL ? {totalUsdUntil:env.META_PROBE_TOTAL_USD_UNTIL} : {}) });
   }
   // One process owns the checkpoint. A crash leaves the lock for explicit operator review.
   const lock = await open('runtime/neighbourhood-session.lock', 'wx', 0o600);

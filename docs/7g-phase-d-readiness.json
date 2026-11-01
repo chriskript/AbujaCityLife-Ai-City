@@ -1,0 +1,41 @@
+{
+  "mode": "offline-read-only",
+  "checkedAt": "2026-11-01T09:50:14.408Z",
+  "timezone": "Africa/Lagos",
+  "model": "muse-spark-1.3",
+  "keyConfigured": true,
+  "keySource": "ignored-env-file",
+  "matchesPriorSuccessfulConfiguration": false,
+  "currentAuthentication": "unverified-no-api-calls",
+  "modelAccess": "unverified-no-api-calls",
+  "configuredDailyUsd": 20,
+  "dailyUsd": 20,
+  "dailyUsdUntil": "2026-11-04",
+  "configuredTotalUsd": 5,
+  "totalUsd": 5,
+  "totalUsdUntil": "2026-11-04",
+  "ledgerLockPresent": false,
+  "inputTokenLimit": 8000,
+  "budget": {
+    "day": "2026-11-01",
+    "perCallMicroUsd": 18704,
+    "requiredMicroUsd": 897792,
+    "dailyReservedMicroUsd": 162040,
+    "totalReservedMicroUsd": 333958,
+    "dailyRemainingMicroUsd": 19837960,
+    "totalRemainingMicroUsd": 4666042,
+    "affordableGenerations": 48,
+    "fullRunFits": true
+  },
+  "approval": "not-created-by-this-preparation",
+  "generations": 0,
+  "proposedEvaluation": {
+    "phase": "7g-d-context",
+    "maximumGenerations": 48,
+    "maximumIncrementalUsd": 0.9,
+    "simulationSeconds": 1200,
+    "wallMs": 1800000,
+    "inputTokenLimit": 8000
+  },
+  "approvalRequired": true
+}

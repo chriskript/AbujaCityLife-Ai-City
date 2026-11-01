@@ -22,7 +22,7 @@ The player can observe, talk and intervene without directing every life. Unity G
 
 The local experience runs with **deterministic offline policies by default**, with no API charges. Offline residents already navigate, earn and spend, exchange messages, respond to requests and complete deliveries. Mock conversation is clearly labelled.
 
-**Muse Spark 1.3**, through Meta Model API, adds language-model reasoning at selected decision opportunities. Live evaluations have demonstrated individual choices and validated stock and purchasing consequences. Reliable, independently reasoned AI-to-AI cooperation has **not yet been demonstrated**. Muse receives the deciding resident's limited knowledge and personal context; proposed actions must pass the simulation's rules before changing the world.
+**Muse Spark 1.3**, through Meta Model API, adds language-model reasoning at selected decision opportunities. Live evaluations have demonstrated individual choices, a resident-to-resident request and independent reply, and validated economic consequences. Completed model-negotiated collaboration and sustained social autonomy remain **unproven**. Muse receives the deciding resident's limited knowledge and personal context; proposed actions must pass the simulation's rules before changing the world.
 
 Live use requires separate configuration and explicit approval. See [Meta setup and evaluation documentation](docs/meta-api.md).
 
@@ -60,7 +60,7 @@ AI Town is a separate hackathon entry that builds on the broader Abuja City Life
 - [Unity Gardens: history and residents](docs/unity-gardens.md)
 - [Local operation and controls](docs/backend.md)
 - [Simulation architecture](docs/architecture.md)
-- [Muse evaluations and next-session readiness](docs/milestone-7g-phase-c-plan.md)
+- [Muse: live evidence and limitations](docs/milestone-7g-phase-c-live-evaluation.md)
 - [Project provenance and attribution](docs/provenance.md)
 
 No project licence has been selected. Third-party dependencies retain their own licences.
