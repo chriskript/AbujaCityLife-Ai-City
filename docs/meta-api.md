@@ -36,6 +36,8 @@ The CLI sends one token-counting request and at most one generation request to `
 
 Only `muse-spark-1.3` and `muse-wonder-1.0` Standard mode are allowed. Defaults are Spark 1.3, a **$0.25 daily probe limit**, a **$1 total probe limit**, a maximum 16,000 preflight input tokens, and a 2,048-token output cap including reasoning. Environment limit names are `META_PROBE_DAILY_USD` and `META_PROBE_TOTAL_USD`.
 
+On October 31 the user authorised a temporary internal **$20/day** allowance through November 4, 2026. Local configuration pairs it with `META_PROBE_DAILY_USD_UNTIL=2026-11-04`; the shared ledger gate reverts to at most $0.25/day at November 5 Lagos midnight. Existing reservations, the separate $1 total limit, explicit live approval and all per-run ceilings remain. This changes no provider restriction or credential. The neighbourhood provider retains its stricter 6,000-input-token cap. See the [Phase B execution report](milestone-7g-phase-b-live-evaluation.md).
+
 The result reports provider identity, model, decision, validation, latency, token usage, and estimated cost. Raw exceptions are suppressed to protect credentials. A disabled probe prints a notice and makes no network calls:
 
 ```bash

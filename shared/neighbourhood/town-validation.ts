@@ -33,6 +33,7 @@ export function assertTownEconomy(state: WorldState): void {
     for (const [id,known] of Object.entries(npc.knowledge.businesses)) {
       check(Object.hasOwn(town.businesses,id) && known && typeof known==='object');
       check((known.available===null || typeof known.available==='boolean') && (known.observedAt===null ? known.available===null : Number.isFinite(known.observedAt) && known.observedAt>=0 && known.observedAt<=state.time));
+      check(known.funded===undefined || typeof known.funded==='boolean' && known.observedAt!==null);
     }
     if (npc.activity.kind==='work' || npc.activity.kind==='wait') {
       const activity=npc.activity;

@@ -295,11 +295,11 @@ export class Neighbourhood {
     const npc = this.state.npcs[id]!;
     if (!this.atNode(id)) return;
     if (this.state.town) for (const business of Object.values(this.state.town.businesses)) if (business.node === npc.node) {
-      const available = this.workAvailable(business.id), previous = npc.knowledge.businesses?.[business.id];
+      const available = this.workAvailable(business.id), funded = business.coins >= business.wage, previous = npc.knowledge.businesses?.[business.id];
       npc.knowledge.businesses ??= {};
-      if (!previous || previous.available !== available || previous.siteNode && previous.siteNode!==business.node) {
-        npc.knowledge.businesses[business.id] = {available,observedAt:this.state.time,siteNode:business.node};
-        this.record('work-observed',id,[id],business.id,available ? 'Observed a funded work opening' : 'Observed no current work opening',{available},'observed');
+      if (!previous || previous.available !== available || previous.funded !== funded || previous.siteNode && previous.siteNode!==business.node) {
+        npc.knowledge.businesses[business.id] = {available,funded,observedAt:this.state.time,siteNode:business.node};
+        this.record('work-observed',id,[id],business.id,available ? 'Observed a funded work opening' : 'Observed no current work opening',{available,funded},'observed');
         this.trigger(id,'work-availability-changed');
       }
     }
@@ -334,10 +334,28 @@ export class Neighbourhood {
     }
   }
 
+  private projectWork(id:string): NonNullable<NpcObservation['town']>['work'] {
+    const npc=this.state.npcs[id]!;
+    return Object.entries(npc.knowledge.businesses ?? {}).flatMap(([key,knowledge])=>{
+      const business=this.state.town?.businesses[key];if(!business)return [];
+      const atWorkplace=npc.node===business.node && this.atNode(id);
+      const oldSite=Boolean(knowledge.siteNode && knowledge.siteNode!==business.node);
+      const observedAt=atWorkplace?this.state.time:oldSite?null:knowledge.observedAt;
+      const ineligibleReason=this.validate(id,{type:'take-work',businessId:key});
+      return [{id:key,name:business.name,node:business.node,skill:business.skill,wage:business.wage,seconds:business.seconds,
+        matchesSkill:npc.skills?.includes(business.skill) ?? false,atWorkplace,
+        available:atWorkplace?this.workAvailable(key):oldSite?null:knowledge.available,
+        funded:atWorkplace?business.coins>=business.wage:oldSite?null:knowledge.funded ?? null,
+        observedAt,freshness:atWorkplace?'current' as const:observedAt===null?'unknown' as const:'historical' as const,
+        canTakeNow:ineligibleReason===null,ineligibleReason}];
+    });
+  }
+
   observe(id: NpcId, topic = ''): NpcObservation {
     if (!this.hasResident(id)) throw new Error('Unknown resident');
     const npc = this.state.npcs[id]!;
     const socialContext = projectSocialContext(this.state, id, topic);
+    const work=this.state.town?this.projectWork(id):[];
     const actionConstraints: NpcObservation['actionConstraints'] = {};
     for (const type of ['propose-transport', 'collect-self', 'stock-stall', 'buy', 'eat'] as const) {
       if (npc.capabilities.includes(type)) actionConstraints[type] = { quantity: { ...quantityBounds } };
@@ -370,11 +388,8 @@ export class Neighbourhood {
       ...(this.state.town ? { town: {
         marketPrice:this.state.town.marketPrice,ownsMarket:this.state.town.businesses.market?.owner===id,transportPayment:this.state.town.transportPayment,
         marketServing:npc.node==='market' && this.atNode(id) ? this.marketServing(id) : null,
-        work:Object.entries(npc.knowledge.businesses ?? {}).flatMap(([key,knowledge])=>{
-          const business=this.state.town!.businesses[key];
-          return business && npc.skills?.includes(business.skill) ? [{id:business.id,name:business.name,node:business.node,skill:business.skill,wage:business.wage,seconds:business.seconds,
-            available:npc.node===business.node && this.atNode(id) ? this.workAvailable(key) : knowledge.siteNode && knowledge.siteNode!==business.node?null:knowledge.available,observedAt:npc.node===business.node && this.atNode(id) ? this.state.time : knowledge.siteNode && knowledge.siteNode!==business.node?null:knowledge.observedAt}] : [];
-        }),
+        work,
+        eligibleWorkIds:work.filter(job=>job.canTakeNow).map(job=>job.id),
       }} : {}),
       resources: npc.knowledge.resources,
       tasks: Object.entries(npc.knowledge.tasks).flatMap(([taskId, status]) => {
@@ -726,9 +741,13 @@ export class Neighbourhood {
           if (this.state.town) for (const witness of this.witnesses(id)) this.perceive(witness);
         } else if (activity.kind === 'travel') {
           let distance = (npc.mobility === 'taxi' ? 14 : 4) * dt;
-          while (distance > 0 && npc.activity === activity) {
+          while (npc.activity === activity) {
             const edge = this.map.edges.find(item => item.id === activity.path.edgeIds[activity.step]);
             if (!edge) { this.arrive(id); break; }
+            // Co-located entrance/street connectors consume no distance. Finish
+            // them even when the preceding edge used this tick's last metre,
+            // so every persisted travel step remains a valid checkpoint.
+            if (distance <= 0 && edge.distance > 0) break;
             if (this.state.roads.blockedEdges.includes(edge.id)) {
               this.fail(id, `Encountered blocked edge ${edge.id}`); this.perceive(id); break;
             }

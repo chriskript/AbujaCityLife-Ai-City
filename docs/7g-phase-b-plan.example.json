@@ -1,0 +1,11 @@
+{
+  "id": "7g-b-unity-REPLACE-AFTER-APPROVAL",
+  "phase": "7g-b-unity",
+  "approved": false,
+  "notBefore": "2026-11-01T00:00:00+01:00",
+  "expiresAt": "SET-AFTER-EXPLICIT-APPROVAL",
+  "maxGenerations": 12,
+  "maxEstimatedUsd": 0.25,
+  "allowAutonomy": true,
+  "residents": ["amina", "musa", "chris", "halima"]
+}

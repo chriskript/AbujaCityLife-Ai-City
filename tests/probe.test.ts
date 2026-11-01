@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { initializeProbeBudget, withProbeBudget } from '../server/controls/probe-budget.js';
+import { initializeProbeBudget, withProbeBudget, effectiveDailyProbeUsd } from '../server/controls/probe-budget.js';
 import { inferenceCost, probeMeta } from '../server/inference/meta-probe.js';
 import { TaxiAgent } from '../shared/agent/taxi-agent.js';
 import { MockProvider } from '../server/inference/mock-provider.js';
@@ -20,6 +20,17 @@ afterEach(async () => {
 
 describe('persistent probe spending gate', () => {
   const limits = { dailyUsd: 0.25, totalUsd: 1 };
+  it('expires a temporary $20 daily allowance at Lagos midnight without changing the total limit', async () => {
+    const until='2026-11-04';
+    expect(effectiveDailyProbeUsd(20,until,new Date('2026-11-04T22:59:59Z'))).toBe(20);
+    expect(effectiveDailyProbeUsd(20,until,new Date('2026-11-04T23:00:00Z'))).toBe(.25);
+    expect(()=>effectiveDailyProbeUsd(20,'2026-02-31')).toThrow('expiry');
+    const path=await budgetPath();await initializeProbeBudget(path);
+    await withProbeBudget(path,{dailyUsd:20,totalUsd:1,dailyUsdUntil:until},reserve=>reserve(.8),new Date('2026-10-31T10:00:00Z'));
+    await expect(withProbeBudget(path,{dailyUsd:20,totalUsd:1,dailyUsdUntil:until},reserve=>reserve(.3),new Date('2026-11-01T10:00:00Z'))).rejects.toThrow('exhausted');
+    await expect(withProbeBudget(path,{dailyUsd:20,totalUsd:10,dailyUsdUntil:until},reserve=>reserve(.3),new Date('2026-11-05T00:00:00Z'))).rejects.toThrow('exhausted');
+    expect(JSON.parse(await readFile(path,'utf8')).reservations).toHaveLength(1);
+  });
   it('retains reservations across invocations and failures', async () => {
     const path = await budgetPath(); await initializeProbeBudget(path);
     await expect(withProbeBudget(path, limits, async reserve => { await reserve(0.2); throw new Error('timeout'); })).rejects.toThrow('timeout');

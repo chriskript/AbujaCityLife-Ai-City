@@ -1,0 +1,11 @@
+{
+  "id": "7g-c-unity-REPLACE-AFTER-APPROVAL",
+  "phase": "7g-c-unity",
+  "approved": false,
+  "notBefore": "SET-AFTER-EXPLICIT-APPROVAL",
+  "expiresAt": "SET-AFTER-EXPLICIT-APPROVAL",
+  "maxGenerations": 36,
+  "maxEstimatedUsd": 0.60,
+  "allowAutonomy": true,
+  "residents": ["musa", "amina", "zainab", "chris", "fatima", "tunde", "halima", "ibrahim", "yusuf", "ngozi", "emeka", "grace", "ladi", "sadiq", "maryam", "bisi"]
+}

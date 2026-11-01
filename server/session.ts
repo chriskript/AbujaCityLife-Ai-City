@@ -25,10 +25,11 @@ interface Checkpoint {
   routineRequests?: number;
   progression?: { used: number; limit: number; cursor: number };
 }
-export interface LivePlan { id: string; approved: true; expiresAt: string; maxGenerations: number; maxEstimatedUsd: number; allowAutonomy: boolean }
+export interface LivePlan { id: string; approved: true; expiresAt: string; maxGenerations: number; maxEstimatedUsd: number; allowAutonomy: boolean; phase?:string; residents?:string[]; notBefore?:string }
 export function validateLivePlan(value: unknown): asserts value is LivePlan {
   const p = value as LivePlan;
-  if (!p || p.approved !== true || !/^[\w-]{1,80}$/.test(p.id) || !Number.isFinite(Date.parse(p.expiresAt)) || Date.parse(p.expiresAt) <= Date.now() || !Number.isSafeInteger(p.maxGenerations) || p.maxGenerations < 1 || p.maxGenerations > 12 || !Number.isFinite(p.maxEstimatedUsd) || p.maxEstimatedUsd < maximumGenerationUsd || p.maxEstimatedUsd > .25 || typeof p.allowAutonomy !== 'boolean') throw new Error('A valid separately approved live evaluation plan is required');
+  const expanded=p?.phase==='7g-c-unity';
+  if (!p || p.approved !== true || !/^[\w-]{1,80}$/.test(p.id) || !Number.isFinite(Date.parse(p.expiresAt)) || Date.parse(p.expiresAt) <= Date.now() || !Number.isSafeInteger(p.maxGenerations) || p.maxGenerations < 1 || p.maxGenerations > (expanded?36:12) || !Number.isFinite(p.maxEstimatedUsd) || p.maxEstimatedUsd < maximumGenerationUsd || p.maxEstimatedUsd > (expanded?.60:.25) || typeof p.allowAutonomy !== 'boolean' || expanded && (p.maxGenerations!==36 || p.maxEstimatedUsd!==.60 || !p.allowAutonomy || JSON.stringify(p.residents)!==JSON.stringify(townResidents(16).map(n=>n.id)) || !p.notBefore || !Number.isFinite(Date.parse(p.notBefore)) || Date.parse(p.notBefore)>Date.now())) throw new Error('A valid separately approved live evaluation plan is required');
 }
 export class NeighbourhoodServerSession {
   private world!: Neighbourhood;
@@ -44,7 +45,7 @@ export class NeighbourhoodServerSession {
   private constructor(private readonly options: ConstructorParametersInternal) { this.provider = options.provider ?? new MockNeighbourhoodProvider(); }
   static async open(options: ConstructorParametersInternal): Promise<NeighbourhoodServerSession> {
     const session = new NeighbourhoodServerSession(options);
-    if (session.provider.mode === 'live-meta') validateLivePlan(options.plan);
+    if (session.provider.mode === 'live-meta' || options.plan) validateLivePlan(options.plan);
     await mkdir(dirname(options.checkpoint), { recursive: true });
     try {
       const savedText=await readFile(options.checkpoint,'utf8');
@@ -54,7 +55,7 @@ export class NeighbourhoodServerSession {
       const npcIds = session.world.residentIds;
       if (data.routineRecent !== undefined && (!Array.isArray(data.routineRecent) || data.routineRecent.length > (session.world.hasTownEconomy ? offlineTownLimits.perMinute : 6) || data.routineRecent.some(time => !Number.isFinite(time) || time < 0 || time > session.world.time))) throw new Error('Invalid routine accounting checkpoint');
       if (data.routineRequests!==undefined && (!Number.isSafeInteger(data.routineRequests) || data.routineRequests<0 || data.routineRequests>offlineTownLimits.maximumDecisions)) throw new Error('Invalid routine allowance');
-      if (data.requests > 48 || data.recent.length > 6 || data.recent.some(time => !Number.isFinite(time) || time < 0) || Object.keys(data.receipts).length > 512 || Object.values(data.receipts).some(receipt => !receipt || !/^[a-f0-9]{64}$/.test(receipt.hash) || !['pending','done','failed'].includes(receipt.status)) || Object.entries(data.last).some(([id, time]) => !npcIds.includes(id as NpcId) || !time || !Number.isFinite(time.wall) || !Number.isFinite(time.simulation) || time.simulation < 0) || data.metrics.length > 48 || (data.plan !== null && (!data.plan || !/^[\w-]{1,80}$/.test(data.plan.id) || !Number.isSafeInteger(data.plan.used) || data.plan.used < 0 || data.plan.used > 12 || !Number.isFinite(data.plan.reservedUsd) || data.plan.reservedUsd < 0 || data.plan.reservedUsd > .25))) throw new Error('Invalid server accounting checkpoint');
+      if (data.requests > 48 || data.recent.length > 6 || data.recent.some(time => !Number.isFinite(time) || time < 0) || Object.keys(data.receipts).length > 512 || Object.values(data.receipts).some(receipt => !receipt || !/^[a-f0-9]{64}$/.test(receipt.hash) || !['pending','done','failed'].includes(receipt.status)) || Object.entries(data.last).some(([id, time]) => !npcIds.includes(id as NpcId) || !time || !Number.isFinite(time.wall) || !Number.isFinite(time.simulation) || time.simulation < 0) || data.metrics.length > 48 || (data.plan !== null && (!data.plan || !/^[\w-]{1,80}$/.test(data.plan.id) || !Number.isSafeInteger(data.plan.used) || data.plan.used < 0 || data.plan.used > (options.plan?.phase==='7g-c-unity'?36:12) || !Number.isFinite(data.plan.reservedUsd) || data.plan.reservedUsd < 0 || data.plan.reservedUsd > (options.plan?.phase==='7g-c-unity'?.60:.25)))) throw new Error('Invalid server accounting checkpoint');
       for (const id of npcIds) if (!Array.isArray(data.history[id]) || data.history[id].length > 12) throw new Error('Invalid conversation checkpoint');
       if (JSON.parse(data.world).version === 1) {
         // Keep an exclusive rollback copy before upgrading an existing operator world.
@@ -233,8 +234,13 @@ export class NeighbourhoodServerSession {
       const npcIds = this.world.residentIds;
       if(actorId && this.provider.sourceFor)throw new SessionError(400,'Selective reasoning uses autonomous opportunities, not forced resident decisions');
       if (actorId && !this.hasResident(actorId)) throw new SessionError(400, 'Unknown resident');
-      for (let i = 0; i < (actorId ? 1 : npcIds.length); i++) {
-        const id = actorId ?? npcIds[(this.cursor++ % npcIds.length)]!;
+      const candidates=actorId?[actorId]:npcIds.map((_,i)=>npcIds[(this.cursor+i)%npcIds.length]!);
+      if(!actorId && this.provider.priorityFor){
+        const priorities=new Map(candidates.map(id=>[id,this.provider.priorityFor!(this.world.observe(id),this.world.decisionTriggers(id))]));
+        candidates.sort((a,b)=>priorities.get(b)!-priorities.get(a)!);
+      }
+      for (const id of candidates) {
+        if(!actorId)this.cursor++;
         if(this.phoneControl.controlled(this.world.id,id))continue;
         const previousLast = this.data.last[id];
         if (!actorId && (previousLast?.worldId === undefined || previousLast.worldId === this.world.id) && this.world.time - (previousLast?.simulation ?? -Infinity) < 20) continue;

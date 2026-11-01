@@ -29,7 +29,7 @@ export interface Inhabitant {
     transporters?: NpcId[];
     contacts?: NpcId[];
     sharedContacts?: NpcId[];
-    businesses?: Record<string, { available: boolean | null; observedAt: number | null; siteNode?:string }>;
+    businesses?: Record<string, { available: boolean | null; observedAt: number | null; siteNode?:string; funded?:boolean }>;
     placeFacts?: Record<string, PlaceFacts>;
     tasks: Record<string, TaskStatus>;
     resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
@@ -104,7 +104,9 @@ export interface NpcObservation {
   communication?: { contacts: { id: NpcId; name: string; canTransport: boolean }[]; threads: Communication[]; canContact: NpcId[]; canCall: NpcId[]; contactOffers: NpcId[]; rules: {textDelay:number;callLifetime:number;textLifetime:number;cooldown:number;maximumThreads:number;maximumPending:number} };
   town?: {
     marketPrice: number; ownsMarket: boolean; transportPayment: number; marketServing: boolean | null;
-    work: { id: string; name: string; node: string; skill: string; wage: number; seconds: number; available: boolean | null; observedAt: number | null }[];
+    work: { id: string; name: string; node: string; skill: string; wage: number; seconds: number; available: boolean | null; observedAt: number | null;
+      matchesSkill:boolean; atWorkplace:boolean; funded:boolean|null; freshness:'current'|'historical'|'unknown'; canTakeNow:boolean; ineligibleReason:string|null }[];
+    eligibleWorkIds:string[];
   };
   resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
   tasks: Pick<TransportTask, 'id' | 'requester' | 'recipient' | 'quantity' | 'pickup' | 'destination' | 'status' | 'expiresAt' | 'communicationId'>[]; knownBlockedEdges: string[];

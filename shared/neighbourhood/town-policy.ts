@@ -67,7 +67,7 @@ export function townDecision(request: NpcDecisionRequest, choices: MockChoices):
   const productionNeed=a.skills?.includes('supply') && (o.resources.supplierGoods ?? 0)<12;
   const needWork=a.needs.income>.35 || (a.inventory.coins ?? 0)<6 || productionNeed;
   if (needWork) {
-    const postings=town.work.filter(work=>work.available!==false || work.observedAt===null || o.time-work.observedAt>=120)
+    const postings=town.work.filter(work=>a.skills?.includes(work.skill) && (work.available!==false || work.observedAt===null || o.time-work.observedAt>=120))
       .sort((x,y)=>Number(y.skill!=='general')-Number(x.skill!=='general') || y.wage/y.seconds-x.wage/x.seconds);
     for (const posting of postings) {
       if (a.node===posting.node && posting.available===true) return choose({type:'take-work',businessId:posting.id},'Accept a funded opening suited to my skills and needs');

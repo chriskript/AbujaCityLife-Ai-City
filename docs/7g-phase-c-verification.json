@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-31T11:20:42.315Z",
+  "mode": "offline-only",
+  "protectedFilesUnchanged": {
+    ".env": true,
+    "runtime/meta-probe-budget.json": true,
+    "runtime/neighbourhood-session.json": true,
+    "runtime/town-headless.json": true,
+    "runtime/approved-7g-phase-b-plan.json": true
+  },
+  "phaseCApprovalExists": false,
+  "newLiveCalls": 0,
+  "cumulativeAllowanceChanged": false,
+  "tests": {
+    "files": 20,
+    "passed": 328,
+    "command": "npm test -- --maxWorkers=1"
+  },
+  "typecheck": "passed",
+  "productionBuild": "passed; existing large-renderer-chunk warning",
+  "readme": {
+    "words": 580,
+    "localLinks": 7,
+    "allLocalLinksExist": true
+  }
+}

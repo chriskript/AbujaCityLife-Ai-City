@@ -6,6 +6,7 @@ import { NeighbourhoodServerSession, validateLivePlan } from '../server/session.
 import { createNeighbourhoodHttp } from '../server/http.js';
 import { MockNeighbourhoodProvider, MetaNeighbourhoodProvider, maximumGenerationUsd, validateConversation, type NeighbourhoodProvider } from '../server/inference/neighbourhood-provider.js';
 import { initializeProbeBudget } from '../server/controls/probe-budget.js';
+import { employmentDecisionSchema } from '../server/inference/employment-grounding.js';
 import { Neighbourhood } from '../shared/neighbourhood/world.js';
 import type { ConversationContext } from '../shared/neighbourhood/conversation.js';
 import { prepareAutonomyFixture } from '../server/evaluation/autonomy-probe.js';
@@ -206,7 +207,8 @@ describe('Meta neighbourhood contract without paid requests', () => {
     expect(fetcher).toHaveBeenCalledTimes(2); // Token count + fake generation, no retry.
     for (const call of fetcher.mock.calls) {
       const body = JSON.parse(call[1]!.body as string);
-      expect(body.text.format.schema).toEqual(npcDecisionSchema);
+      expect(body.text.format.schema).toEqual(employmentDecisionSchema(request.observation));
+      expect(body.text.format.schema.properties.action.anyOf.find((branch:{properties:{type:{enum:string[]}}})=>branch.properties.type.enum[0]==='propose-transport')).toEqual(npcDecisionSchema.properties.action.anyOf.find(branch=>branch.properties.type.enum[0]==='propose-transport'));
       const observation = JSON.parse(body.input).observation;
       expect(observation.actionConstraints['propose-transport'].quantity).toEqual({ minimum: 1, maximum: 6 });
       expect(observation.actionConstraints['collect-self'].carryingCapacity).toBe(2);
