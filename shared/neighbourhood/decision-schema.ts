@@ -13,6 +13,12 @@ export function isNpcDecision(value: unknown): value is NpcDecision {
   if (!decision.action || typeof decision.action !== 'object' || Array.isArray(decision.action)) return false;
   const action = decision.action as Record<string, unknown>;
   switch (action.type) {
+    case 'order-external': case 'fund-business': return exact(action,['type','businessId','quantity']) && isResidentId(action.businessId) && quantity(action.quantity);
+    case 'invite-social': return exact(action,['type','recipient','destination','channel','seconds','message']) && isResidentId(action.recipient) && text(action.destination) && ['text','nearby'].includes(String(action.channel)) && Number.isFinite(action.seconds) && Number(action.seconds)>=30 && Number(action.seconds)<=180 && text(action.message,160);
+    case 'respond-social': return exact(action,['type','invitationId','response','destination','message']) && text(action.invitationId) && ['accept','decline','postpone','alternative'].includes(String(action.response)) && (action.response==='alternative'?text(action.destination):action.destination===null) && text(action.message,160);
+    case 'join-social': return exact(action,['type','invitationId']) && text(action.invitationId);
+    case 'socialise': return exact(action,['type','invitationId','seconds','message']) && text(action.invitationId) && Number.isFinite(action.seconds) && Number(action.seconds)>=10 && Number(action.seconds)<=60 && text(action.message,160);
+    case 'leave-social': return exact(action,['type','invitationId','message']) && text(action.invitationId) && text(action.message,160);
     case 'offer-contact': return exact(action,['type','recipient']) && isResidentId(action.recipient);
     case 'communicate': return exact(action,['type','recipient','channel','purpose','message','memoryId']) && isResidentId(action.recipient) && ['text','call'].includes(String(action.channel)) && ['chat','request-help'].includes(String(action.purpose)) && text(action.message,160) && (action.memoryId===null || text(action.memoryId));
     case 'respond-communication': return exact(action,['type','communicationId','response','message','memoryId']) && text(action.communicationId) && ['accept','decline','defer','clarify','ignore'].includes(String(action.response)) && text(action.message,160) && (action.memoryId===null || text(action.memoryId));
@@ -40,6 +46,12 @@ export const npcDecisionSchema = {
   properties: {
     goalId: { type: 'string', minLength: 1, maxLength: 120 }, reason: { type: 'string', minLength: 1, maxLength: 400 },
     action: { anyOf: [
+      ...['order-external','fund-business'].map(type=>[type,{businessId:{type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$'},quantity:{type:'integer',...quantityBounds}}]),
+      ['invite-social',{recipient:{type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$'},destination:{type:'string'},channel:{type:'string',enum:['text','nearby']},seconds:{type:'number',minimum:30,maximum:180},message:{type:'string',minLength:1,maxLength:160}}],
+      ['respond-social',{invitationId:{type:'string'},response:{type:'string',enum:['accept','decline','postpone','alternative']},destination:{anyOf:[{type:'string'},{type:'null'}]},message:{type:'string',minLength:1,maxLength:160}}],
+      ['join-social',{invitationId:{type:'string'}}],
+      ['socialise',{invitationId:{type:'string'},seconds:{type:'number',minimum:10,maximum:60},message:{type:'string',minLength:1,maxLength:160}}],
+      ['leave-social',{invitationId:{type:'string'},message:{type:'string',minLength:1,maxLength:160}}],
       ['offer-contact', { recipient: { type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$' } }],
       ['communicate', { recipient: { type:'string',pattern:'^[a-z][a-z0-9_-]{0,47}$' },channel:{type:'string',enum:['text','call']},purpose:{type:'string',enum:['chat','request-help']},message:{type:'string',minLength:1,maxLength:160},memoryId:{anyOf:[{type:'string'},{type:'null'}]} }],
       ['respond-communication', { communicationId:{type:'string'},response:{type:'string',enum:['accept','decline','defer','clarify','ignore']},message:{type:'string',minLength:1,maxLength:160},memoryId:{anyOf:[{type:'string'},{type:'null'}]} }],

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "mode": "offline-only",
+  "liveMetaCalls": 0,
+  "tests": {
+    "command": "npm test",
+    "total": 376,
+    "passed": 376,
+    "failed": 0,
+    "files": 26,
+    "success": true
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "passed": true
+  },
+  "productionBuild": {
+    "command": "npm run build",
+    "passed": true,
+    "warning": "Existing routes chunk exceeds the 500 kB advisory (603.59 kB)."
+  },
+  "endurance": {
+    "command": "npx tsx scripts/economic-endurance.ts",
+    "branches": 2,
+    "simulatedSecondsEach": 3600,
+    "reproduced": true
+  },
+  "sourceExecution": "No live provider invocation, commit, push or deployment."
+}

@@ -1,3 +1,5 @@
+import { enableEconomicContinuity, tradeObservation, validateTrade, executeTrade, advanceTrade } from './economic-continuity.js';
+import { ordinaryRejection, recordRejection } from './decision-recovery.js';
 import { mapFor, initialHomes, initialLocations, workSites, type MapId } from '../world/town-layout.js';
 import { pathToNode } from '../navigation/routes.js';
 import { initialState, defaultResidents } from './initial-state.js';
@@ -10,6 +12,7 @@ import { quantityBounds, transportCapacity, selfCollectionCapacity } from './act
 import { residentPlan, townBusinesses } from './population.js';
 import { initialPlaceFacts } from './knowledge.js';
 import { enableCommunication, communicationObservation, validateCommunication, executeCommunication, advanceCommunications, remoteExchange, communicationRules } from './communication.js';
+import { enableSocialVisits, socialVisitObservation, validateSocialVisit, executeSocialVisit, advanceSocialVisits } from './social-visits.js';
 
 let worldSequence = 0;
 const copy = <T>(value: T): T => structuredClone(value);
@@ -85,7 +88,7 @@ export class Neighbourhood {
   applyPhoneAction(id:NpcId,action:unknown):DecisionOutcome {
     const actor=this.state.npcs[id];if(!actor)return {accepted:false,reason:'unknown-resident',duplicate:false};
     const proposal={goalId:actor.goals[0]!.id,reason:'Player operating this resident’s phone',action};
-    if(!isNpcDecision(proposal) || !['communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'].includes(proposal.action.type))return {accepted:false,reason:'invalid-phone-action',duplicate:false};
+    if(!isNpcDecision(proposal) || !['order-external','fund-business','communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'].includes(proposal.action.type))return {accepted:false,reason:'invalid-phone-action',duplicate:false};
     if(proposal.action.type==='propose-transport' && !remoteExchange(this.state,id,proposal.action.recipient))return {accepted:false,reason:'accepted-discussion-required',duplicate:false};
     if(proposal.action.type==='respond-transport' && (!this.state.tasks[proposal.action.taskId]?.communicationId || actor.knowledge.tasks[proposal.action.taskId]!=='proposed'))return {accepted:false,reason:'delivered-phone-offer-required',duplicate:false};
     const reason=this.validate(id,proposal.action);if(reason)return {accepted:false,reason,duplicate:false};
@@ -99,9 +102,11 @@ export class Neighbourhood {
     for(const id of this.residentIds)this.trigger(id,'communication-available');
   }
   private communicationHost() { return {state:this.state,record:this.record.bind(this),trigger:this.trigger.bind(this)}; }
+  enableEconomicContinuity():void {const candidate=copy(this.state);enableEconomicContinuity(candidate);assertSnapshot(candidate);this.state=candidate;}
+  enableSocialVisits():void {const candidate=copy(this.state);enableSocialVisits(candidate);assertSnapshot(candidate);this.state=candidate;}
   static restore(serialized: string): Neighbourhood {
     const state: unknown = migrateSnapshot(JSON.parse(serialized)); assertSnapshot(state);
-    ensureSocialContext(state); assertSnapshot(state);
+    ensureSocialContext(state); enableEconomicContinuity(state); assertSnapshot(state);
     const world = new Neighbourhood(state.id); world.state = copy(state);
     // No in-flight response survives restoration; new request IDs continue monotonically.
     for (const id of world.residentIds) if (['idle', 'wait'].includes(world.state.npcs[id]!.activity.kind)) world.trigger(id, 'restored');
@@ -356,6 +361,11 @@ export class Neighbourhood {
     const npc = this.state.npcs[id]!;
     const socialContext = projectSocialContext(this.state, id, topic);
     const work=this.state.town?this.projectWork(id):[];
+    const memoryEvidence:NpcObservation['memoryEvidence']=npc.memories.map(memory=>{
+      const event=this.state.events.find(e=>e.id===memory.eventId);
+      const speechOnly=event?.type==='conversation'&&memory.source===id||event?.actor===id&&['communication-sent','communication-response-chosen'].includes(event.type);
+      return {id:memory.id,interpretation:speechOnly?'speech-only':memory.kind==='fact'?'established-fact':memory.kind==='reported'?'unverified-report':memory.kind==='belief'?'uncertain-belief':memory.kind==='commitment'?'commitment':memory.kind==='outcome'?'verified-outcome':'observed-world-event'};
+    });
     const actionConstraints: NpcObservation['actionConstraints'] = {};
     for (const type of ['propose-transport', 'collect-self', 'stock-stall', 'buy', 'eat'] as const) {
       if (npc.capabilities.includes(type)) actionConstraints[type] = { quantity: { ...quantityBounds } };
@@ -368,14 +378,22 @@ export class Neighbourhood {
       carryingCapacity: transportCapacity,
       remainingCarryingCapacity: Math.max(0, transportCapacity - npc.inventory.goods),
     };
+    const local=this.atNode(id),placeKnowledge=projectPlaceKnowledge(npc,this.state.events,this.state.time);
+    // Reading a physically visible stall is current, even when stock is unchanged.
+    // The old event remains historical; the new snapshot evidence is scoped to this instant.
+    for(const place of placeKnowledge)if(local&&place.placeId===npc.node) {
+      const amount=place.placeId==='market'?this.state.resources.marketGoods:place.placeId==='centre'?this.state.resources.supplierGoods:null;
+      if(amount!==null)place.stock={value:amount,source:'observed',observedAt:this.state.time,evidenceId:`visible-stock:${id}:${place.placeId}:${this.state.revision}`,freshness:'current'};
+      if(place.placeId==='market')place.salesOpen={value:this.state.resources.salesOpen,source:'observed',observedAt:this.state.time,evidenceId:`visible-sales:${id}:${this.state.revision}`,freshness:'current'};
+    }
     return copy({
+      ...(this.state.decisionRecovery?.[id]?{decisionRecovery:this.state.decisionRecovery[id]}:{}),
+      ...(this.state.trade?{wholesale:tradeObservation(this.state,id)!}:{}),
       actor: npc, time: this.state.time,mapId:this.state.mapId,
       ...(socialContext ? { socialContext } : {}),
       places: this.map.places.filter(place => npc.knowledge.places.includes(place.id)),
-      placeKnowledge: projectPlaceKnowledge(npc, this.state.events, this.state.time),
-      memoryEvidence: npc.memories.map(memory => ({ id: memory.id, interpretation:
-        this.state.events.find(event => event.id === memory.eventId)?.type === 'conversation' && memory.source === id ? 'speech-only' :
-        memory.kind === 'fact' ? 'established-fact' : memory.kind === 'reported' ? 'unverified-report' : memory.kind === 'belief' ? 'uncertain-belief' : memory.kind === 'commitment' ? 'commitment' : memory.kind === 'outcome' ? 'verified-outcome' : 'observed-world-event' })),
+      placeKnowledge,
+      memoryEvidence,
       nearbyPeople: this.residentIds.filter(other => this.nearby(id, other)).map(other => ({
         id: other, name: npc.knowledge.people.includes(other) ? this.state.npcs[other]!.name : null,
         occupation: npc.knowledge.people.includes(other) ? this.state.npcs[other]!.occupation : null,
@@ -385,13 +403,15 @@ export class Neighbourhood {
       encounters: Object.values(this.state.social.interactions).filter(item => item.initiator === id || item.recipient === id).slice(-8),
       encounterOpportunities: this.residentIds.filter(other => this.canEncounter(id, other)),
       ...(this.state.communication ? {communication:communicationObservation(this.state,id)!} : {}),
+      ...(this.state.socialVisits ? {socialVisits:socialVisitObservation(this.state,id)!} : {}),
       ...(this.state.town ? { town: {
         marketPrice:this.state.town.marketPrice,ownsMarket:this.state.town.businesses.market?.owner===id,transportPayment:this.state.town.transportPayment,
         marketServing:npc.node==='market' && this.atNode(id) ? this.marketServing(id) : null,
         work,
+        purchase:npc.node==='market' && this.atNode(id)?{canBuyOneNow:this.validate(id,{type:'buy',quantity:1})===null,ineligibleReason:this.validate(id,{type:'buy',quantity:1}),quantityKnown:this.state.resources.marketGoods}:{canBuyOneNow:null,ineligibleReason:null,quantityKnown:null},
         eligibleWorkIds:work.filter(job=>job.canTakeNow).map(job=>job.id),
       }} : {}),
-      resources: npc.knowledge.resources,
+      resources: {...npc.knowledge.resources,...(local&&npc.node==='market'?{marketGoods:this.state.resources.marketGoods,salesOpen:this.state.resources.salesOpen}:{}),...(local&&npc.node==='centre'?{supplierGoods:this.state.resources.supplierGoods}:{})},
       tasks: Object.entries(npc.knowledge.tasks).flatMap(([taskId, status]) => {
         const task = this.state.tasks[taskId];
         return task ? [{ id: task.id, requester: task.requester, recipient: task.recipient, quantity: task.quantity, pickup: task.pickup, destination: task.destination, status, expiresAt: task.expiresAt,...(task.communicationId?{communicationId:task.communicationId}:{}) }] : [];
@@ -416,7 +436,9 @@ export class Neighbourhood {
 
   requestDecision(id: NpcId): NpcDecisionRequest | null {
     if (!this.hasResident(id)) return null;
+    if((this.state.decisionRecovery?.[id]?.blockedUntil ?? 0)>this.state.time)return null;
     if (!this.state.triggers[id]?.length || [...this.pending.values()].some(request => request.actorId === id)) return null;
+    this.perceive(id);
     const observation = this.observe(id);
     if (!observation.permittedActions.length) return null;
     const request: NpcDecisionRequest = {
@@ -433,6 +455,10 @@ export class Neighbourhood {
     this.pending.delete(requestId);
     this.record('inference-unavailable', request.actorId, [request.actorId], requestId, 'No inference result; no action executed');
     // No automatic retry loop. A subsequent meaningful event can trigger a new decision.
+  }
+  interruptDecision(requestId:string):void {
+    const request=this.pending.get(requestId);if(!request)return;
+    this.record('inference-interrupted',request.actorId,[request.actorId],requestId,'Muse decision remains pending for manual review; no offline substitution or automatic retry');
   }
 
   applyDecision(requestId: string, proposal: unknown, provenance: { mode: 'mock' | 'meta' | 'player'; model: string }): DecisionOutcome {
@@ -456,10 +482,12 @@ export class Neighbourhood {
     this.processed.set(requestId, outcome);
     if (this.processed.size > 512) this.processed.delete(this.processed.keys().next().value!);
     if (reason) {
+      if(isNpcDecision(proposal)&&ordinaryRejection(reason))recordRejection(this.communicationHost(),actor.id,requestId,reason,proposal.action);
       if (reason === 'stale-actor') this.trigger(actor.id, 'state-changed');
       return outcome;
     }
     if (!isNpcDecision(proposal)) throw new Error('Unreachable invalid decision');
+    if(this.state.decisionRecovery?.[actor.id])delete this.state.decisionRecovery[actor.id];
     actor.intention = { goalId: proposal.goalId, reason: proposal.reason }; actor.revision++;
     this.record('intention-selected', actor.id, [actor.id], proposal.goalId, proposal.reason);
     this.execute(actor.id, proposal.action);
@@ -474,7 +502,9 @@ export class Neighbourhood {
     const npc = this.state.npcs[id]!;
     if (!npc.capabilities.includes(action.type)) return 'missing-capability';
     if (!this.available(id)) return 'actor-busy';
+    const tradeError=validateTrade(this.state,id,action);if(tradeError)return tradeError;
     const communicationError=validateCommunication(this.state,id,action);if(communicationError)return communicationError;
+    const socialError=validateSocialVisit(this.state,id,action);if(socialError)return socialError;
     const town = this.state.town;
     if (action.type === 'take-work') {
       const business = town?.businesses[action.businessId];
@@ -553,6 +583,8 @@ export class Neighbourhood {
 
   private execute(id: NpcId, action: Action): void {
     const npc = this.state.npcs[id]!; npc.activity = { kind: 'idle' };
+    if(executeTrade(this.communicationHost(),id,action))return;
+    if(executeSocialVisit(this.communicationHost(),id,action,destination=>this.travel(id,destination,null,null)))return;
     if(executeCommunication(this.communicationHost(),id,action))return;
     if (action.type === 'encounter') { this.startEncounter(id, action); return; }
     if (action.type === 'respond-encounter') { this.respondEncounter(id, action); return; }
@@ -762,8 +794,10 @@ export class Neighbourhood {
           }
         }
       }
+      if(advanceTrade(this.communicationHost()))for(const id of this.residentIds)this.perceive(id);
       this.detectEncounters();
       if(this.state.communication)advanceCommunications(this.communicationHost());
+      if(this.state.socialVisits)advanceSocialVisits(this.communicationHost());
       this.townNeeds();
     }
   }

@@ -6,11 +6,16 @@ import { generationReservation, type InputTokenLimit } from '../inference/model-
 export const firstSocietyLimits = {maximumGenerations:6, maximumIncrementalUsd:.10, maximumSimulationSeconds:180, maximumWallMs:300000} as const;
 export const phaseBSocietyLimits = {maximumGenerations:12, maximumIncrementalUsd:.25, maximumSimulationSeconds:180, maximumWallMs:300000} as const;
 export const phaseCSocietyLimits = {maximumGenerations:36, maximumIncrementalUsd:.60, maximumSimulationSeconds:600, maximumWallMs:1200000} as const;
-export const phaseDSocietyLimits = {maximumGenerations:48, maximumIncrementalUsd:.90, maximumSimulationSeconds:1200, maximumWallMs:1800000} as const;
-export type SocietyLimits = typeof firstSocietyLimits | typeof phaseBSocietyLimits | typeof phaseCSocietyLimits | typeof phaseDSocietyLimits;
+export const contextSocietyLimits = {maximumGenerations:48, maximumIncrementalUsd:.90, maximumSimulationSeconds:1200, maximumWallMs:1800000} as const;
+export const phaseDSocietyLimits = {maximumGenerations:200, maximumIncrementalUsd:5, maximumSimulationSeconds:1800, maximumWallMs:5400000} as const;
+export type SocietyLimits = typeof firstSocietyLimits | typeof phaseBSocietyLimits | typeof phaseCSocietyLimits | typeof contextSocietyLimits | typeof phaseDSocietyLimits;
 export const phaseBResidents = ['amina','musa','chris','halima'] as const;
 export const phaseCResidents = townResidents(16).map(n=>n.id);
 export function validatePhaseDApproval(value:unknown):asserts value is LivePlan {
+  validateLivePlan(value);
+  if((value as LivePlan).phase!=='7g-d-society')throw new Error('Not the separately approved Muse society evaluation plan');
+}
+export function validateContextApproval(value:unknown):asserts value is LivePlan {
   validateLivePlan(value);
   if((value as LivePlan).phase!=='7g-d-context')throw new Error('Not the separately approved context-managed evaluation plan');
 }
@@ -31,7 +36,7 @@ export function validatePhaseBApproval(value: unknown): asserts value is LivePla
 export function inspectSocietyBudget(ledger: unknown, dailyUsd: number, totalUsd: number, day: string, generations = 12,inputTokenLimit:InputTokenLimit=6000) {
   const data = ledger as {version:number;reservations:{day:string;microUsd:number}[]};
   if (!data || data.version!==1 || !Array.isArray(data.reservations) || data.reservations.some(r=>!r || !/^\d{4}-\d{2}-\d{2}$/.test(r.day) || !Number.isSafeInteger(r.microUsd) || r.microUsd<=0)) throw new Error('Invalid budget ledger');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isSafeInteger(generations) || generations<1 || generations>48 || !Number.isFinite(dailyUsd) || dailyUsd<=0 || dailyUsd>20 || !Number.isFinite(totalUsd) || totalUsd<=0 || totalUsd>10) throw new Error('Invalid evaluation budget settings');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isSafeInteger(generations) || generations<1 || generations>200 || !Number.isFinite(dailyUsd) || dailyUsd<=0 || dailyUsd>50 || !Number.isFinite(totalUsd) || totalUsd<=0 || totalUsd>100) throw new Error('Invalid evaluation budget settings');
   const perCall = usdToMicroUsd(generationReservation(inputTokenLimit)), required = generations*perCall;
   const dailyReserved = data.reservations.filter(r=>r.day===day).reduce((sum,r)=>sum+r.microUsd,0);
   const totalReserved = data.reservations.reduce((sum,r)=>sum+r.microUsd,0);

@@ -4,7 +4,7 @@ import type { SocialContextState, SocialObservation } from './social-context.js'
 export const legacyNpcIds = ['musa', 'amina', 'zainab'] as const;
 // Legacy fixture IDs are retained for compatibility; runtime membership is world-owned.
 export type NpcId = string;
-export const actionTypes = ['travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat', 'offer-contact', 'communicate', 'respond-communication', 'end-call'] as const;
+export const actionTypes = ['order-external', 'fund-business', 'travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat', 'offer-contact', 'communicate', 'respond-communication', 'end-call', 'invite-social', 'respond-social', 'join-social', 'socialise', 'leave-social'] as const;
 export type MemoryKind = 'fact' | 'observed' | 'reported' | 'belief' | 'commitment' | 'outcome';
 export interface Memory {
   id: string; kind: MemoryKind; eventId: string; source: NpcId | 'world' | 'player';
@@ -34,7 +34,7 @@ export interface Inhabitant {
     tasks: Record<string, TaskStatus>;
     resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
   };
-  relationships: Partial<Record<NpcId, { successfulJobs: number }>>;
+  relationships: Partial<Record<NpcId, { successfulJobs: number; socialExchanges?:number; lastSocialAt?:number }>>;
   memories: Memory[];
 }
 export type TaskStatus = 'proposed' | 'accepted' | 'declined' | 'collected' | 'delivered' | 'expired';
@@ -57,8 +57,11 @@ export interface WorldState {
   npcs: Record<NpcId, Inhabitant> & { musa: Inhabitant; amina: Inhabitant; zainab: Inhabitant };
   initialGoods: number;
   town?: TownEconomy;
+  trade?: ExternalTrade;
+  decisionRecovery?: Record<string, DecisionRecovery>;
   socialContext?: SocialContextState;
   communication?: { nextId: number; threads: Record<string, Communication>; cooldowns: Record<string, number> };
+  socialVisits?: {version:1;nextId:number;invitations:Record<string,SocialInvitation>};
   social: { nextInteraction: number; interactions: Record<string, Encounter>; noticed: Record<string, number>; cooldowns: Record<string, number> };
   resources: { supplierGoods: number; marketGoods: number; salesOpen: boolean; revision: number };
   roads: { blockedEdges: string[]; revision: number };
@@ -67,6 +70,13 @@ export interface WorldState {
   nextEvent: number; nextTask: number; nextRequest: number;
 }
 export type Action =
+  | {type:'order-external'; businessId:string; quantity:number}
+  | {type:'fund-business'; businessId:string; quantity:number}
+  | { type:'invite-social'; recipient:NpcId; destination:string; channel:'text'|'nearby'; seconds:number; message:string }
+  | { type:'respond-social'; invitationId:string; response:'accept'|'decline'|'postpone'|'alternative'; destination:string|null; message:string }
+  | { type:'join-social'; invitationId:string }
+  | { type:'socialise'; invitationId:string; seconds:number; message:string }
+  | { type:'leave-social'; invitationId:string; message:string }
   | { type: 'offer-contact'; recipient: NpcId }
   | { type: 'communicate'; recipient: NpcId; channel: 'text' | 'call'; purpose: 'chat' | 'request-help'; message: string; memoryId: string | null }
   | { type: 'respond-communication'; communicationId: string; response: 'accept' | 'decline' | 'defer' | 'clarify' | 'ignore'; message: string; memoryId: string | null }
@@ -91,7 +101,13 @@ export interface Encounter {
   message: string; response: string | null; status: 'pending' | 'accepted' | 'declined' | 'deferred' | 'clarified' | 'expired';
   createdAt: number; expiresAt: number;
 }
+export interface DecisionRecovery {version:1; action:string; reason:string; requestId:string; at:number; repetitions:number; blockedUntil:number}
+export interface ExternalTrade {version:1; nextId:number; sourceRemaining:number; spent:number; importedFood:number; importedInputs:number; orders:ExternalOrder[]}
+export interface ExternalOrder {id:string; actor:string; businessId:string; quantity:number; cost:number; createdAt:number; dueAt:number; status:'pending'|'delivered'}
 export interface NpcObservation {
+  decisionRecovery?: DecisionRecovery;
+  wholesale?: {rules:{unitPrice:number; deliverySeconds:number; cooldownSeconds:number; maximumQuantity:number; sourceLimit:number}; offers:{businessId:string; product:'food-portion'|'production-input'|null; node:string; sourceAvailable:number|null; canOrder:boolean; ineligibleReason:string|null; payer:'personal-coins'; balance:number; businessCoins:number; localInputs:number|null; pending:ExternalOrder[]}[]};
+  socialVisits?: {version:1;venues:{id:string;kind:'home-doorstep'|'workplace'|'public'}[];invitations:SocialInvitationView[];rules:{maximumInvitations:number;maximumActive:number;expirySeconds:number;maximumUpdates:number;privateAccess:false}};
   socialContext?: SocialObservation;
   mapId:MapId;
   actor: Inhabitant; time: number;
@@ -107,6 +123,7 @@ export interface NpcObservation {
     work: { id: string; name: string; node: string; skill: string; wage: number; seconds: number; available: boolean | null; observedAt: number | null;
       matchesSkill:boolean; atWorkplace:boolean; funded:boolean|null; freshness:'current'|'historical'|'unknown'; canTakeNow:boolean; ineligibleReason:string|null }[];
     eligibleWorkIds:string[];
+    purchase?:{canBuyOneNow:boolean|null;ineligibleReason:string|null;quantityKnown:number|null};
   };
   resources: { supplierGoods: number | null; marketGoods: number | null; salesOpen: boolean | null };
   tasks: Pick<TransportTask, 'id' | 'requester' | 'recipient' | 'quantity' | 'pickup' | 'destination' | 'status' | 'expiresAt' | 'communicationId'>[]; knownBlockedEdges: string[];
@@ -117,6 +134,20 @@ export interface NpcObservation {
     quantity?: { minimum: number; maximum: number };
     carryingCapacity?: number; remainingCarryingCapacity?: number;
   }>>;
+}
+export interface SocialUpdate {
+  number:number;author:NpcId|null;proposalBy:NpcId;respondTo:NpcId|null;
+  destination:string;seconds:number;message:string;
+  status:'pending'|'accepted'|'declined'|'postponed'|'left'|'expired';
+  createdAt:number;availableAt:number;deliveredTo:NpcId[];
+}
+export interface SocialInvitation {
+  id:string;participants:[NpcId,NpcId];channel:'text'|'nearby';communicationId:string|null;
+  createdAt:number;expiresAt:number;updates:SocialUpdate[];joined:NpcId[];present:NpcId[];metAt:number|null;lastSpeaker?:NpcId|null;
+}
+export interface SocialInvitationView {
+  id:string;participants:[NpcId,NpcId];channel:'text'|'nearby';communicationId:string|null;expiresAt:number;
+  update:SocialUpdate;joined:boolean;otherPresent:boolean;canConverse:boolean;metAt:number|null;lastSpeaker:NpcId|null;
 }
 export interface Communication {
   id: string; initiator: NpcId; recipient: NpcId; channel: 'text' | 'call'; purpose: 'chat' | 'request-help';

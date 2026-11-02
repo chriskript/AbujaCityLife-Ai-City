@@ -35,6 +35,7 @@ export const conversationSchema = {
 export function validateConversation(value: unknown, context: ConversationContext): asserts value is ConversationDecision {
   const data = value as ConversationDecision;
   const evidence = new Set([...context.observation.places.map(place => place.id), ...context.observation.actor.memories.map(memory => memory.id), context.observation.actor.id, ...context.observation.placeKnowledge.flatMap(place => place.factEvidenceId ? [place.factEvidenceId] : [])]);
+  for(const place of context.observation.placeKnowledge)for(const value of [place.stock,place.salesOpen])if(value.evidenceId)evidence.add(value.evidenceId);
   for (const fact of context.observation.socialContext?.publicFacts ?? []) evidence.add(fact.id);
   const background = context.observation.socialContext?.background;
   if (background) evidence.add(background.id);

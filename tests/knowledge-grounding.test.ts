@@ -61,15 +61,17 @@ describe('knowledge and recommendation grounding', () => {
     state.npcs.zainab.knowledge.placeFacts!.centre!.services.push('food-retail');
     expect(() => Neighbourhood.restore(JSON.stringify(state))).toThrow('snapshot');
   });
-  it('distinguishes historical stock from availability now', () => {
-    const world = new Neighbourhood(); apply(world, 'zainab', { type: 'travel', destination: 'market' }); world.advance(10);
-    const observed = world.observe('zainab').placeKnowledge.find(place => place.placeId === 'market')!;
-    const evidence = ['place-facts:market', observed.stock.evidenceId!];
-    expect(() => validateConversation(reply([{ ...claim(), availability: 'available-now', quantity: 1 }], evidence, false), context(world))).not.toThrow();
+  it('refreshes unchanged physically visible stock without treating remote historical stock as current', () => {
+    const world = new Neighbourhood(); apply(world,'zainab',{type:'travel',destination:'market'});world.advance(10);
+    const evidence=()=>{const p=world.observe('zainab').placeKnowledge.find(p=>p.placeId==='market')!;return ['place-facts:market',p.stock.evidenceId!,p.salesOpen.evidenceId!];};
+    expect(()=>validateConversation(reply([{...claim(),availability:'available-now',quantity:1}],evidence(),false),context(world))).not.toThrow();
     world.advance(1);
-    expect(() => validateConversation(reply([{ ...claim(), availability: 'available-now', quantity: 1 }], evidence, false), context(world))).toThrow('not established');
-    expect(() => validateConversation(reply([{ ...claim(), availability: 'last-observed', quantity: 1 }], evidence), context(world))).not.toThrow();
-    expect(() => validateConversation(reply([{ ...claim(), availability: 'last-observed', quantity: 1 }], evidence, false), context(world))).toThrow('Historical');
+    expect(world.observe('zainab').placeKnowledge.find(p=>p.placeId==='market')!.stock.freshness).toBe('current');
+    expect(()=>validateConversation(reply([{...claim(),availability:'available-now',quantity:1}],evidence(),false),context(world))).not.toThrow();
+    apply(world,'zainab',{type:'travel',destination:'centre'});
+    expect(()=>validateConversation(reply([{...claim(),availability:'available-now',quantity:1}],evidence(),false),context(world))).toThrow('not established');
+    expect(()=>validateConversation(reply([{...claim(),availability:'last-observed',quantity:1}],evidence()),context(world))).not.toThrow();
+    expect(()=>validateConversation(reply([{...claim(),availability:'last-observed',quantity:1}],evidence(),false),context(world))).toThrow('Historical');
   });
   it('rejects zero stock, closed sales and invented stock quantities as available-now', () => {
     const world = new Neighbourhood(); apply(world, 'zainab', { type: 'travel', destination: 'market' }); world.advance(10);

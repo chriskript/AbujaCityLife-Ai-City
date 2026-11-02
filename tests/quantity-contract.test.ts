@@ -17,7 +17,10 @@ function apply(world: Neighbourhood, id: NpcId, action: Action) {
 }
 // Failed attempts may append audit events and advance their counters/revision.
 // All gameplay state, including intentions, memories and commitments, must match.
-function gameplay({ events: _events, revision: _revision, nextEvent: _nextEvent, ...state }: WorldState) { return state; }
+// Rejected attempts may add scoped learning/guards, but never transactional effects.
+function gameplay({events:_events,revision:_revision,nextEvent:_nextEvent,triggers:_triggers,decisionRecovery:_recovery,npcs,...state}: WorldState) {
+  return {...state,npcs:Object.fromEntries(Object.entries(npcs).map(([id,{memories:_memories,revision:_actorRevision,...npc}])=>[id,npc]))};
+}
 
 describe('Milestone 6C quantity contract', () => {
   it.each(quantityActions)('exports integer bounds matching the runtime guard for %s', type => {

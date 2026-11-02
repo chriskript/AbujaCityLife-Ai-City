@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-11-02T14:25:04.556Z",
+  "mode": "offline-read-only",
+  "networkCalls": 0,
+  "protectedFiles": {
+    ".env": true,
+    "runtime/neighbourhood-session.json": true,
+    "runtime/town-headless.json": true,
+    "runtime/approved-7g-phase-b-plan.json": true,
+    "runtime/approved-7g-phase-c-plan.json": true,
+    "output/society-7g/7g-c-unity-20261101T085502Z/evidence.ndjson": true
+  },
+  "evidenceUnchanged": true,
+  "ledgerUnchanged": true,
+  "reservations": 40,
+  "totalReservedMicroUsd": 689334,
+  "readiness": {
+    "mode": "offline-read-only",
+    "checkedAt": "2026-11-02T14:25:04.555Z",
+    "timezone": "Africa/Lagos",
+    "model": "muse-spark-1.3",
+    "keyConfigured": true,
+    "keySource": "ignored-env-file",
+    "matchesPriorSuccessfulConfiguration": false,
+    "currentAuthentication": "unverified-no-api-calls",
+    "modelAccess": "unverified-no-api-calls",
+    "configuredDailyUsd": 50,
+    "dailyUsd": 50,
+    "dailyUsdUntil": "2026-11-04",
+    "configuredTotalUsd": 100,
+    "totalUsd": 100,
+    "totalUsdUntil": "2026-11-04",
+    "ledgerLockPresent": false,
+    "inputTokenLimit": 8000,
+    "budget": {
+      "day": "2026-11-02",
+      "perCallMicroUsd": 18704,
+      "requiredMicroUsd": 3740800,
+      "dailyReservedMicroUsd": 0,
+      "totalReservedMicroUsd": 689334,
+      "dailyRemainingMicroUsd": 50000000,
+      "totalRemainingMicroUsd": 99310666,
+      "affordableGenerations": 200,
+      "fullRunFits": true
+    },
+    "approval": "not-created-by-this-preparation",
+    "generations": 0
+  },
+  "allChecksPassed": true
+}

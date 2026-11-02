@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { phaseDSocietyLimits, phaseCResidents, validatePhaseDApproval, inspectSocietyBudget } from '../server/evaluation/society-plan.js';
+import { contextSocietyLimits, phaseCResidents, validateContextApproval, inspectSocietyBudget } from '../server/evaluation/society-plan.js';
 import { validateLivePlan, type LivePlan } from '../server/session.js';
 import { runSocietyProbe } from '../server/evaluation/society-probe.js';
 import { MockNeighbourhoodProvider, type NeighbourhoodProvider } from '../server/inference/neighbourhood-provider.js';
@@ -17,10 +17,10 @@ function synthetic():NeighbourhoodProvider{const offline=new MockNeighbourhoodPr
 
 describe('separately approved longer context-managed evaluation',()=>{
   it('requires explicit new limits without enlarging previously approved plans or reservations',()=>{
-    expect(()=>validatePhaseDApproval(plan())).not.toThrow();
+    expect(()=>validateContextApproval(plan())).not.toThrow();
     for(const overrides of [{approved:false},{maxGenerations:49},{maxEstimatedUsd:.91},{inputTokenLimit:6000},{residents:['amina','musa']},{allowAutonomy:false}])expect(()=>validateLivePlan({...plan(),...overrides})).toThrow();
     expect(()=>validateLivePlan({...plan(),phase:'7g-c-unity',maxGenerations:36,maxEstimatedUsd:.60})).toThrow();
-    expect(()=>validatePhaseDApproval({...plan(),phase:'7g-c-unity',maxGenerations:36,maxEstimatedUsd:.60,inputTokenLimit:6000})).toThrow();
+    expect(()=>validateContextApproval({...plan(),phase:'7g-c-unity',maxGenerations:36,maxEstimatedUsd:.60,inputTokenLimit:6000})).toThrow();
     const ledger={version:1,reservations:[{day:'2026-11-01',microUsd:333958}]},prior=structuredClone(ledger);
     expect(inspectSocietyBudget(ledger,20,5,'2026-11-01',48,8000)).toMatchObject({perCallMicroUsd:18704,requiredMicroUsd:897792,fullRunFits:true});
     expect(inspectSocietyBudget(ledger,20,1,'2026-11-01',48,8000).fullRunFits).toBe(false);
@@ -29,7 +29,7 @@ describe('separately approved longer context-managed evaluation',()=>{
   it('rehearses 48 isolated decisions with selected-context counterfactuals, precise reservations and no network or resumption',async()=>{
     const fetch=vi.spyOn(globalThis,'fetch').mockRejectedValue(new Error('Network forbidden'));
     let wall=Date.now();const dir=await directory();
-    const report=await runSocietyProbe({directory:dir,provider:synthetic(),selectedResidents:[...phaseCResidents],plan:plan(),kind:'offline-contract-rehearsal',limits:phaseDSocietyLimits,paceMs:0,now:()=>wall+=1000});
+    const report=await runSocietyProbe({directory:dir,provider:synthetic(),selectedResidents:[...phaseCResidents],plan:plan(),kind:'offline-contract-rehearsal',limits:contextSocietyLimits,paceMs:0,now:()=>wall+=1000});
     expect(fetch).not.toHaveBeenCalled();expect(report.selectedResidents).toHaveLength(16);
     expect(report.calls).toBe(48);expect(report.stopReason).toBe('generation-limit');
     expect(report.maximumReservedUsd).toBeCloseTo(.897792,9);expect(report.accounting.plan.used).toBe(48);
@@ -45,11 +45,11 @@ describe('separately approved longer context-managed evaluation',()=>{
       expect(start.contextSelection.version).toBe(1);
     }
     const saved=JSON.parse(await readFile(join(dir,'session.json'),'utf8'));expect(saved.paused).toBe(true);
-    await expect(runSocietyProbe({directory:dir,provider:synthetic(),selectedResidents:[...phaseCResidents],plan:plan(),kind:'offline-contract-rehearsal',limits:phaseDSocietyLimits,paceMs:0})).rejects.toMatchObject({code:'EEXIST'});
+    await expect(runSocietyProbe({directory:dir,provider:synthetic(),selectedResidents:[...phaseCResidents],plan:plan(),kind:'offline-contract-rehearsal',limits:contextSocietyLimits,paceMs:0})).rejects.toMatchObject({code:'EEXIST'});
   },90_000);
   it('reserves the timeout margin and refuses an unapproved CLI before any provider access',async()=>{
     let checks=0,wall=Date.now();const provider=synthetic(),decide=vi.spyOn(provider,'decide');
-    const report=await runSocietyProbe({directory:await directory(),provider,selectedResidents:[...phaseCResidents],plan:plan(),kind:'offline-contract-rehearsal',limits:phaseDSocietyLimits,paceMs:0,now:()=>wall+=1000,wallNow:()=>checks++===0?0:1780001});
+    const report=await runSocietyProbe({directory:await directory(),provider,selectedResidents:[...phaseCResidents],plan:plan(),kind:'offline-contract-rehearsal',limits:contextSocietyLimits,paceMs:0,now:()=>wall+=1000,wallNow:()=>checks++===0?0:1780001});
     expect(report.stopReason).toBe('wall-bound');expect(decide).not.toHaveBeenCalled();
     const dir=await directory();await mkdir(join(dir,'runtime'));
     await writeFile(join(dir,'runtime/approved-7g-phase-d-plan.json'),JSON.stringify({...plan(),approved:false}));

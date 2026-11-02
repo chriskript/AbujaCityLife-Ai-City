@@ -1,0 +1,1041 @@
+{
+  "id": "7g-d-society-20261101T175236Z",
+  "kind": "live-meta",
+  "decisions": [
+    {
+      "number": 1,
+      "time": 0.25,
+      "actor": "musa",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "seconds": 60,
+          "type": "wait"
+        },
+        "goalId": "earn",
+        "reason": "Staying at taxi stand to remain available for transport work."
+      },
+      "validation": {
+        "id": "event-80",
+        "time": 0.25,
+        "type": "action-validated",
+        "actor": "musa",
+        "subject": "society-7g-initial:decision-1",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5673,
+        "inputTokens": 3594,
+        "outputTokens": 366,
+        "estimatedCostUsd": 0.006048
+      },
+      "preflightTokens": 3737,
+      "stage": "model-returned",
+      "latencyMs": 5687,
+      "offlineDecision": {
+        "goalId": "earn",
+        "reason": "OFFLINE: Remain available at the taxi pickup for suitable work",
+        "action": {
+          "type": "wait",
+          "seconds": 60
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:musa"
+      ],
+      "inputCharacters": 6237,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4851,
+      "error": null
+    },
+    {
+      "number": 2,
+      "time": 0.5,
+      "actor": "amina",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "destination": "centre",
+          "type": "travel"
+        },
+        "goalId": "restock",
+        "reason": "Stock need is high with empty inventory, moving to supply desk to collect."
+      },
+      "validation": {
+        "id": "event-84",
+        "time": 0.5,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "society-7g-initial:decision-2",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3228,
+        "inputTokens": 4154,
+        "outputTokens": 406,
+        "estimatedCostUsd": 0.006918
+      },
+      "preflightTokens": 4297,
+      "stage": "model-returned",
+      "latencyMs": 3244,
+      "offlineDecision": {
+        "goalId": "restock",
+        "reason": "OFFLINE: Contact a known transporter remotely instead of assuming they will help",
+        "action": {
+          "type": "communicate",
+          "recipient": "musa",
+          "channel": "text",
+          "purpose": "request-help",
+          "message": "I need to replenish the stall. Are you available to discuss a paid supply delivery?",
+          "memoryId": "event-58:amina"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": false,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:concerns",
+        "history:unity-v1:character",
+        "history:unity-v1:self:amina"
+      ],
+      "inputCharacters": 8406,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4995,
+      "error": null
+    },
+    {
+      "number": 3,
+      "time": 0.75,
+      "actor": "zainab",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "destination": "market",
+          "type": "travel"
+        },
+        "goalId": "food",
+        "reason": "Hungry with no food, heading to Market Square to buy something to eat."
+      },
+      "validation": {
+        "id": "event-88",
+        "time": 0.75,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "society-7g-initial:decision-3",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3894,
+        "inputTokens": 3788,
+        "outputTokens": 250,
+        "estimatedCostUsd": 0.0057975
+      },
+      "preflightTokens": 3931,
+      "stage": "model-returned",
+      "latencyMs": 3904,
+      "offlineDecision": {
+        "goalId": "food",
+        "reason": "OFFLINE: Seek food at the known market",
+        "action": {
+          "type": "travel",
+          "destination": "market"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:zainab"
+      ],
+      "inputCharacters": 7515,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4160,
+      "error": null
+    },
+    {
+      "number": 4,
+      "time": 1,
+      "actor": "chris",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "destination": "repair-shop-work",
+          "type": "travel"
+        },
+        "goalId": "earn",
+        "reason": "Heading to the workshop to look for paid repair work since no eligible work is open at the supply desk."
+      },
+      "validation": {
+        "id": "event-92",
+        "time": 1,
+        "type": "action-validated",
+        "actor": "chris",
+        "subject": "society-7g-initial:decision-4",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 7545,
+        "inputTokens": 4272,
+        "outputTokens": 609,
+        "estimatedCostUsd": 0.00792825
+      },
+      "preflightTokens": 4415,
+      "stage": "model-returned",
+      "latencyMs": 7558,
+      "offlineDecision": {
+        "goalId": "earn",
+        "reason": "OFFLINE: Visit a known workplace to check its actual openings",
+        "action": {
+          "type": "travel",
+          "destination": "repair-shop-work"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:chris"
+      ],
+      "inputCharacters": 8969,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4859,
+      "error": null
+    },
+    {
+      "number": 5,
+      "time": 1.25,
+      "actor": "fatima",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "seconds": 90,
+          "type": "rest"
+        },
+        "goalId": "personal",
+        "reason": "Tired after shift at home with no food stocked; resting now restores energy before seeking meal or work."
+      },
+      "validation": {
+        "id": "event-96",
+        "time": 1.25,
+        "type": "action-validated",
+        "actor": "fatima",
+        "subject": "society-7g-initial:decision-5",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5324,
+        "inputTokens": 3751,
+        "outputTokens": 383,
+        "estimatedCostUsd": 0.0063165
+      },
+      "preflightTokens": 3894,
+      "stage": "model-returned",
+      "latencyMs": 5343,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Make time for my personal interests",
+        "action": {
+          "type": "travel",
+          "destination": "overlook"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": false,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:concerns",
+        "history:unity-v1:character",
+        "history:unity-v1:self:fatima"
+      ],
+      "inputCharacters": 7639,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4180,
+      "error": null
+    },
+    {
+      "number": 6,
+      "time": 1.5,
+      "actor": "tunde",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At workshop with funded repair work available that matches skill; taking it supports livelihood."
+      },
+      "validation": {
+        "id": "event-100",
+        "time": 1.5,
+        "type": "action-validated",
+        "actor": "tunde",
+        "subject": "society-7g-initial:decision-6",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3364,
+        "inputTokens": 3805,
+        "outputTokens": 243,
+        "estimatedCostUsd": 0.005789
+      },
+      "preflightTokens": 3948,
+      "stage": "model-returned",
+      "latencyMs": 3375,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Accept a funded opening suited to my skills and needs",
+        "action": {
+          "type": "take-work",
+          "businessId": "repair-workshop"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:concerns",
+        "history:unity-v1:character",
+        "history:unity-v1:self:tunde"
+      ],
+      "inputCharacters": 7694,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4382,
+      "error": null
+    },
+    {
+      "number": 7,
+      "time": 27.75,
+      "actor": "halima",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "businessId": "supply-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At supply desk with funded eligible work available; taking it moves supplies and earns income."
+      },
+      "validation": {
+        "id": "event-122",
+        "time": 27.75,
+        "type": "action-validated",
+        "actor": "halima",
+        "subject": "society-7g-initial:decision-7",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4488,
+        "inputTokens": 4100,
+        "outputTokens": 388,
+        "estimatedCostUsd": 0.006774
+      },
+      "preflightTokens": 4243,
+      "stage": "model-returned",
+      "latencyMs": 4502,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Accept a funded opening suited to my skills and needs",
+        "action": {
+          "type": "take-work",
+          "businessId": "supply-desk"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:halima"
+      ],
+      "inputCharacters": 8874,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4352,
+      "error": null
+    },
+    {
+      "number": 8,
+      "time": 29,
+      "actor": "ibrahim",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "destination": "centre",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Low cash and no food; going to centre supply desk to seek supply work for income."
+      },
+      "validation": {
+        "id": "event-126",
+        "time": 29,
+        "type": "action-validated",
+        "actor": "ibrahim",
+        "subject": "society-7g-initial:decision-8",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3686,
+        "inputTokens": 3585,
+        "outputTokens": 337,
+        "estimatedCostUsd": 0.0059135
+      },
+      "preflightTokens": 3728,
+      "stage": "model-returned",
+      "latencyMs": 3697,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Visit a known workplace to check its actual openings",
+        "action": {
+          "type": "travel",
+          "destination": "centre"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:ibrahim"
+      ],
+      "inputCharacters": 6859,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4166,
+      "error": null
+    },
+    {
+      "number": 9,
+      "time": 29.25,
+      "actor": "yusuf",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "businessId": "learning-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At Learning Centre with funded teaching work available; taking session for income."
+      },
+      "validation": {
+        "id": "event-130",
+        "time": 29.25,
+        "type": "action-validated",
+        "actor": "yusuf",
+        "subject": "society-7g-initial:decision-9",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 2561,
+        "inputTokens": 3806,
+        "outputTokens": 240,
+        "estimatedCostUsd": 0.0057775
+      },
+      "preflightTokens": 3949,
+      "stage": "model-returned",
+      "latencyMs": 2571,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Accept a funded opening suited to my skills and needs",
+        "action": {
+          "type": "take-work",
+          "businessId": "learning-desk"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:yusuf"
+      ],
+      "inputCharacters": 7542,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4380,
+      "error": null
+    },
+    {
+      "number": 10,
+      "time": 30.25,
+      "actor": "ngozi",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "quantity": 1,
+          "type": "buy"
+        },
+        "goalId": "personal",
+        "reason": "At market with coins and food need, buying a portion keeps food manageable."
+      },
+      "validation": {
+        "id": "event-135",
+        "time": 30.25,
+        "type": "action-validated",
+        "actor": "ngozi",
+        "subject": "society-7g-initial:decision-10",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4036,
+        "inputTokens": 4252,
+        "outputTokens": 556,
+        "estimatedCostUsd": 0.007678
+      },
+      "preflightTokens": 4395,
+      "stage": "model-returned",
+      "latencyMs": 4053,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Buy a portion within my means",
+        "action": {
+          "type": "buy",
+          "quantity": 1
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:ngozi"
+      ],
+      "inputCharacters": 8883,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4827,
+      "error": null
+    },
+    {
+      "number": 11,
+      "time": 33.5,
+      "actor": "emeka",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "businessId": "utility-work",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At workshop with funded repair work available, taking it supports dependable income."
+      },
+      "validation": {
+        "id": "event-148",
+        "time": 33.5,
+        "type": "action-validated",
+        "actor": "emeka",
+        "subject": "society-7g-initial:decision-11",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3754,
+        "inputTokens": 3768,
+        "outputTokens": 181,
+        "estimatedCostUsd": 0.00547925
+      },
+      "preflightTokens": 3911,
+      "stage": "model-returned",
+      "latencyMs": 3766,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Accept a funded opening suited to my skills and needs",
+        "action": {
+          "type": "take-work",
+          "businessId": "utility-work"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:emeka"
+      ],
+      "inputCharacters": 7443,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4386,
+      "error": null
+    },
+    {
+      "number": 12,
+      "time": 35.25,
+      "actor": "grace",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "destination": "community-office-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest, so going to Community Offices to access general errands work."
+      },
+      "validation": {
+        "id": "event-153",
+        "time": 35.25,
+        "type": "action-validated",
+        "actor": "grace",
+        "subject": "society-7g-initial:decision-12",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6176,
+        "inputTokens": 3504,
+        "outputTokens": 706,
+        "estimatedCostUsd": 0.0073805
+      },
+      "preflightTokens": 3647,
+      "stage": "model-returned",
+      "latencyMs": 6187,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Seek food at the known market",
+        "action": {
+          "type": "travel",
+          "destination": "market"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": false,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:grace"
+      ],
+      "inputCharacters": 6545,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4166,
+      "error": null
+    },
+    {
+      "number": 13,
+      "time": 59,
+      "actor": "ladi",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "destination": "community-office-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is high and no eligible work at market; travelling to Community Offices to check general errands work."
+      },
+      "validation": {
+        "id": "event-162",
+        "time": 59,
+        "type": "action-validated",
+        "actor": "ladi",
+        "subject": "society-7g-initial:decision-13",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4400,
+        "inputTokens": 4263,
+        "outputTokens": 304,
+        "estimatedCostUsd": 0.00662075
+      },
+      "preflightTokens": 4406,
+      "stage": "model-returned",
+      "latencyMs": 4420,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Visit a known workplace to check its actual openings",
+        "action": {
+          "type": "travel",
+          "destination": "community-office-work"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:ladi"
+      ],
+      "inputCharacters": 9050,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4834,
+      "error": null
+    },
+    {
+      "number": 14,
+      "time": 60.25,
+      "actor": "sadiq",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "destination": "repair-shop-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is high and repair work matches skill; going to workshop to seek eligible work."
+      },
+      "validation": {
+        "id": "event-167",
+        "time": 60.25,
+        "type": "action-validated",
+        "actor": "sadiq",
+        "subject": "society-7g-initial:decision-14",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3712,
+        "inputTokens": 4111,
+        "outputTokens": 458,
+        "estimatedCostUsd": 0.00708525
+      },
+      "preflightTokens": 4254,
+      "stage": "model-returned",
+      "latencyMs": 3724,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Visit a known workplace to check its actual openings",
+        "action": {
+          "type": "travel",
+          "destination": "repair-shop-work"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:character",
+        "history:unity-v1:self:sadiq"
+      ],
+      "inputCharacters": 8903,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4182,
+      "error": null
+    },
+    {
+      "number": 15,
+      "time": 60.5,
+      "actor": "maryam",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "seconds": 60,
+          "type": "rest"
+        },
+        "goalId": "personal",
+        "reason": "At home with rest need highest, so taking brief rest before work and food plans."
+      },
+      "validation": {
+        "id": "event-171",
+        "time": 60.5,
+        "type": "action-validated",
+        "actor": "maryam",
+        "subject": "society-7g-initial:decision-15",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 2837,
+        "inputTokens": 3645,
+        "outputTokens": 391,
+        "estimatedCostUsd": 0.006218
+      },
+      "preflightTokens": 3788,
+      "stage": "model-returned",
+      "latencyMs": 2856,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Visit a known workplace to check its actual openings",
+        "action": {
+          "type": "travel",
+          "destination": "community-office-work"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": false,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:concerns",
+        "history:unity-v1:character",
+        "history:unity-v1:self:maryam"
+      ],
+      "inputCharacters": 7225,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4160,
+      "error": null
+    },
+    {
+      "number": 16,
+      "time": 61.25,
+      "actor": "bisi",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "businessId": "tailoring-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At my tailoring desk with funded work available, taking it builds steady income."
+      },
+      "validation": {
+        "id": "event-175",
+        "time": 61.25,
+        "type": "action-validated",
+        "actor": "bisi",
+        "subject": "society-7g-initial:decision-16",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 2573,
+        "inputTokens": 3805,
+        "outputTokens": 247,
+        "estimatedCostUsd": 0.005806
+      },
+      "preflightTokens": 3948,
+      "stage": "model-returned",
+      "latencyMs": 2596,
+      "offlineDecision": {
+        "goalId": "livelihood",
+        "reason": "OFFLINE: Accept a funded opening suited to my skills and needs",
+        "action": {
+          "type": "take-work",
+          "businessId": "tailoring-desk"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:origins",
+        "history:unity-v1:character",
+        "history:unity-v1:self:bisi"
+      ],
+      "inputCharacters": 7492,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4381,
+      "error": null
+    },
+    {
+      "number": 17,
+      "time": 65.75,
+      "actor": "musa",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "seconds": 60,
+          "type": "wait"
+        },
+        "goalId": "earn",
+        "reason": "Staying at taxi stand to remain available for transport work."
+      },
+      "validation": {
+        "id": "event-184",
+        "time": 65.75,
+        "type": "action-validated",
+        "actor": "musa",
+        "subject": "society-7g-initial:decision-17",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4292,
+        "inputTokens": 3648,
+        "outputTokens": 328,
+        "estimatedCostUsd": 0.005954
+      },
+      "preflightTokens": 3791,
+      "stage": "model-returned",
+      "latencyMs": 4302,
+      "offlineDecision": {
+        "goalId": "earn",
+        "reason": "OFFLINE: Remain available at the taxi pickup for suitable work",
+        "action": {
+          "type": "wait",
+          "seconds": 60
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": true,
+      "suppliedHistoryIds": [
+        "history:unity-v1:character",
+        "history:unity-v1:self:musa"
+      ],
+      "inputCharacters": 6417,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4851,
+      "error": null
+    },
+    {
+      "number": 18,
+      "time": 67,
+      "actor": "amina",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "collect-self"
+        },
+        "goalId": "restock",
+        "reason": "At supply desk with empty inventory and high stock need; collecting max carry myself."
+      },
+      "validation": {
+        "id": "event-188",
+        "time": 67,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "society-7g-initial:decision-18",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3452,
+        "inputTokens": 4495,
+        "outputTokens": 250,
+        "estimatedCostUsd": 0.00668125
+      },
+      "preflightTokens": 4638,
+      "stage": "model-returned",
+      "latencyMs": 3470,
+      "offlineDecision": {
+        "goalId": "restock",
+        "reason": "OFFLINE: Contact a known transporter remotely instead of assuming they will help",
+        "action": {
+          "type": "communicate",
+          "recipient": "musa",
+          "channel": "text",
+          "purpose": "request-help",
+          "message": "I need to replenish the stall. Are you available to discuss a paid supply delivery?",
+          "memoryId": "event-58:amina"
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": false,
+      "suppliedHistoryIds": [
+        "history:unity-v1:concerns",
+        "history:unity-v1:character",
+        "history:unity-v1:self:amina"
+      ],
+      "inputCharacters": 9796,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4995,
+      "error": null
+    },
+    {
+      "number": 19,
+      "time": 93,
+      "actor": "zainab",
+      "opportunity": "personal-economic-social-choice",
+      "decision": {
+        "action": {
+          "quantity": 1,
+          "type": "buy"
+        },
+        "goalId": "food",
+        "reason": "Hungry at Market Square with coins available, trying to buy food to eat."
+      },
+      "validation": {
+        "id": "event-212",
+        "time": 93,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "society-7g-initial:decision-19",
+        "detail": "insufficient-stock",
+        "data": {
+          "accepted": false
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5983,
+        "inputTokens": 4123,
+        "outputTokens": 515,
+        "estimatedCostUsd": 0.0073425
+      },
+      "preflightTokens": 4266,
+      "stage": "model-returned",
+      "latencyMs": 6003,
+      "offlineDecision": {
+        "goalId": "food",
+        "reason": "OFFLINE: Wait for observed stock or an available vendor before reconsidering food",
+        "action": {
+          "type": "wait",
+          "seconds": 20
+        }
+      },
+      "offlineLimitation": null,
+      "actionMatchesOffline": false,
+      "suppliedHistoryIds": [
+        "history:unity-v1:character",
+        "history:unity-v1:self:zainab"
+      ],
+      "inputCharacters": 8782,
+      "instructionCharacters": 5215,
+      "schemaCharacters": 4160,
+      "error": null
+    }
+  ]
+}

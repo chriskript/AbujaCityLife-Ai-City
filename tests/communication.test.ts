@@ -101,7 +101,7 @@ describe('grounded contact communication',()=>{
   apply(world,'amina',send());expect(apply(world,'amina',send()).reason).toBe('communication-cooldown');
  });
  it('keeps schema content bounds aligned and rejects extra fields',()=>{
-  expect(npcDecisionSchema.properties.action.anyOf).toHaveLength(21);
+  expect(npcDecisionSchema.properties.action.anyOf).toHaveLength(28);
   const decision=(action:unknown)=>({goalId:'restock',reason:'Test',action});expect(isNpcDecision(decision(send()))).toBe(true);
   expect(isNpcDecision(decision({...send(),message:'x'.repeat(160)}))).toBe(true);expect(isNpcDecision(decision({...send(),message:'x'.repeat(161)}))).toBe(false);
   expect(isNpcDecision(decision({...send(),privateTargetState:{needs:0}}))).toBe(false);

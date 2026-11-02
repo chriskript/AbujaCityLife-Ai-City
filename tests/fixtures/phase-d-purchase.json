@@ -1,0 +1,60 @@
+{
+  "sourceRun": "7g-d-society-20261101T175236Z",
+  "requestId": "society-7g-initial:decision-19",
+  "time": 93,
+  "market": {
+    "id": "market",
+    "name": "Market Square",
+    "facts": {
+      "services": [
+        "food-retail"
+      ],
+      "products": [
+        "food-portion"
+      ],
+      "source": "established",
+      "complete": true
+    },
+    "factEvidenceId": "place-facts:market",
+    "stock": {
+      "value": 0,
+      "source": "observed",
+      "observedAt": 30.25,
+      "evidenceId": "event-140:zainab",
+      "freshness": "historical"
+    },
+    "salesOpen": {
+      "value": true,
+      "source": "observed",
+      "observedAt": 30.25,
+      "evidenceId": "event-140:zainab",
+      "freshness": "historical"
+    }
+  },
+  "resources": {
+    "supplierGoods": 8,
+    "marketGoods": 0,
+    "salesOpen": true
+  },
+  "decision": {
+    "action": {
+      "quantity": 1,
+      "type": "buy"
+    },
+    "goalId": "food",
+    "reason": "Hungry at Market Square with coins available, trying to buy food to eat."
+  },
+  "offline": {
+    "mode": "mock",
+    "model": "town-offline-rules-v1",
+    "decision": {
+      "goalId": "food",
+      "reason": "OFFLINE: Wait for observed stock or an available vendor before reconsidering food",
+      "action": {
+        "type": "wait",
+        "seconds": 20
+      }
+    }
+  },
+  "actualStock": 0
+}

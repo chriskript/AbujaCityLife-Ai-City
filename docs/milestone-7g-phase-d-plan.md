@@ -1,79 +1,110 @@
-# Proposed longer Muse evaluation: context management and sustained consequences
+# Milestone 7G Phase D: Muse society evaluation plan
 
-**Status: prepared for review; not approved or executed.** No live API calls are authorised by this document. Phase C's nine validated generations and Amina–Musa independent discussion remain the live evidence; no completed Muse-mediated delivery or advantage over offline policy is claimed.
+**Approved and executed once on November 1, 2026.** After reviewing this preparation, the user explicitly approved the live run. It stopped on a validation rejection after 19 genuine generations; see the [Phase D live report](milestone-7g-phase-d-live-evaluation.md). No automatic retry or resumption is authorised. The bounds below superseded the earlier unexecuted 48-generation/$0.90 context plan. Existing B/C plans retain their original limits.
 
-## Question and bounds
+## Purpose and limits
 
-Can independently reasoning residents sustain a legitimately initiated exchange through recipient choice, an actual commitment where chosen, execution under ordinary mechanics, and subsequent decisions affected by the consequences?
+Evaluate whether Muse-powered residents independently choose personal, economic and social activities, influence one another through legitimately delivered communication, carry out commitments and make subsequent decisions informed by actual consequences. Successful cooperation is one possible outcome; refusals, solitude, changed plans, unanswered invitations and failed proposals are valid evidence.
 
-Proposed profile `7g-d-context`:
-
-| Bound | Proposed maximum |
+| Limit | Revised proposal |
 | --- | ---: |
-| Muse generations / attempted opportunities | 48 |
-| Incremental spending | $0.90 |
-| Simulated time | 1,200 seconds (20 minutes) |
-| Wall time | 1,800 seconds (30 minutes) |
+| Muse generations / attempted opportunities | Up to 200 |
+| Incremental spending ceiling | $5.00 |
+| Elapsed simulation | Up to 1,800 seconds (30 minutes) |
+| Wall time | Up to 5,400 seconds (90 minutes) |
 | Input preflight | 8,000 tokens |
 | Output | 2,048 tokens |
-| Per-invocation timeout | 20 seconds, no retries |
-| Full reservation | $0.018704 per invocation; $0.897792 for 48 |
+| Per-invocation deadline | 20 seconds shared by preflight/generation |
+| Application throttle | Six generations per wall minute; one pending inference |
+| Full per-attempt reservation | $0.018704 |
+| All 200 reservations | $3.740800 |
 
-These are stopping bounds, not targets. The existing 48-request session lifetime and six-request-per-minute controls remain. The run stops before its wall deadline by an invocation-timeout margin. It may reach a call limit before twenty simulated minutes; no further calls or routine continuation will be appended to manufacture completion. Ordinary work and transport can take tens of seconds; the longer window offers room for completion and follow-up without promising that residents will choose it.
+Use profile **7g-d-society** with a fresh unique run ID. An old context or C approval cannot authorise this profile. The session persists this profile and token ceiling and refuses an offline/profile downgrade on restart. Generation, spending, simulated-time and wall-time bounds are independent stopping limits, not targets or promises that all will be reached. Do not extend a run to obtain a desired story.
 
-## Town, opportunities and independence
+Six generations per minute alone requires roughly 34 wall minutes for 200 attempts. The larger wall window accommodates that unchanged throttle, provider latency and deterministic advancement. The existing 1,800-second progression limit and 2,048 routine-execution allowance are preserved. A timeout margin prevents starting a provider call too close to the wall deadline.
 
-Start a fresh isolated clone of the normal sixteen-resident Unity Gardens initial town, alongside a matched offline baseline. Do not modify either operating save or resume Phase C's evaluation. Preserve the layout, economy, histories, existing acquaintances, phone contacts, needs and offline policies. All sixteen residents are eligible: Musa, Amina, Zainab, Chris, Fatima, Tunde, Halima, Ibrahim, Yusuf, Ngozi, Emeka, Grace, Ladi, Sadiq, Maryam and Bisi.
+## Town and meaningful decisions
 
-Use the existing selective opportunity policy, with priority for **actually delivered** invitations and pending recipient choices. No seeded invitations, special contacts, fabricated disruptions, prearranged pairings or forced successful deliveries. Initiation can concern legitimate economic or social opportunities. Each recipient can accept discussion, ask for clarification, negotiate within existing actions, defer, refuse, ignore or pursue something else. Shared history does not oblige anyone to cooperate.
+Start the normal sixteen-resident Unity Gardens town in **isolated evaluation state**, with a time-matched offline branch from the identical initial snapshot. Retain all homes, workplaces, streets, resources, histories, initial relationships and contacts. The operating checkpoints are not reset or modified.
 
-Routine navigation, eating, purchases, work timers, inventory operations and continuation of already accepted tasks stay under existing offline mechanics. Muse receives meaningful decisions, not every movement tick. No new governance or economy features are introduced. A discussion acceptance is not a transport commitment; a work booking is not wages earned; an accepted task is not a completed delivery.
+All sixteen residents are eligible: Musa, Amina, Zainab, Chris, Fatima, Tunde, Halima, Ibrahim, Yusuf, Ngozi, Emeka, Grace, Ladi, Sadiq, Maryam and Bisi. No resident or pair must participate. Priority goes to actually delivered invitations and independent recipient responses; priority schedules attention and never chooses an answer.
 
-## Input, execution and stop conditions
+In this profile, every ready decision opportunity involving personal needs, employment, finances, travel destinations, calls, messages, encounters or social plans goes to Muse. The old sociability/poverty thresholds no longer restrict which ready residents can reason. Muse can choose work, rest, food, solitude, an ordinary social call or text, a visit or something else allowed by the scoped action contract. Low funds or fatigue inform a choice; they do not silently switch the actor to the offline reasoning policy.
 
-Use the [bounded context policy](model-context-management.md). Preserve the actor's own background and relevant legitimately granted history, current constraints, job grounding, resources, contacts, delivered exchanges and mandatory evidence. Record selection manifests, exact compact inputs/instructions/schema and the raw scoped request. No global resident biography catalogue enters the request.
+Movement along a chosen route, time, inventory changes, job completion, held/paid funds and delivery execution remain deterministic. The only offline decision in the Muse branch is the mechanical continuation of an **already accepted delivery**. That continuation directly proposes fulfil-transport; it cannot select a new job, purchase, friendship or invitation. Pending social/communication/transport responses can still require independent Muse attention.
 
-Before a future approved execution:
+## Minimum additional social actions
 
-1. Recheck official model pricing, context support, the configured model and key eligibility without printing credentials. Current authentication/provider access is unverified in this offline preparation. After approval, the first bounded preflight/generation must validate access; failure stops the run rather than triggering separate probes or retries.
-2. Run `npm run society:phase-d:check`; require full-run reservation headroom, no lock, valid ledger, effective allowances and an unexpired new plan. Current [offline readiness](7g-phase-d-readiness.json) fits the full reservation. Check again at execution because allowances and concurrent spending can change.
-3. Only after explicit approval, create a unique dated `runtime/approved-7g-phase-d-plan.json` using the [unapproved example](7g-phase-d-plan.example.json), with current `notBefore`/`expiresAt`. Existing C approval cannot authorise this profile or the larger token ceiling. No such D approval file was created during preparation.
-4. Capture fingerprints of `.env` and the operating saves; preserve the ledger and prior evaluation artifacts. Claim a unique one-shot run ID and refuse existing evidence directories. There is no automatic resumption.
-5. Invoke `npm run society:phase-d:evaluate` once. Each request reserves worst-case cost before provider access; exact provider preflight must pass the 8,000 ceiling. Use the same prepared content for generation. Execute proposals exclusively through current authoritative schema, knowledge, freshness, capability, quantity, employment, consent and funds validation.
-6. Stop immediately on validation rejection, malformed output, context overflow, provider/accounting failure, exhausted limits or timeout. Preserve failed proposals, raw responses, reservations and checkpoints. Never replay a consequential action automatically or clear locks/accounting to continue.
+The opt-in versioned social-visits extension adds five bounded actions, reusing the current map, texts, nearby encounters, event/memory system, timers and relationship records:
 
-The $20 daily/$5 cumulative temporary allowances expire after November 4, Lagos time. Preserve that expiry and all historical reservations; available credits are not a spending goal. Existing provider restrictions, ledger locking, duplicate prevention and manual recovery remain unchanged.
+| Action | Meaning |
+| --- | --- |
+| invite-social | Propose a known public rendezvous to a known resident, by existing text contact or nearby speech |
+| respond-social | Independently accept, decline, postpone or counterpropose another known venue |
+| join-social | Independently choose one's own journey after acceptance |
+| socialise | Speak a bounded attributed turn when both consented participants are present and available |
+| leave-social | Withdraw or end participation, including while an unseen reply is in flight |
 
-## Evidence to collect
+An alternative requires a separate acceptance by the other resident. Acceptance never moves either participant. A host can offer their own doorstep/shared entrance; this discloses that **public rendezvous**, not a private unit. No invitation grants private-home access, a phone number, trust or friendship. Existing private dwelling/path validation remains strict. Public workplaces and public spaces use existing travel. Residents learn other home rendezvous only through delivered invitations; canonical home data is not added to their observations.
 
-For every attempted opportunity retain actor, trigger, selected context and omitted IDs; provider preflight; exact structured decision and brief public explanation; usage, latency, estimated standard-price cost and full reservation; validation acceptance/rejection; and committed world changes. Do not request hidden chain of thought.
+Conversation turns alternate if residents choose to continue. Neither a reply nor continued attendance is forced. A resident can wait, change priorities, leave or decline to speak. Shared duration begins only when both physically arrive and ends at its bound; residents can leave earlier. An absent person's participation/position remains private. Nearby speech is delivered only when actually audible, never replayed later as a manufactured conversation. Deadline expiry is a system outcome, not an invented resident utterance.
 
-Trace each genuine interaction chronologically:
+Experienced utterances increment optional socialExchanges/lastSocialAt fields in the participants' existing relationship records. These record contact history, **not reciprocity, friendship, trust or relationship quality**. Completed jobs retain their separate existing counter. Text/call requests and replies remain real attributed communication records, without automatically becoming a meeting or financial commitment.
 
-- Initiator's independent choice and the actual invitation delivery.
-- Recipient's separately scoped decision, including refusal or alternatives.
-- Clarification or negotiation, if chosen; explicit proposal and independent acceptance where applicable.
-- Actual task progression/completion and any held/paid funds, goods, inventory or work output.
-- Later reasoning that can observe the consequences.
+## Scoped context and compatibility
 
-Report participating actors rather than assuming all eligible actors generated. Compare tasks, commitments, contacts, balances, inventory, memories, relationships and employment bookings against both initial state and the time-matched offline town. Separate discussion agreements, formal task commitments and completed outcomes. Record null/unknown usage for failures, not a guessed generation cost or stale metrics from a prior request.
+Use the accepted [bounded context policy](model-context-management.md), extended to include only the actor's delivered social invitations and legitimate venues. Preserve current needs, goals, resources, commitments, jobs and constraints, own biography, relevant granted history and required uncertain evidence. Narrow social action IDs and destination choices to the scoped observations. Actual validation remains authoritative even if conditions change after observation.
 
-Compare each proposal with the offline counterfactual using the same selected information before compact wire encoding; distinguish this from the parallel baseline, whose state may diverge. State whether actions differ, but do not equate difference with quality. Attribute history/social-context influence only when the model's public explanation or structured choice supports it; label operator interpretation explicitly. More supplied context and more generations cannot establish improved autonomy by themselves.
+Own sent texts/replies are marked speech-only; observing one's own message does not verify its contents. Social utterances remain attributed uncertain reports. Other people's biographies, undelivered replies, remote presence and private needs never enter the projection.
 
-## Offline readiness
+Social visits are optional version-1 state within the existing snapshot format. Enabling the extension preserves inventories, balances, locations, tasks, relationships and memories, adds capabilities and knowledge of one's own public entrance, and creates **no invitations or events**. Older saves without the extension still load unchanged. The evaluation explicitly enables the extension in its new town; it does not migrate operating saves or add unrelated UI flows.
 
-The implementation includes exact captured-request regressions, privacy/uncertainty/mandatory-context tests, a twenty-minute sixteen-resident offline projection soak, new-plan approval and reservation tests, a complete 48-decision synthetic coordinator rehearsal, deadline and duplicate-directory checks. Authentication, live schema acceptance after compaction, exact new token totals, sustained Muse cooperation and improved outcomes remain unproven until an approved execution.
+No time-of-day or weather system is introduced. Future conditions can be supplied through authorised observation fields and event triggers; no outcomes are scheduled or hardcoded around those future conditions.
 
-The saved synthetic rehearsal reached 267.5 simulated seconds with 11 reasoning actors and two completed offline deliveries before reaching its 48-call cap. This confirms that the bounded coordinator can retain execution consequences, not that Muse will reproduce those outcomes or that all sixteen eligible actors must participate.
+## Allowances, pricing and pre-execution checks
 
-Final validation on November 1, 2026:
+The approved temporary internal settings are now **$50 daily / $100 cumulative through November 4, 2026, Africa/Lagos**. At November 5 midnight Lagos (November 4, 23:00 UTC), effective allowances revert to **$0.25 daily / $1 cumulative**. Historical reservations remain; if past reservations exceed the restored cap, further calls are blocked. These ceilings are not spending targets and do not change provider restrictions or per-run ceilings.
 
-- `npm test -- --maxWorkers=1 --testTimeout=20000`: **343 tests passed across 22 files**, 188.03 seconds. The twenty-second setting affects ordinary test execution only; explicit integration-test timeouts and all runtime/provider/evaluation deadlines remain unchanged.
-- Two preceding full-suite attempts each hit a timing timeout in a different existing soak/integration test. Both tests passed separately with their original assertions and timeouts; one run coincided with a prolonged host stall. The final serial suite passed in full. No test assertions were weakened.
-- `npm run build`: TypeScript server/shared and client checks passed; production build passed. The existing 603.53 kB route chunk still produces Vite's size warning; unrelated bundling changes were not introduced.
-- `npm run context:profile`: ten captured requests profiled offline, no new exact token counts claimed.
-- `npm run society:phase-d:check`: full $0.897792 reservation fits effective allowances, no ledger lock, key configured; current authentication/access remains unverified.
-- The 48-decision synthetic rehearsal, twenty-minute projection soak and privacy/constraint/budget regressions pass. They establish offline readiness, not live social autonomy.
-- [Integrity audit](model-context-integrity.json): operating saves, `.env`, ledger and original Phase C evidence unchanged; 21 ledger reservations totaling $0.333958; no D approval file and no live requests in this task.
+Official [pricing/rate limits](https://dev.meta.ai/docs/pricing-rate-limits) and [model support](https://dev.meta.ai/docs/models) were rechecked during preparation. Muse Spark 1.3 Standard remains $1.25/million input and $4.25/million output tokens, with a 1,048,576-token context window. Keep the same model, Standard mode, low reasoning effort, store:false, strict structured output, no hosted tools and no retries. The 8,000 local input ceiling is well inside the model context window.
 
-Ready for review of the proposed plan. Execute only after separate approval and renewed pricing, configuration, expiry, budget and provider checks.
+Reservation arithmetic is uncached worst case: 8,000 × $1.25/M + 2,048 × $4.25/M = **$0.018704**. All 200 attempts reserve **$3.740800**, leaving **$1.259200** below the $5 ceiling. Do not spend that difference by enlarging token limits or adding generations. Reservations precede any provider HTTP request, survive success/failure and are accounted for separately from measured usage costs.
+
+The [read-only readiness artifact](7g-phase-d-readiness.json) records $0.333958 cumulative prior reservations and full-run headroom under the temporary allowances. It establishes configuration, not current authentication, actual remaining provider credits or key-specific eligibility. Provider access and exact new token counts remain unverified because preparation makes no live calls.
+
+The approved execution followed these checks and steps:
+
+1. Recheck official pricing/model/token support and rerun npm run society:phase-d:check. Require a configured key, valid unlocked ledger, correct expiry and full-run headroom. Report incompatible limits; do not silently adjust them.
+2. Create a unique dated runtime/approved-7g-phase-d-plan.json from the [unapproved example](7g-phase-d-plan.example.json), with an execution window covering the reviewed run. An approval expiring during the run will stop further inference.
+3. Fingerprint the operating saves and current configuration; preserve prior evidence and ledger entries. Acquire the exclusive plan claim and refuse existing evaluation artifacts. No automatic resumption.
+4. Run npm run society:phase-d:evaluate once. The first approved preflight/generation verifies actual provider access within the run's reservations; no separate authentication probes or retries are added.
+5. Stop inference immediately on validation rejection, malformed output, provider/accounting failure, exhausted limits or deadlines. Preserve the exact proposal, context, accounting and checkpoint. Never retry a consequential action automatically.
+
+## Interrupted decisions and safe deterministic completion
+
+If expected Muse inference fails, retain the original request and scoped observation in the durable session checkpoint, record inference-interrupted and block that actor from further automatic decisions. Restoring the checkpoint does not retry or substitute an offline decision. Changing profiles, opening it as an offline session, or resetting away the pending decision is refused.
+
+The session can safely advance unrelated, already chosen movement/work timers. The evaluation coordinator makes **no more inference or policy decisions**, and allows at most 60 simulated seconds of such deterministic completion after a provider/context interruption, within remaining time bounds. It records this drain separately, then pauses both branches. No new bookings, purchases, invitations or recipient choices are produced by that drain. Accounting failures receive **no drain**. Checkpoint-write failure stops the session immediately. Manual review is required for any later action.
+
+## Evidence and comparison
+
+For each attempt retain actor/trigger, raw scoped request, actual projected input, exact instructions/schema, selection audit, provider preflight, exact structured output and public explanation, validation and execution outcome, tokens, latency, estimated cost and full reservation. Record interruptions with unknown usage honestly; do not reuse earlier metrics or guess that a generation occurred.
+
+Report model-chosen visits and travel destinations; invitations and independent recipient responses; accepted alternatives; actual arrivals and meetings; attributed conversation turns; departure/solitude choices; subsequent decisions; changes in relationships/memories/contacts; and tasks, commitments, work, money, goods and inventory. Distinguish discussion, acceptance, independent travel, actual conversation, formal economic commitment and completed execution. A personal-care choice by Muse is model-driven reasoning even when its inventory operation is deterministic.
+
+Use both the time-matched offline town and per-decision offline counterfactuals supplied the same selected records before compact wire encoding. The existing offline policy has **no structured social-invitation response policy**: those counterfactuals are explicitly marked unsupported, not fabricated as invalid generic replies or replaced with a scripted cooperation policy. New actions absent from the baseline are not by themselves evidence of superior reasoning. Attribute historical-context influence only to explicit public explanations or clearly supported choices, with operator interpretation identified separately.
+
+No live improvement, sustained friendship, negotiated cooperation or completed Muse-mediated social visit is claimed in preparation. A run with no cooperation or no invitations must be reported as observed, without adding calls to obtain a desired outcome.
+
+## Offline validation
+
+Verified November 1, 2026:
+
+- npm test -- --maxWorkers=1 --testTimeout=20000: **364 tests passed across 24 files**, 238.36 seconds. Coverage includes all sixteen residents; existing economy/navigation/communication/persistence; the original context-overflow fixture; consent, alternatives, withdrawal, private-home refusal, nearby speech, relationship counters and source attribution; pending inference across restart; rejection of offline substitution/downgrade; allowance expiry at Lagos midnight; usage/corrupt-ledger failures; and the complete 200-attempt profile. Literal old schema-count and allowance-limit expectations were updated for the five new actions and newly approved limit; no validation assertions were removed.
+- A final defensive unknown-invitation-key check was covered by rerunning all **10 social-visit regressions**. The latest production build and both TypeScript checks then passed. Vite retains the existing large route-chunk warning (603.60 kB); no unrelated bundling work was introduced.
+- npm run society:phase-d:dry-run: **200 synthetic decisions across all sixteen actors**, all authoritatively validated, reaching **432.25 simulated seconds** before the generation cap, with two completed offline deliveries. The session paused and persisted the correct society/8,000-token reservation profile. See the [portable rehearsal summary](phase-d-offline-rehearsal.json); full exact inputs, decisions and worlds remain in its ignored source evidence directory.
+- The 200-attempt rehearsal uses the existing offline policy behind a clearly labelled fake model, so it generated **no structured social invitations**. New structured invitation/alternative/journey/conversation/withdrawal paths are covered by separate contract fixtures. Neither is evidence of live Muse cooperation or better reasoning.
+- Largest projected JSON in that rehearsal: **13,632 characters**; largest combined visible input/instructions/schema: **23,706 characters**. These are measured characters, not exact provider tokens. Real invitations can produce different inputs; the hard bounds still stop rather than discard critical evidence.
+- npm run society:phase-d:check and npm run meta:check passed offline: the key is configured and ignored by Git, model/budgets supported, no spending lock, full worst-case headroom. Current authentication, provider credit balance and exact new token counts remain unverified without an approved request.
+- [Preparation integrity audit](phase-d-preparation-integrity.json): at preparation, the configuration change matched **only the approved allowance fields**; credentials and both operating saves were unchanged; all **21 prior reservations totaling $0.333958** and original Phase C evidence were unchanged. Preparation created no live requests or D approval file. The subsequent approved run is separately accounted for in the live report.
+
+The subsequent [approved Phase D execution](milestone-7g-phase-d-live-evaluation.md) completed its bounded run and stopped as required. Its evidence and accounting are distinct from these offline fixtures and from the earlier [Phase C report](milestone-7g-phase-c-live-evaluation.md). A further live run requires new review and approval; unused generation or spending headroom is not automatic permission to resume.

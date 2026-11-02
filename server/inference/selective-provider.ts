@@ -7,6 +7,17 @@ import { MockNeighbourhoodProvider, type NeighbourhoodProvider } from './neighbo
 export function reasoningOpportunity(o: NpcObservation, triggers: string[]): string | null {
   if (!o.permittedActions.length || !triggers.some(t => !['restored','control-changed'].includes(t))) return null;
   const id=o.actor.id, threads=o.communication?.threads ?? [];
+  if(o.socialVisits){
+    if(o.socialVisits.invitations.some(i=>i.update.status==='pending'&&i.update.respondTo===id&&i.expiresAt>o.time))return 'social-invitation-response';
+    if(threads.some(t=>t.recipient===id&&t.status==='pending'))return 'incoming-communication';
+    if(o.encounters.some(e=>e.recipient===id&&e.status==='pending'))return 'encounter-response';
+    if(o.tasks.some(t=>t.recipient===id&&t.status==='proposed'))return 'commitment-choice';
+    // Sole offline decision in the expanded society: execute an already accepted
+    // delivery. No job, purchase, social choice, meal or rest is selected offline.
+    if(o.tasks.some(t=>t.recipient===id&&['accepted','collected'].includes(t.status)))return null;
+    if(o.socialVisits.invitations.some(i=>i.update.status==='accepted'&&i.expiresAt>o.time))return 'social-rendezvous-choice';
+    return 'personal-economic-social-choice';
+  }
   if (threads.some(t=>t.recipient===id && t.status==='pending')) return 'incoming-communication';
   if (o.encounters.some(e=>e.recipient===id && e.status==='pending')) return 'encounter-response';
   if (o.tasks.some(t=>t.recipient===id && t.status==='proposed')) return 'commitment-choice';
@@ -42,7 +53,7 @@ export class SelectiveNeighbourhoodProvider implements NeighbourhoodProvider {
     if(prioritiseResponses)this.priorityFor=(o,triggers)=>{
       if(this.sourceFor(o,triggers)!=='live-meta')return 0;
       const opportunity=reasoningOpportunity(o,triggers);
-      return ['incoming-communication','encounter-response','commitment-choice'].includes(opportunity ?? '')?2:['follow-up-offer','reconsider-response'].includes(opportunity ?? '')?1:0;
+      return ['social-invitation-response','incoming-communication','encounter-response','commitment-choice'].includes(opportunity ?? '')?2:['social-rendezvous-choice','follow-up-offer','reconsider-response'].includes(opportunity ?? '')?1:0;
     };
   }
   sourceFor(o:NpcObservation,triggers:string[]):'mock'|'live-meta' {
@@ -51,6 +62,11 @@ export class SelectiveNeighbourhoodProvider implements NeighbourhoodProvider {
   async decide(request:NpcDecisionRequest):Promise<NpcInferenceResult> {
     this.metrics=null;
     const provider=this.sourceFor(request.observation,request.triggers)==='live-meta'?this.muse:this.offline;
+    if(provider===this.offline&&request.observation.socialVisits){
+      const task=request.observation.tasks.find(t=>t.recipient===request.actorId&&['accepted','collected'].includes(t.status));
+      if(!task)throw new Error('No deterministic continuation authorised; Muse decision required');
+      return {mode:'mock',model:'accepted-delivery-mechanics-v1',decision:{goalId:request.observation.actor.goals[0]!.id,reason:'Execute the already accepted delivery through deterministic navigation and payment.',action:{type:'fulfil-transport',taskId:task.id}}};
+    }
     // A failed/invalid Muse result never falls through to the offline policy.
     try{return await provider.decide(request);}finally{this.metrics=provider.metrics;}
   }

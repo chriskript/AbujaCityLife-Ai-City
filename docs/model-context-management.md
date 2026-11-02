@@ -1,5 +1,7 @@
 # Bounded Muse context in Unity Gardens
 
+The investigation below records the accepted context work and its original allowance check. The subsequent [revised Phase D society plan](milestone-7g-phase-d-plan.md) supersedes the unexecuted 48-generation proposal and records the newly approved temporary $50 daily/$100 cumulative allowance. The original profile measurements and evaluation evidence remain historical records.
+
 Prepared November 1, 2026. No additional Meta requests were made for this investigation. The next live run requires separate approval; see the [proposed evaluation](milestone-7g-phase-d-plan.md).
 
 ## What stopped Phase C

@@ -6,5 +6,6 @@ export function createTown(id?: string, count: 8 | 16 = prototypePopulation, opt
   world.enableTown(townResidents(count));
   if(options.map!=='legacy-v1')world.upgradeTownMap({fresh:true});
   if(options.communication!==false)world.enableCommunications();
+  world.enableEconomicContinuity();
   return world;
 }

@@ -1,0 +1,396 @@
+{
+  "id": "7g-d-society-20261101T175236Z",
+  "allChecksPassed": true,
+  "startedAtUTC": "2026-11-01T17:53:01.791Z",
+  "completedAtUTC": "2026-11-01T17:56:08.734Z",
+  "startedAtLagos": "Sunday, 1 November 2026 at 18:53:01 GMT+1",
+  "completedAtLagos": "Sunday, 1 November 2026 at 18:56:08 GMT+1",
+  "protectedFiles": {
+    ".env": true,
+    "runtime/neighbourhood-session.json": true,
+    "runtime/town-headless.json": true,
+    "runtime/approved-7g-phase-b-plan.json": true,
+    "runtime/approved-7g-phase-c-plan.json": true,
+    "output/society-7g/7g-c-unity-20261101T085502Z/evidence.ndjson": true
+  },
+  "sourceFilesUnchanged": true,
+  "priorReservationsUnchanged": true,
+  "priorReservationCount": 21,
+  "newReservationCount": 19,
+  "newReservedMicroUsd": 355376,
+  "totalReservedMicroUsd": 689334,
+  "newReservations": [
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    },
+    {
+      "day": "2026-11-01",
+      "microUsd": 18704
+    }
+  ],
+  "actualUsage": {
+    "knownEstimatedUsd": 0.12350775000000001,
+    "unknownInvocations": 0,
+    "measuredGenerations": 19,
+    "inputTokens": 74469,
+    "outputTokens": 7158,
+    "measuredLatencyMs": 80978
+  },
+  "sessionRequests": 19,
+  "planUsed": 19,
+  "sessionReservationUsd": 0.355376,
+  "sessionPaused": true,
+  "baselinePaused": true,
+  "noOfflinePolicyDecisionsInMuseBranch": true,
+  "providerFailed": false,
+  "stoppedOnValidation": true,
+  "automaticRetries": 0,
+  "resumed": false,
+  "scopeAuditAllPassed": true,
+  "latency": {
+    "minimumMs": 2561,
+    "medianMs": 3894,
+    "maximumMs": 7545,
+    "meanMs": 4262
+  },
+  "inputPreflightRange": {
+    "minimum": 3647,
+    "maximum": 4638
+  },
+  "evidenceSha256": "236ec0995628ae39555b3e23d33ba2c55c1c4799d4322191ad05bc5e3bd84588",
+  "stopReason": "rejected-proposal",
+  "simulationSeconds": 93,
+  "wallMs": 186892,
+  "actors": [
+    "musa",
+    "amina",
+    "zainab",
+    "chris",
+    "fatima",
+    "tunde",
+    "halima",
+    "ibrahim",
+    "yusuf",
+    "ngozi",
+    "emeka",
+    "grace",
+    "ladi",
+    "sadiq",
+    "maryam",
+    "bisi"
+  ],
+  "actionCounts": {
+    "wait": 2,
+    "travel": 7,
+    "rest": 2,
+    "take-work": 5,
+    "buy": 2,
+    "collect-self": 1
+  },
+  "validationCounts": {
+    "accepted": 18,
+    "rejected": 1
+  },
+  "counterfactuals": {
+    "same": 13,
+    "different": 6,
+    "unsupported": 0,
+    "unavailable": 0
+  },
+  "economy": {
+    "initial": {
+      "time": 0,
+      "money": {
+        "residents": 155,
+        "businesses": 400,
+        "heldWages": 0,
+        "escrow": 0,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 8,
+        "marketGoods": 1,
+        "salesOpen": true,
+        "revision": 0
+      },
+      "rawInputs": 96,
+      "produced": 0,
+      "consumed": 0,
+      "taskStatuses": {},
+      "activeWork": [],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 0
+        },
+        {
+          "id": "supply-desk",
+          "coins": 100
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 60
+        },
+        {
+          "id": "care-desk",
+          "coins": 40
+        },
+        {
+          "id": "community-errands",
+          "coins": 80
+        },
+        {
+          "id": "learning-desk",
+          "coins": 40
+        },
+        {
+          "id": "utility-work",
+          "coins": 40
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 40
+        }
+      ]
+    },
+    "final": {
+      "time": 93,
+      "money": {
+        "residents": 158,
+        "businesses": 391,
+        "heldWages": 6,
+        "escrow": 0,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 8,
+        "marketGoods": 0,
+        "salesOpen": true,
+        "revision": 3
+      },
+      "rawInputs": 94,
+      "produced": 2,
+      "consumed": 0,
+      "taskStatuses": {},
+      "activeWork": [
+        {
+          "actor": "yusuf",
+          "businessId": "learning-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "emeka",
+          "businessId": "utility-work",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "bisi",
+          "businessId": "tailoring-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      ],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 1
+        },
+        {
+          "id": "supply-desk",
+          "coins": 98
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 58
+        },
+        {
+          "id": "care-desk",
+          "coins": 40
+        },
+        {
+          "id": "community-errands",
+          "coins": 80
+        },
+        {
+          "id": "learning-desk",
+          "coins": 38
+        },
+        {
+          "id": "utility-work",
+          "coins": 38
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 38
+        }
+      ]
+    },
+    "baseline": {
+      "time": 93,
+      "money": {
+        "residents": 168,
+        "businesses": 379,
+        "heldWages": 8,
+        "escrow": 0,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 6,
+        "marketGoods": 3,
+        "salesOpen": true,
+        "revision": 7
+      },
+      "rawInputs": 90,
+      "produced": 4,
+      "consumed": 1,
+      "taskStatuses": {
+        "delivered": 1
+      },
+      "activeWork": [
+        {
+          "actor": "chris",
+          "businessId": "repair-workshop",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "halima",
+          "businessId": "supply-desk",
+          "wage": 2,
+          "inputs": 2,
+          "output": 2
+        },
+        {
+          "actor": "ladi",
+          "businessId": "community-errands",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "sadiq",
+          "businessId": "community-errands",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "bisi",
+          "businessId": "tailoring-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      ],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 2
+        },
+        {
+          "id": "supply-desk",
+          "coins": 94
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 54
+        },
+        {
+          "id": "care-desk",
+          "coins": 40
+        },
+        {
+          "id": "community-errands",
+          "coins": 77
+        },
+        {
+          "id": "learning-desk",
+          "coins": 38
+        },
+        {
+          "id": "utility-work",
+          "coins": 38
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 36
+        }
+      ]
+    }
+  }
+}

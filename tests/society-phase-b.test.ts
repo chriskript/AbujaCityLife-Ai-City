@@ -45,7 +45,7 @@ describe('twelve-generation Unity Gardens readiness (no live transport)',()=>{
     const ledger={version:1,reservations:[{day:'2026-10-31',microUsd:97224},{day:'2026-10-30',microUsd:42286}]},before=structuredClone(ledger);
     expect(inspectSocietyBudget(ledger,.25,1,'2026-10-31')).toMatchObject({perCallMicroUsd:16204,requiredMicroUsd:194448,affordableGenerations:9,fullRunFits:false});
     expect(inspectSocietyBudget(ledger,20,1,'2026-10-31')).toMatchObject({requiredMicroUsd:194448,affordableGenerations:12,fullRunFits:true});
-    expect(()=>inspectSocietyBudget(ledger,20.01,1,'2026-10-31')).toThrow();
+    expect(()=>inspectSocietyBudget(ledger,50.01,1,'2026-10-31')).toThrow();
     expect(inspectSocietyBudget(ledger,.25,1,'2026-11-01')).toMatchObject({affordableGenerations:12,fullRunFits:true});
     expect(inspectSocietyBudget(ledger,.25,.2,'2026-11-01').fullRunFits).toBe(false);
     expect(ledger).toEqual(before);

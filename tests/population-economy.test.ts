@@ -19,7 +19,10 @@ function apply(world: Neighbourhood,id: string,action: Action) {
   const request=world.requestInteractionDecision(id)!;
   return {request,result:world.applyDecision(request.id,{goalId:request.observation.actor.goals[0]!.id,reason:'Offline fixture action',action},provenance)};
 }
-function gameplay({events:_events,revision:_revision,nextEvent:_nextEvent,...state}: WorldState) {return state;}
+// Rejected attempts may add scoped learning/guards, but never transactional effects.
+function gameplay({events:_events,revision:_revision,nextEvent:_nextEvent,triggers:_triggers,decisionRecovery:_recovery,npcs,...state}: WorldState) {
+  return {...state,npcs:Object.fromEntries(Object.entries(npcs).map(([id,{memories:_memories,revision:_actorRevision,...npc}])=>[id,npc]))};
+}
 function conservation(state: WorldState) {
   const town=state.town!;
   const goods=state.resources.supplierGoods+state.resources.marketGoods+Object.values(state.npcs).reduce((sum,npc)=>sum+npc.inventory.goods,0);

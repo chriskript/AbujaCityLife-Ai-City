@@ -1,0 +1,21 @@
+{
+  "mode": "offline-preparation",
+  "allowanceOnlyChangeVerified": true,
+  "approvedAllowance": {
+    "dailyUsd": 50,
+    "cumulativeUsd": 100,
+    "throughLagosDate": "2026-11-04",
+    "dailyAfterExpiry": 0.25,
+    "cumulativeAfterExpiry": 1
+  },
+  "operatingSavesUnchanged": {
+    "runtime/neighbourhood-session.json": true,
+    "runtime/town-headless.json": true
+  },
+  "ledgerUnchanged": true,
+  "ledgerReservations": 21,
+  "reservedMicroUsd": 333958,
+  "phaseCEvidenceUnchanged": true,
+  "phaseDApprovalCreated": false,
+  "liveRequestsThisTask": 0
+}

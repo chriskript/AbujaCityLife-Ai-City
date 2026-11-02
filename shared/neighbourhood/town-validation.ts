@@ -63,7 +63,7 @@ export function assertTownEconomy(state: WorldState): void {
     check(task.escrow===undefined || integer(task.escrow));
     check((task.escrow ?? 0)===(['accepted','collected'].includes(task.status) ? task.payment ?? 0 : 0)); money+=task.escrow ?? 0;
   }
-  check(money===town.initialMoney);
-  check(town.rawInputs+town.produced+bookings.reduce((sum,job)=>sum+job.inputs,0)===town.initialInputs);
+  check(money+(state.trade?.spent ?? 0)===town.initialMoney);
+  check(town.rawInputs+town.produced+bookings.reduce((sum,job)=>sum+job.inputs,0)===town.initialInputs+(state.trade?.importedInputs ?? 0));
   check(state.resources.supplierGoods+bookings.reduce((sum,job)=>sum+job.output,0)<=town.supplierCapacity);
 }

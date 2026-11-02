@@ -1,7 +1,7 @@
 import type { Action, NpcId, NpcObservation } from './types.js';
 import { Neighbourhood } from './world.js';
 import { communicationObservation } from './communication.js';
-export const phoneActionTypes=['communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'] as const;
+export const phoneActionTypes=['order-external','fund-business','communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'] as const;
 export type PhoneAction=Extract<Action,{type:typeof phoneActionTypes[number]}>;
 export interface PhoneControlStatus {actorId:string;expiresAt:number}
 export interface PhoneLease extends PhoneControlStatus {leaseId:string;worldId:string}
@@ -10,13 +10,14 @@ export interface PhoneActionInput {id:string;worldId:string;actorId:string;lease
 export interface PhoneView {
  worldId:string;owner:{id:string;name:string};time:number;paused:boolean;canAct:boolean;reason:string|null;
  communication:NonNullable<NpcObservation['communication']>;names:Record<string,string>;tasks:NpcObservation['tasks'];capabilities:string[];
+ wholesale?:NpcObservation['wholesale'];
  memories:{id:string;detail:string}[];nearby:{id:string;name:string}[];control:PhoneControlStatus|null;
 }
 export function projectPhone(world:Neighbourhood,id:NpcId,paused:boolean,control:PhoneControlStatus|null):PhoneView {
  if(!world.hasResident(id))throw new Error('Unknown resident');
  const observation=world.observe(id),state=world.snapshot,actor=observation.actor;
  if(!observation.communication)throw new Error('Phone unavailable in this fixture');
- return {worldId:world.id,owner:{id,name:actor.name},time:world.time,paused,canAct:!paused && observation.permittedActions.length>0,reason:paused?'The town is paused':observation.permittedActions.length?'':'Finish the current journey, work or rest first',communication:communicationObservation(state,id,128)!,names:Object.fromEntries(actor.knowledge.people.map(other=>[other,state.npcs[other]!.name])),tasks:observation.tasks,capabilities:actor.capabilities,memories:actor.memories.map(memory=>({id:memory.id,detail:memory.detail})),nearby:observation.nearbyPeople.filter(person=>person.known && !actor.knowledge.sharedContacts?.includes(person.id)).map(person=>({id:person.id,name:person.name!})),control};
+ return {...(observation.wholesale?{wholesale:observation.wholesale}:{}),worldId:world.id,owner:{id,name:actor.name},time:world.time,paused,canAct:!paused && observation.permittedActions.length>0,reason:paused?'The town is paused':observation.permittedActions.length?'':'Finish the current journey, work or rest first',communication:communicationObservation(state,id,128)!,names:Object.fromEntries(actor.knowledge.people.map(other=>[other,state.npcs[other]!.name])),tasks:observation.tasks,capabilities:actor.capabilities,memories:actor.memories.map(memory=>({id:memory.id,detail:memory.detail})),nearby:observation.nearbyPeople.filter(person=>person.known && !actor.knowledge.sharedContacts?.includes(person.id)).map(person=>({id:person.id,name:person.name!})),control};
 }
 // Ephemeral ownership. Tokens never enter checkpoints or public projections.
 export class PhoneControl {

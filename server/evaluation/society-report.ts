@@ -9,7 +9,8 @@ export function societyStateChanges(before: WorldState, after: WorldState) {
       .filter(key=>!equal(a[key],b[key])).map(key=>[key,{before:a[key],after:b[key]}]));
     return Object.keys(changes).length?[{id,changes}]:[];
   });
-  return {residents,tasks:equal(before.tasks,after.tasks)?null:{before:before.tasks,after:after.tasks},
+  return {residents,trade:equal(before.trade,after.trade)?null:{before:before.trade,after:after.trade},decisionRecovery:equal(before.decisionRecovery,after.decisionRecovery)?null:{before:before.decisionRecovery,after:after.decisionRecovery},tasks:equal(before.tasks,after.tasks)?null:{before:before.tasks,after:after.tasks},
+    socialVisits:equal(before.socialVisits,after.socialVisits)?null:{before:before.socialVisits,after:after.socialVisits},
     communication:equal(before.communication,after.communication)?null:{before:before.communication,after:after.communication},
     economy:equal(before.town,after.town)?null:{before:before.town,after:after.town},
     resources:equal(before.resources,after.resources)?null:{before:before.resources,after:after.resources}};

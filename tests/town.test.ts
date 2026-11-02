@@ -30,7 +30,10 @@ function invite(world: Neighbourhood, initiator = 'amina', recipient = 'chris') 
   expect(apply(world,initiator,{ type:'encounter',recipient,purpose:'introduce',message:'May we discuss local work?' }).accepted).toBe(true);
   return Object.values(world.snapshot.social.interactions).at(-1)!;
 }
-function gameplay({ events:_events,revision:_revision,nextEvent:_nextEvent,...state }: WorldState) { return state; }
+// Rejected attempts may add scoped learning/guards, but never transactional effects.
+function gameplay({events:_events,revision:_revision,nextEvent:_nextEvent,triggers:_triggers,decisionRecovery:_recovery,npcs,...state}: WorldState) {
+  return {...state,npcs:Object.fromEntries(Object.entries(npcs).map(([id,{memories:_memories,revision:_actorRevision,...npc}])=>[id,npc]))};
+}
 function extra(id: string): Inhabitant { const resident = chrisResident(); return { ...resident,id,name:id.toUpperCase(),knowledge:{ ...resident.knowledge,people:[],transporters:[] },relationships:{} }; }
 
 describe('extensible resident registry', () => {

@@ -1,0 +1,12 @@
+{
+  "id": "REPLACE-with-new-reviewed-economic-recovery-run-id",
+  "approved": false,
+  "phase": "7g-d-society",
+  "residents": ["musa", "amina", "zainab", "chris", "fatima", "tunde", "halima", "ibrahim", "yusuf", "ngozi", "emeka", "grace", "ladi", "sadiq", "maryam", "bisi"],
+  "notBefore": "REPLACE-after-explicit-approval",
+  "expiresAt": "REPLACE-after-explicit-approval",
+  "maxGenerations": 200,
+  "maxEstimatedUsd": 5,
+  "inputTokenLimit": 8000,
+  "allowAutonomy": true
+}

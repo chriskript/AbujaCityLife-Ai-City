@@ -33,6 +33,7 @@ export function selectModelObservation(source:NpcObservation, topic='', triggers
     ...o.tasks.map(t=>t.id),...o.tasks.flatMap(t=>[t.pickup,t.destination,t.requester,t.recipient]),
     ...(o.communication?.threads ?? []).flatMap(t=>[t.id,t.initiator,t.recipient]),...o.encounters.flatMap(e=>[e.id,e.initiator,e.recipient]),
     ...(o.town?.work.filter(w=>w.canTakeNow).map(w=>w.id) ?? [])]);
+  for(const invitation of o.socialVisits?.invitations ?? [])for(const item of [invitation.id,...invitation.participants,invitation.update.destination])focus.add(item);
   const requiredEvidence=new Set(o.placeKnowledge.flatMap(p=>[p.stock.evidenceId,p.salesOpen.evidenceId]).filter((v):v is string=>!!v));
   const interpretations=new Map(o.memoryEvidence.map(e=>[e.id,e.interpretation]));
   const mandatoryMemories=new Set(o.actor.memories.filter(m=>m.kind!=='observed' || m.source!=='world' || focus.has(m.subject) || requiredEvidence.has(m.id) || interpretations.get(m.id)==='speech-only' || /^(Observed|Verified)\b/.test(m.detail)).map(m=>m.id));
@@ -66,11 +67,13 @@ function encodeObservation(o:NpcObservation,audit:ContextAudit){
   const facts=new Map(o.placeKnowledge.map(p=>[p.placeId,p]));
   return {
     mapId:o.mapId,time:o.time,actor,
+    ...(o.decisionRecovery?{decisionRecovery:o.decisionRecovery}:{}),...(o.wholesale?{wholesale:o.wholesale}:{}),
     knownPeople:knowledge.people,knownTransporters:knowledge.transporters ?? [],capabilities,permittedActions:o.permittedActions,actionConstraints:o.actionConstraints,
     places:o.places.map(p=>{const k=facts.get(p.id);return{id:p.id,name:p.name,...(p.node!==p.id?{node:p.node}:{}),facts:k?.facts ?? null,...(k?.factEvidenceId?{factEvidenceId:k.factEvidenceId}:{}),...(k?.stock.value!==null&&k?.stock.value!==undefined?{stock:k.stock}:{}),...(k?.salesOpen.value!==null&&k?.salesOpen.value!==undefined?{salesOpen:k.salesOpen}:{})};}),
     memories:memories.map(({eventId,...m})=>({...m,interpretation:interpretations.get(m.id) ?? 'unverified-report'})),
     nearbyPeople:o.nearbyPeople,encounterOpportunities:o.encounterOpportunities,encounters:o.encounters,
     ...(o.communication?{communication:o.communication}:{}),...(o.town?{town:o.town}:{}),
+    ...(o.socialVisits?{socialVisits:o.socialVisits}:{}),
     tasks:o.tasks,resources:o.resources,knownBlockedEdges:o.knownBlockedEdges,...(o.socialContext?{socialContext:o.socialContext}:{}),
     contextSelection:{version:1,omitted:{memories:audit.memories.omitted.length,threads:audit.threads.omitted.length,tasks:audit.tasks.omitted.length,encounters:audit.encounters.omitted.length,historyFacts:audit.historyFacts.omitted.length}},
   };
@@ -105,6 +108,27 @@ export function prepareModelInput(input:NpcDecisionRequest|ConversationContext,m
   const memoryIds=new Set(o.actor.memories.map(m=>m.id));o.memoryEvidence=o.memoryEvidence.filter(m=>memoryIds.has(m.id));
   const schema=employmentDecisionSchema(o);
   schema.properties.action.anyOf=schema.properties.action.anyOf.filter(branch=>o.permittedActions.includes(branch.properties.type.enum[0] as NpcDecision['action']['type']));
+  schema.properties.action.anyOf=schema.properties.action.anyOf.filter(branch=>{
+    const type=branch.properties.type.enum[0],properties=branch.properties as Record<string,unknown>;
+    const invitations=o.socialVisits?.invitations ?? [];
+    if(type==='order-external'||type==='fund-business'){
+      const ids=(o.wholesale?.offers ?? []).filter(f=>type==='fund-business'||f.product!==null).map(f=>f.businessId);
+      if(!ids.length)return false;properties.businessId={type:'string',enum:ids};
+    }
+    if(type==='invite-social'){
+      const venues=o.socialVisits?.venues.map(v=>v.id) ?? [];
+      if(!venues.length)return false;properties.destination={type:'string',enum:venues};
+    }
+    if(['respond-social','join-social','socialise','leave-social'].includes(String(type))){
+      const eligible=invitations.filter(i=>i.expiresAt>o.time&&['pending','accepted'].includes(i.update.status)&&
+        (type==='respond-social'?i.update.respondTo===o.actor.id:
+          type==='join-social'?i.update.status==='accepted'&&!i.joined:
+          type==='socialise'?i.update.status==='accepted'&&i.joined&&i.canConverse:true)).map(i=>i.id);
+      if(!eligible.length)return false;properties.invitationId={type:'string',enum:eligible};
+      if(type==='respond-social')properties.destination={anyOf:[{type:'string',enum:o.socialVisits!.venues.map(v=>v.id)},{type:'null'}]};
+    }
+    return true;
+  });
   if(mode==='decision'&&!schema.properties.action.anyOf.length)throw new Error('No permitted actions for model decision');
   return {input:projected,observation:o,audit,instructions:scopedInstructions(o,mode),schema};
 }

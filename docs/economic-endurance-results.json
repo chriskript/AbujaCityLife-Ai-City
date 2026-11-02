@@ -1,0 +1,790 @@
+{
+  "version": 1,
+  "networkCalls": 0,
+  "results": [
+    {
+      "fixture": "unchanged-town-offline-policy",
+      "simulatedSeconds": 3600,
+      "maximumDecisions": 4096,
+      "firstEmpty": 2.5,
+      "emptyMarketSeconds": 2543.75,
+      "samples": [
+        {
+          "time": 300,
+          "decisions": 142,
+          "residents": 16,
+          "market": 5,
+          "supplier": 10,
+          "rawInputs": 78,
+          "produced": 14,
+          "consumed": 8,
+          "money": {
+            "personal": 189,
+            "business": 357,
+            "heldWages": 9,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 600,
+          "decisions": 272,
+          "residents": 16,
+          "market": 0,
+          "supplier": 14,
+          "rawInputs": 72,
+          "produced": 24,
+          "consumed": 19,
+          "money": {
+            "personal": 205,
+            "business": 347,
+            "heldWages": 3,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 900,
+          "decisions": 419,
+          "residents": 16,
+          "market": 0,
+          "supplier": 6,
+          "rawInputs": 70,
+          "produced": 24,
+          "consumed": 24,
+          "money": {
+            "personal": 208,
+            "business": 345,
+            "heldWages": 2,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 1200,
+          "decisions": 572,
+          "residents": 16,
+          "market": 0,
+          "supplier": 4,
+          "rawInputs": 58,
+          "produced": 34,
+          "consumed": 35,
+          "money": {
+            "personal": 221,
+            "business": 328,
+            "heldWages": 6,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 1500,
+          "decisions": 706,
+          "residents": 16,
+          "market": 4,
+          "supplier": 6,
+          "rawInputs": 50,
+          "produced": 44,
+          "consumed": 43,
+          "money": {
+            "personal": 235,
+            "business": 314,
+            "heldWages": 6,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 1800,
+          "decisions": 851,
+          "residents": 16,
+          "market": 0,
+          "supplier": 12,
+          "rawInputs": 44,
+          "produced": 52,
+          "consumed": 49,
+          "money": {
+            "personal": 246,
+            "business": 305,
+            "heldWages": 4,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [
+            "ngozi"
+          ],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 2100,
+          "decisions": 1022,
+          "residents": 16,
+          "market": 0,
+          "supplier": 10,
+          "rawInputs": 44,
+          "produced": 52,
+          "consumed": 51,
+          "money": {
+            "personal": 249,
+            "business": 305,
+            "heldWages": 1,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [
+            "fatima",
+            "halima",
+            "ibrahim",
+            "yusuf",
+            "ngozi",
+            "grace",
+            "bisi"
+          ],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 2400,
+          "decisions": 1187,
+          "residents": 16,
+          "market": 0,
+          "supplier": 8,
+          "rawInputs": 32,
+          "produced": 60,
+          "consumed": 61,
+          "money": {
+            "personal": 260,
+            "business": 288,
+            "heldWages": 7,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [
+            "amina",
+            "ngozi",
+            "grace"
+          ],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 2700,
+          "decisions": 1354,
+          "residents": 16,
+          "market": 0,
+          "supplier": 12,
+          "rawInputs": 32,
+          "produced": 64,
+          "consumed": 61,
+          "money": {
+            "personal": 267,
+            "business": 288,
+            "heldWages": 0,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [
+            "amina",
+            "zainab",
+            "fatima",
+            "halima",
+            "ibrahim",
+            "ngozi",
+            "emeka",
+            "grace",
+            "sadiq",
+            "bisi"
+          ],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 3000,
+          "decisions": 1541,
+          "residents": 16,
+          "market": 0,
+          "supplier": 2,
+          "rawInputs": 24,
+          "produced": 70,
+          "consumed": 75,
+          "money": {
+            "personal": 271,
+            "business": 279,
+            "heldWages": 5,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [
+            "amina",
+            "chris"
+          ],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": [
+            "ngozi"
+          ]
+        },
+        {
+          "time": 3300,
+          "decisions": 1691,
+          "residents": 16,
+          "market": 0,
+          "supplier": 0,
+          "rawInputs": 22,
+          "produced": 74,
+          "consumed": 81,
+          "money": {
+            "personal": 279,
+            "business": 269,
+            "heldWages": 7,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [
+            "ibrahim"
+          ],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": [
+            "ngozi"
+          ]
+        },
+        {
+          "time": 3600,
+          "decisions": 1858,
+          "residents": 16,
+          "market": 0,
+          "supplier": 0,
+          "rawInputs": 22,
+          "produced": 74,
+          "consumed": 83,
+          "money": {
+            "personal": 288,
+            "business": 267,
+            "heldWages": 0,
+            "transportEscrow": 0,
+            "externalSpent": 0,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 240,
+            "importedFood": 0,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [
+            "musa",
+            "amina",
+            "zainab",
+            "chris",
+            "tunde",
+            "halima",
+            "ibrahim",
+            "ngozi",
+            "ladi",
+            "bisi"
+          ],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": [
+            "ngozi"
+          ]
+        }
+      ],
+      "final": {
+        "time": 3600,
+        "decisions": 1858,
+        "residents": 16,
+        "market": 0,
+        "supplier": 0,
+        "rawInputs": 22,
+        "produced": 74,
+        "consumed": 83,
+        "money": {
+          "personal": 288,
+          "business": 267,
+          "heldWages": 0,
+          "transportEscrow": 0,
+          "externalSpent": 0,
+          "initial": 555
+        },
+        "external": {
+          "remaining": 240,
+          "importedFood": 0,
+          "importedInputs": 0,
+          "pending": 0
+        },
+        "hungry": [
+          "musa",
+          "amina",
+          "zainab",
+          "chris",
+          "tunde",
+          "halima",
+          "ibrahim",
+          "ngozi",
+          "ladi",
+          "bisi"
+        ],
+        "unfundedBusinesses": [],
+        "zeroCashResidents": [
+          "ngozi"
+        ]
+      },
+      "recoveryVerified": true,
+      "interpretation": "Offline deterministic economic evidence only; no claim of Muse decisions or indefinite sustainability."
+    },
+    {
+      "fixture": "explicit-procurement-stress-fixture",
+      "simulatedSeconds": 3600,
+      "maximumDecisions": 4096,
+      "firstEmpty": 2.5,
+      "emptyMarketSeconds": 409,
+      "samples": [
+        {
+          "time": 300,
+          "decisions": 132,
+          "residents": 16,
+          "market": 5,
+          "supplier": 16,
+          "rawInputs": 82,
+          "produced": 14,
+          "consumed": 8,
+          "money": {
+            "personal": 185,
+            "business": 359,
+            "heldWages": 5,
+            "transportEscrow": 0,
+            "externalSpent": 6,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 234,
+            "importedFood": 6,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 600,
+          "decisions": 262,
+          "residents": 16,
+          "market": 9,
+          "supplier": 14,
+          "rawInputs": 76,
+          "produced": 20,
+          "consumed": 18,
+          "money": {
+            "personal": 192,
+            "business": 347,
+            "heldWages": 4,
+            "transportEscrow": 0,
+            "externalSpent": 12,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 228,
+            "importedFood": 12,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 900,
+          "decisions": 393,
+          "residents": 16,
+          "market": 14,
+          "supplier": 8,
+          "rawInputs": 74,
+          "produced": 20,
+          "consumed": 25,
+          "money": {
+            "personal": 193,
+            "business": 341,
+            "heldWages": 3,
+            "transportEscrow": 0,
+            "externalSpent": 18,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 222,
+            "importedFood": 18,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 1200,
+          "decisions": 524,
+          "residents": 16,
+          "market": 4,
+          "supplier": 12,
+          "rawInputs": 72,
+          "produced": 24,
+          "consumed": 35,
+          "money": {
+            "personal": 201,
+            "business": 334,
+            "heldWages": 2,
+            "transportEscrow": 0,
+            "externalSpent": 18,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 222,
+            "importedFood": 18,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 1500,
+          "decisions": 671,
+          "residents": 16,
+          "market": 6,
+          "supplier": 8,
+          "rawInputs": 68,
+          "produced": 26,
+          "consumed": 44,
+          "money": {
+            "personal": 198,
+            "business": 330,
+            "heldWages": 3,
+            "transportEscrow": 0,
+            "externalSpent": 24,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 216,
+            "importedFood": 24,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 1800,
+          "decisions": 804,
+          "residents": 16,
+          "market": 8,
+          "supplier": 12,
+          "rawInputs": 64,
+          "produced": 32,
+          "consumed": 51,
+          "money": {
+            "personal": 205,
+            "business": 318,
+            "heldWages": 2,
+            "transportEscrow": 0,
+            "externalSpent": 30,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 210,
+            "importedFood": 30,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 2100,
+          "decisions": 947,
+          "residents": 16,
+          "market": 2,
+          "supplier": 12,
+          "rawInputs": 58,
+          "produced": 36,
+          "consumed": 65,
+          "money": {
+            "personal": 197,
+            "business": 315,
+            "heldWages": 7,
+            "transportEscrow": 0,
+            "externalSpent": 36,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 204,
+            "importedFood": 36,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 2400,
+          "decisions": 1083,
+          "residents": 16,
+          "market": 5,
+          "supplier": 12,
+          "rawInputs": 58,
+          "produced": 38,
+          "consumed": 71,
+          "money": {
+            "personal": 200,
+            "business": 311,
+            "heldWages": 2,
+            "transportEscrow": 0,
+            "externalSpent": 42,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 198,
+            "importedFood": 42,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 2700,
+          "decisions": 1217,
+          "residents": 16,
+          "market": 7,
+          "supplier": 12,
+          "rawInputs": 52,
+          "produced": 44,
+          "consumed": 82,
+          "money": {
+            "personal": 203,
+            "business": 300,
+            "heldWages": 4,
+            "transportEscrow": 0,
+            "externalSpent": 48,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 192,
+            "importedFood": 48,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 3000,
+          "decisions": 1343,
+          "residents": 16,
+          "market": 0,
+          "supplier": 12,
+          "rawInputs": 52,
+          "produced": 44,
+          "consumed": 84,
+          "money": {
+            "personal": 207,
+            "business": 296,
+            "heldWages": 4,
+            "transportEscrow": 0,
+            "externalSpent": 48,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 192,
+            "importedFood": 48,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 3300,
+          "decisions": 1481,
+          "residents": 16,
+          "market": 5,
+          "supplier": 14,
+          "rawInputs": 42,
+          "produced": 54,
+          "consumed": 98,
+          "money": {
+            "personal": 220,
+            "business": 279,
+            "heldWages": 2,
+            "transportEscrow": 0,
+            "externalSpent": 54,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 186,
+            "importedFood": 54,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        },
+        {
+          "time": 3600,
+          "decisions": 1618,
+          "residents": 16,
+          "market": 5,
+          "supplier": 12,
+          "rawInputs": 42,
+          "produced": 54,
+          "consumed": 103,
+          "money": {
+            "personal": 219,
+            "business": 274,
+            "heldWages": 2,
+            "transportEscrow": 0,
+            "externalSpent": 60,
+            "initial": 555
+          },
+          "external": {
+            "remaining": 180,
+            "importedFood": 60,
+            "importedInputs": 0,
+            "pending": 0
+          },
+          "hungry": [],
+          "unfundedBusinesses": [],
+          "zeroCashResidents": []
+        }
+      ],
+      "final": {
+        "time": 3600,
+        "decisions": 1618,
+        "residents": 16,
+        "market": 5,
+        "supplier": 12,
+        "rawInputs": 42,
+        "produced": 54,
+        "consumed": 103,
+        "money": {
+          "personal": 219,
+          "business": 274,
+          "heldWages": 2,
+          "transportEscrow": 0,
+          "externalSpent": 60,
+          "initial": 555
+        },
+        "external": {
+          "remaining": 180,
+          "importedFood": 60,
+          "importedInputs": 0,
+          "pending": 0
+        },
+        "hungry": [],
+        "unfundedBusinesses": [],
+        "zeroCashResidents": []
+      },
+      "recoveryVerified": true,
+      "interpretation": "Offline deterministic economic evidence only; no claim of Muse decisions or indefinite sustainability."
+    }
+  ]
+}

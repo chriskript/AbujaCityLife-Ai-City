@@ -1,3 +1,5 @@
+import { assertTrade } from './economic-continuity.js';
+import { assertDecisionRecovery } from './decision-recovery.js';
 import { mapFor } from '../world/town-layout.js';
 import { initialState, maximumResidents } from './initial-state.js';
 import { actionTypes, type WorldState } from './types.js';
@@ -8,6 +10,7 @@ import { assertTownEconomy } from './town-validation.js';
 import { isResidentId } from './decision-schema.js';
 import { assertCommunication } from './communication-validation.js';
 import { neighbourhoodHistory, residentHistories } from './social-context.js';
+import { assertSocialVisits } from './social-visits-validation.js';
 
 function check(condition: unknown): asserts condition { if (!condition) throw new Error('Invalid neighbourhood snapshot'); }
 const object = (value: unknown): boolean => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -21,6 +24,8 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
   check(state.mapUpgradedAt===undefined || state.mapId==='town-v1' && Number.isFinite(state.mapUpgradedAt) && state.mapUpgradedAt>=0 && state.mapUpgradedAt<=state.time);
   check(object(state.npcs) && Object.keys(state.npcs).length >= 3 && Object.keys(state.npcs).length <= maximumResidents && object(state.resources) && object(state.roads) && object(state.tasks) && object(state.triggers));
   const npcIds = Object.keys(state.npcs);
+  assertSocialVisits(state);
+  assertTrade(state);assertDecisionRecovery(state);
   if (state.socialContext !== undefined) {
     const context = state.socialContext;
     check(state.town && object(context) && Object.keys(context).sort().join(',') === 'canon,residents,version');
@@ -79,7 +84,11 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
     for (const amount of [npc.knowledge.resources.supplierGoods, npc.knowledge.resources.marketGoods]) check(amount === null || integer(amount));
     check(npc.knowledge.resources.salesOpen === null || typeof npc.knowledge.resources.salesOpen === 'boolean');
     check(object(npc.relationships));
-    for (const [other, relationship] of Object.entries(npc.relationships)) check(npcIds.includes(other as typeof npcIds[number]) && object(relationship) && relationship && integer(relationship.successfulJobs));
+    for (const [other, relationship] of Object.entries(npc.relationships)) {
+      check(npcIds.includes(other as typeof npcIds[number]) && object(relationship) && relationship && integer(relationship.successfulJobs));
+      check(relationship.socialExchanges===undefined||integer(relationship.socialExchanges));
+      check(relationship.lastSocialAt===undefined||Number.isFinite(relationship.lastSocialAt)&&relationship.lastSocialAt>=0&&relationship.lastSocialAt<=state.time);
+    }
     check(Array.isArray(npc.memories) && npc.memories.length <= 24);
     for (const memory of npc.memories) {
       check(object(memory) && ['fact', 'observed', 'reported', 'belief', 'commitment', 'outcome'].includes(memory.kind));
@@ -137,7 +146,7 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
     check(npc.inventory.rewards === tasks.filter(task => task.recipient === id && task.status === 'delivered').length);
   }
   check(state.resources.supplierGoods >= tasks.reduce((total, task) => total + task.reserved, 0));
-  check(state.resources.supplierGoods + state.resources.marketGoods + npcIds.reduce((total, id) => total + state.npcs[id]!.inventory.goods, 0) === state.initialGoods + (state.town?.produced ?? 0) - (state.town?.consumed ?? 0));
+  check(state.resources.supplierGoods + state.resources.marketGoods + npcIds.reduce((total, id) => total + state.npcs[id]!.inventory.goods, 0) === state.initialGoods + (state.trade?.importedFood ?? 0) + (state.town?.produced ?? 0) - (state.town?.consumed ?? 0));
   assertTownEconomy(state);
   assertCommunication(state);
   const social = state.social;
