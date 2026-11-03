@@ -1,5 +1,8 @@
 # Milestone 7D: autonomous calls and delayed messaging
 
+> Historical record: Taxi Lab, its headless scenarios and standalone taxi Meta probe have been retired. Unity Gardens is the only supported app experience; taxi-related results below describe the earlier implementation.
+
+
 Implemented offline on October 31, 2026. Contact-based remote communication is integrated into the existing sixteen-resident town, authoritative actions, scheduler, observations, memories, transport tasks, recovery and browser. No external telephone/SMS service, audio, live Meta request, commit, push, deployment or repository rename was used.
 
 ## Capabilities and rules

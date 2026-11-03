@@ -1,5 +1,8 @@
 # Milestone 7A: extensible residents and autonomous face-to-face encounters
 
+> Historical record: Taxi Lab, its headless scenarios and standalone taxi Meta probe have been retired. Unity Gardens is the only supported app experience; taxi-related results below describe the earlier implementation.
+
+
 Follow-up: [Milestone 7B](milestone-7b.md) now expands the normal town to sixteen residents with paid work, food/rest routines, conserved credits/inputs and updated recovery. This document retains the historical four-person 7A results and limits.
 
 Implemented and verified offline on October 30, 2026. This extends the existing world, validation/execution, scheduling, persistence and Three.js architecture. No live Meta inference, commit, push, deployment or repository rename was performed. Phone calls, messaging, governance and families remain outside this milestone.

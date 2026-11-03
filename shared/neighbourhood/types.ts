@@ -52,7 +52,7 @@ export interface WorldEvent {
   data: Record<string, string | number | boolean | null>;
 }
 export interface WorldState {
-  version: 4; mapId:MapId; mapUpgradedAt?:number; id: string; revision: number; time: number;
+  version: 4; mapId:MapId; layoutRevision?:2; mapUpgradedAt?:number; id: string; revision: number; time: number;
   // The original residents remain required for the preserved supply scenario.
   npcs: Record<NpcId, Inhabitant> & { musa: Inhabitant; amina: Inhabitant; zainab: Inhabitant };
   initialGoods: number;

@@ -3,11 +3,9 @@ import { createWorld, landmarkLabels } from './world.js';
 import { createTownWorld } from './town-world.js';
 import { MapControls } from 'three/addons/controls/MapControls.js';
 import { mapFor,type MapId } from '../../../shared/world/town-layout.js';
-import type { TaxiPose } from '../simulation/taxi-journey.js';
-import type { Route } from '../../../shared/navigation/routes.js';
-import { nodes, edges } from '../../../shared/world/neighbourhood.js';
+import { townFurnishings } from '../../../shared/world/town-planning.js';
 import { createInhabitants } from './inhabitants.js';
-import type { NeighbourhoodView } from '../../../shared/neighbourhood/presentation.js';
+import type { ActorPose, NeighbourhoodView } from '../../../shared/neighbourhood/presentation.js';
 import { type NpcId } from '../../../shared/neighbourhood/types.js';
 
 export class NeighbourhoodScene {
@@ -27,10 +25,7 @@ export class NeighbourhoodScene {
   private readonly desiredTarget = new THREE.Vector3();
   private readonly projection = new THREE.Vector3();
   private readonly labelElements: HTMLDivElement[] = [];
-  private readonly taxiLabel = document.createElement('div');
   private readonly resizeObserver: ResizeObserver;
-  private route: THREE.Line | null = null;
-  private routeId: string | null = null;
   private follow = false;
   private disposed = false;
   private contextLost = false;
@@ -53,6 +48,7 @@ export class NeighbourhoodScene {
     this.scene.fog = new THREE.Fog('#dce5d3', 350, 620);
     this.scene.add(new THREE.HemisphereLight('#fff9e3', '#809674', 2.6));
     const sun = new THREE.DirectionalLight('#fff0cc', 3.2);
+    sun.name='neighbourhood-sun';
     sun.position.set(-60, 150, 70); sun.castShadow = true;
     sun.shadow.mapSize.set(1024, 1024);
     Object.assign(sun.shadow.camera, { left: -160, right: 160, top: 150, bottom: -150, near: 1, far: 350 });
@@ -66,7 +62,6 @@ export class NeighbourhoodScene {
       label.className = `landmark landmark-${landmark.kind}`;
       label.textContent = landmark.text; labels.append(label); this.labelElements.push(label);
     }
-    this.taxiLabel.className = 'landmark taxi-marker'; this.taxiLabel.textContent = '● TAXI'; labels.append(this.taxiLabel);
     const lost = (event: Event): void => { event.preventDefault(); this.contextLost = true; onContextChange(true); };
     const restored = (): void => { this.contextLost = false; onContextChange(false); };
     this.renderer.domElement.addEventListener('webglcontextlost', lost);
@@ -88,8 +83,25 @@ export class NeighbourhoodScene {
     this.camera.aspect = width / Math.max(1, height);
     this.camera.fov = width < 700 ? this.population ? 60 : 53 : 40;
     this.camera.updateProjectionMatrix();
+    if(this.controls && !this.follow && !this.cameraBuilding)this.showOverview();
   }
-  setFollow(follow: boolean): void { this.follow = follow;this.cameraBuilding=null;if(!follow && this.controls){this.controls.target.set(40,0,20);this.camera.position.set(385,410,430);this.controls.update();} }
+  private showOverview():void {
+    if(!this.controls)return;
+    const map=mapFor(this.mapId),center=new THREE.Vector3((map.bounds.minX+map.bounds.maxX)/2,0,(map.bounds.minZ+map.bounds.maxZ)/2);
+    const direction=new THREE.Vector3(.65,.95,.85).normalize();let near=250,far=1500,distance=far;
+    for(let pass=0;pass<18;pass++){
+      distance=(near+far)/2;
+      this.camera.position.copy(center).addScaledVector(direction,distance);this.camera.lookAt(center);this.camera.updateMatrixWorld();
+      let extent=0;
+      for(const x of [map.bounds.minX,map.bounds.maxX])for(const z of [map.bounds.minZ,map.bounds.maxZ]){
+        const p=new THREE.Vector3(x,0,z).project(this.camera);extent=Math.max(extent,Math.abs(p.x)/.92,Math.abs(p.y)/.70);
+      }
+      if(extent>1)near=distance;else far=distance;
+    }
+    this.camera.position.copy(center).addScaledVector(direction,far);this.camera.lookAt(center);
+    this.controls.target.copy(center);this.controls.update();
+  }
+  setFollow(follow: boolean): void { this.follow = follow;this.cameraBuilding=null;if(!follow)this.showOverview(); }
   zoom(factor:number):void {if(!this.controls)return;this.follow=false;this.cameraBuilding=null;const offset=this.camera.position.clone().sub(this.controls.target);offset.setLength(THREE.MathUtils.clamp(offset.length()*factor,65,850));this.camera.position.copy(this.controls.target).add(offset);this.controls.update();this.onPan?.();}
   enableInhabitants(onSelect: (id: NpcId) => void,onBuilding?:(id:string)=>void,onPan?:()=>void): void {
     if (this.population) return;
@@ -124,9 +136,12 @@ export class NeighbourhoodScene {
     this.world=id==='town-v1'?createTownWorld():createWorld();this.scene.add(this.world.group);this.world.taxi.scale.setScalar(1.3);this.world.taxi.userData.npcId='musa';if(this.population)this.world.taxi.add(this.population.cargo);
     this.controls?.dispose();this.controls=null;this.buildingLabels.forEach(label=>label.remove());this.buildingLabels.clear();
     if(id==='town-v1'){
+      this.renderer.toneMappingExposure=1.2;
+      const sun=this.scene.getObjectByName('neighbourhood-sun') as THREE.DirectionalLight;
+      Object.assign(sun.shadow.camera,{left:-235,right:235,top:235,bottom:-235,far:500});sun.shadow.camera.updateProjectionMatrix();
       this.renderer.setClearColor('#b9d7d8');this.scene.fog=new THREE.Fog('#b9d7d8',850,1400);this.camera.far=2000;this.camera.updateProjectionMatrix();
       this.camera.position.set(385,410,430);this.target.set(40,0,20);this.camera.lookAt(this.target);
-      this.controls=new MapControls(this.camera,this.renderer.domElement);this.controls.target.copy(this.target);this.controls.enableRotate=false;this.controls.enableDamping=true;this.controls.screenSpacePanning=false;this.controls.minDistance=65;this.controls.maxDistance=850;this.controls.zoomSpeed=.8;
+      this.controls=new MapControls(this.camera,this.renderer.domElement);this.controls.target.copy(this.target);this.controls.enableRotate=false;this.controls.enableDamping=true;this.controls.screenSpacePanning=false;this.controls.minDistance=65;this.controls.maxDistance=1500;this.controls.zoomSpeed=.8;this.showOverview();
       this.controls.addEventListener('start',()=>{this.follow=false;this.cameraBuilding=null;this.onPan?.();});
       for(const building of mapFor(id).buildings){const button=document.createElement('button');button.className='building-marker';button.dataset.building=building.id;button.addEventListener('click',()=>this.selectBuilding?.(building.id),{signal:this.populationListeners!.signal});document.querySelector('#building-labels')?.append(button);this.buildingLabels.set(building.id,button);}
     }
@@ -137,6 +152,7 @@ export class NeighbourhoodScene {
   renderInhabitants(view: NeighbourhoodView, selected: NpcId, seconds: number): void {
     const population = this.population; if (!population) return;
     this.setMap(view.mapId);
+    if(view.mapId==='town-v1'){population.stock.position.set(townFurnishings.stock.x-1.6,.5,townFurnishings.stock.z);population.supplies.position.set(townFurnishings.supplies.x-1.6,.5,townFurnishings.supplies.z);}
     this.setClosure(view.blockedEdges.includes('centre-market'),'centre-market');
     const ease = this.populationPlaced ? 1 - Math.exp(-Math.min(seconds, 0.05) * 14) : 1;
     for (const [index,actor] of view.actors.entries()) {
@@ -149,16 +165,17 @@ export class NeighbourhoodScene {
       }
       const localIndex=this.mapId==='town-v1'?view.actors.filter(person=>!person.moving && person.node===actor.node).findIndex(person=>person.id===actor.id):index;
       const standing = { x: (localIndex % 3 - 1) * 3, z: 3 + Math.floor(localIndex / 3) * 3 };
-      const x = actor.pose.x + (actor.moving ? actor.mobility === 'taxi' ? 0 : Math.cos(actor.pose.heading) * 4.4 : standing.x);
-      const z = actor.pose.z + (actor.moving ? actor.mobility === 'taxi' ? 0 : -Math.sin(actor.pose.heading) * 4.4 : standing.z);
+      const sidewalk=actor.mobility!=='taxi' && actor.pathKind==='road'?4.4:0;
+      const x = actor.pose.x + (actor.moving ? Math.cos(actor.pose.heading)*sidewalk : standing.x);
+      const z = actor.pose.z + (actor.moving ? -Math.sin(actor.pose.heading)*sidewalk : standing.z);
       model.group.position.x += (x - model.group.position.x) * ease;
       model.group.position.z += (z - model.group.position.z) * ease;
       const difference = Math.atan2(Math.sin(actor.pose.heading - model.group.rotation.y), Math.cos(actor.pose.heading - model.group.rotation.y));
       model.group.rotation.y += difference * ease;
-      model.body.visible = !(actor.mobility === 'taxi' && actor.moving);
+      model.body.visible = !(actor.mobility === 'taxi' && actor.moving && actor.pathKind!=='walk');
       model.body.position.y = actor.moving ? Math.abs(Math.sin(view.time * 7)) * 0.16 : Math.sin(view.time * 2) * 0.025;
       model.limbs.forEach((limb, index) => { limb.rotation.x = actor.moving ? Math.sin(view.time * 7 + index * Math.PI) * 0.38 : 0; });
-      model.parcel.visible = actor.goods > 0 && actor.mobility !== 'taxi'; model.ring.visible = actor.id === selected;
+      model.parcel.visible = actor.goods > 0 && (actor.mobility !== 'taxi' || actor.pathKind==='walk'); model.ring.visible = actor.id === selected;
       const marker = this.actorLabels.get(actor.id)!;
       const caption = actor.name;
       if (marker.textContent !== caption) marker.textContent = caption;
@@ -168,12 +185,13 @@ export class NeighbourhoodScene {
     population.stock.children.forEach((crate, index) => { crate.visible = index < view.resources.marketGoods; });
     population.supplies.children.forEach((crate, index) => { crate.visible = index < view.resources.supplierGoods; });
     const musa = view.actors.find(actor => actor.mobility === 'taxi') ?? view.actors[0]!;
-    this.world.taxi.visible=!musa.insideBuildingId;
+    this.world.taxi.visible=!musa.insideBuildingId && musa.pathKind!=='walk';
     population.cargo.children.forEach((crate, index) => { crate.visible = index < musa.goods; });
     const focused = view.actors.find(actor => actor.id === selected) ?? musa;
     this.render(musa.pose, seconds, focused.pose);
-    this.taxiLabel.hidden = true;
-    for (const [index,actor] of view.actors.entries()) {
+    const actorLabelRects:{left:number;right:number;top:number;bottom:number}[]=[];
+    const labelOrder=view.actors.map((actor,index)=>({actor,index})).sort((a,b)=>Number(b.actor.id===selected)-Number(a.actor.id===selected));
+    for (const {index,actor} of labelOrder) {
       const position = population.models[actor.id]!.group.position;
       this.projection.set(position.x, 8, position.z).project(this.camera);
       const marker = this.actorLabels.get(actor.id)!;
@@ -183,47 +201,52 @@ export class NeighbourhoodScene {
       const horizontalOffset = crowded ? (index % 3 - 1) * 30 : 0;
       marker.style.transform = `translate(${(this.projection.x + 1) * this.container.clientWidth / 2 + horizontalOffset}px, ${(1 - this.projection.y) * this.container.clientHeight / 2 + labelOffset}px) translate(-50%, -100%)`;
       marker.hidden = !!actor.insideBuildingId || this.projection.z > 1 || Math.abs(this.projection.x) > 1 || Math.abs(this.projection.y) > 1 || this.mapId==='town-v1' && this.camera.position.distanceTo(this.controls!.target)>350 && actor.id!==selected;
+      const x=(this.projection.x+1)*this.container.clientWidth/2+horizontalOffset,y=(1-this.projection.y)*this.container.clientHeight/2+labelOffset;
+      const width=actor.name.length*7+26,rect={left:x-width/2,right:x+width/2,top:y-40,bottom:y};
+      if(!marker.hidden){
+        if(actor.id!==selected && actorLabelRects.some(other=>rect.left<other.right+5 && rect.right>other.left-5 && rect.top<other.bottom+5 && rect.bottom>other.top-5))marker.hidden=true;
+        else actorLabelRects.push(rect);
+      }
     }
     for (const [id,model] of Object.entries(population.models)) if (!view.actors.some(actor => actor.id === id)) { model.group.visible = false; this.actorLabels.get(id)!.hidden = true; }
     this.populationPlaced = true;
-    for(const building of mapFor(this.mapId).buildings){
+    const labelRects:{left:number;right:number;top:number;bottom:number}[]=[];
+    const distance=this.controls?this.camera.position.distanceTo(this.controls.target):0;
+    for(const building of [...mapFor(this.mapId).buildings].sort((a,b)=>Number(a.kind==='flats')-Number(b.kind==='flats'))){
       const marker=this.buildingLabels.get(building.id)!;const occupants=view.actors.filter(actor=>actor.insideBuildingId===building.id);
       marker.textContent=`${building.name}${occupants.length?` · ${occupants.length} indoors`:''}`;marker.setAttribute('aria-label',`Inspect ${building.name}`);
       this.projection.set(building.x,building.floors*7+4,building.z).project(this.camera);
       marker.style.transform=`translate(${(this.projection.x+1)*this.container.clientWidth/2}px,${(1-this.projection.y)*this.container.clientHeight/2}px) translate(-50%,-100%)`;
-      marker.hidden=this.projection.z>1 || Math.abs(this.projection.x)>.95 || Math.abs(this.projection.y)>.95 || this.camera.position.distanceTo(this.controls!.target)>420 && building.kind!=='flats' && building.id!==this.cameraBuilding && !occupants.some(actor=>actor.id===selected);
+      marker.hidden=this.projection.z>1 || Math.abs(this.projection.x)>.95 || Math.abs(this.projection.y)>.95 || this.camera.position.distanceTo(this.controls!.target)>420 && !['flats','market','office'].includes(building.kind) && building.id!==this.cameraBuilding && !occupants.some(actor=>actor.id===selected);
+      if(this.container.clientWidth<600 && distance>420 && !['market','office'].includes(building.kind))marker.hidden=true;
+      const x=(this.projection.x+1)*this.container.clientWidth/2,y=(1-this.projection.y)*this.container.clientHeight/2;
+      const width=(marker.textContent?.length ?? 0)*6+24,rect={left:x-width/2,right:x+width/2,top:y-38,bottom:y+3};
+      if(!marker.hidden){
+        if(building.id!==this.cameraBuilding && labelRects.some(other=>rect.left<other.right+6 && rect.right>other.left-6 && rect.top<other.bottom+4 && rect.bottom>other.top-4))marker.hidden=true;
+        else labelRects.push(rect);
+      }
     }
   }
   resetPresentation(): void { this.populationPlaced = false; }
-  setClosure(closed: boolean, edgeId = 'bridge-overlook'): void {
+  private setClosure(closed: boolean, edgeId: string): void {
     this.world.closure.visible = closed;
-    const edge=edges.find(item=>item.id===edgeId); if (!closed || !edge) return;
-    const from=nodes.find(node=>node.id===edge.from)!,to=nodes.find(node=>node.id===edge.to)!;
+    const map=mapFor(this.mapId),edge=map.edges.find(item=>item.id===edgeId); if (!closed || !edge) return;
+    const from=map.nodes.find(node=>node.id===edge.from)!,to=map.nodes.find(node=>node.id===edge.to)!;
     this.world.closure.position.set((from.x+to.x)/2,0,(from.z+to.z)/2);
     this.world.closure.rotation.y=-Math.atan2(to.z-from.z,to.x-from.x);
   }
-  setRoute(route: Route | null): void {
-    if ((route?.id ?? null) === this.routeId) return;
-    this.routeId = route?.id ?? null;
-    if (this.route) { this.scene.remove(this.route); this.route.geometry.dispose(); (this.route.material as THREE.Material).dispose(); this.route = null; }
-    if (!route) return;
-    const points = route.nodeIds.map(id => { const node = nodes.find(item => item.id === id)!; return new THREE.Vector3(node.x, 0.43, node.z); });
-    this.route = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: '#f5d66d', depthTest: false }));
-    this.route.renderOrder = 2; this.scene.add(this.route);
-  }
-
-  render(pose: TaxiPose, seconds: number, cameraPose: TaxiPose = pose): void {
+  private render(pose: ActorPose, seconds: number, cameraPose: ActorPose = pose): void {
     if (this.disposed || this.contextLost) return;
     this.world.taxi.position.set(pose.x, 0.1, pose.z); this.world.taxi.rotation.y = pose.heading;
     if(this.controls){
-      if(this.follow || this.cameraBuilding){const building=mapFor(this.mapId).buildings.find(b=>b.id===this.cameraBuilding);const x=building?.x ?? cameraPose.x,z=building?.z ?? cameraPose.z;this.desiredTarget.set(x,0,z);this.desiredPosition.set(x+85,115,z+105);const ease=1-Math.exp(-Math.min(seconds,.05)*3);this.camera.position.lerp(this.desiredPosition,ease);this.controls.target.lerp(this.desiredTarget,ease);}
+      if(this.follow || this.cameraBuilding){const map=mapFor(this.mapId),place=map.buildings.find(b=>b.id===this.cameraBuilding) ?? map.nodes.find(n=>n.id===this.cameraBuilding);const x=place?.x ?? cameraPose.x,z=place?.z ?? cameraPose.z;this.desiredTarget.set(x,0,z);this.desiredPosition.set(x+85,115,z+105);const ease=1-Math.exp(-Math.min(seconds,.05)*3);this.camera.position.lerp(this.desiredPosition,ease);this.controls.target.lerp(this.desiredTarget,ease);}
       const previousTarget=this.controls.target.clone();this.controls.target.x=THREE.MathUtils.clamp(this.controls.target.x,-150,260);this.controls.target.z=THREE.MathUtils.clamp(this.controls.target.z,-150,190);this.camera.position.add(this.controls.target.clone().sub(previousTarget));this.controls.update();
     } else {
     if (this.follow) {
       this.desiredTarget.set(cameraPose.x, 0, cameraPose.z);
       this.desiredPosition.set(cameraPose.x + 65, 80, cameraPose.z + 80);
     } else {
-      // Move the city to the right of the desktop instruction card.
+      // Position the legacy neighbourhood for its observer view.
       this.desiredTarget.set(window.innerWidth >= 900 ? 50 : 73, 0, window.innerWidth >= 900 ? 40 : window.innerWidth < 600 && this.population ? 0 : 35);
       this.desiredPosition.copy(this.overview);
     }
@@ -241,9 +264,6 @@ export class NeighbourhoodScene {
       element.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
       element.hidden = this.mapId==='town-v1' || this.projection.z > 1 || Math.abs(this.projection.x) > 1.1 || Math.abs(this.projection.y) > 1.1;
     }
-    this.projection.set(pose.x, 6, pose.z).project(this.camera);
-    this.taxiLabel.style.transform = `translate(${(this.projection.x + 1) * this.container.clientWidth / 2}px, ${(1 - this.projection.y) * this.container.clientHeight / 2}px) translate(-50%, -100%)`;
-    this.taxiLabel.hidden = this.projection.z > 1 || Math.abs(this.projection.x) > 1 || Math.abs(this.projection.y) > 1;
     this.renderer.render(this.scene, this.camera);
   }
 

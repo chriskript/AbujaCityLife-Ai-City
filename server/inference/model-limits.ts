@@ -1,4 +1,4 @@
-import { inferenceCost } from './meta-probe.js';
+import { inferenceCost } from './model-pricing.js';
 
 export type InputTokenLimit = 6000 | 8000;
 export const defaultInputTokenLimit:InputTokenLimit=6000;

@@ -1,546 +1,69 @@
-.experience-nav{
-  display:flex;
-  gap:6px;
-  background:#e9edde;
-  padding:4px;
-  border-radius:24px}
-  .experience-nav a{
-    color:#718069;
-    text-decoration:none;
-    padding:8px 17px;
-    border-radius:20px;
-    font-size:11px}
-    .experience-nav a[aria-current]{
-      background:#faf9f0;
-      color:#2d5340;
-      box-shadow:0 2px 8px #3853320c}
-      .sr-only{
-        position:absolute;
-        width:1px;
-        height:1px;
-        padding:0;
-        overflow:hidden;
-        clip:rect(0,0,0,0);
-        white-space:nowrap;
-        border:0}
-        body[data-experience=neighbourhood] .scene-caption h1{
-          font-size:43px}
-          body[data-experience=neighbourhood] .scene-caption p{
-            font-size:11px}
-            #inhabitant-labels{
-              position:absolute;
-              inset:0;
-              pointer-events:none;
-              overflow:hidden}
-              .npc-marker{
-                position:absolute;
-                left:0;
-                top:0;
-                pointer-events:auto;
-                white-space:nowrap;
-                border:1px solid #fff8e6;
-                border-radius:20px;
-                padding:9px 12px;
-                color:#244e3d;
-                font-size:10px;
-                box-shadow:0 4px 15px #2c4a3926;
-                background:#fff9e8ed;
-                min-height:34px}
-                .npc-marker[aria-pressed=true]{
-                  background:#f3d47b;
-                  border-color:#e8bd50;
-                  z-index:2}
-                  .npc-marker.npc-musa{
-                    border-left:4px solid #5b8194}
-                    .npc-marker.npc-amina{
-                      border-left:4px solid #bd794b}
-                      .npc-marker.npc-zainab{
-                        border-left:4px solid #628d74}
-                        .inhabitant-panel{
-                          position:absolute;
-                          top:212px;
-                          left:40px;
-                          width:306px;
-                          border-radius:18px;
-                          background:#fbfaf2f5;
-                          border:1px solid #fff9;
-                          box-shadow:0 14px 45px #30473213;
-                          backdrop-filter:blur(12px);
-                          padding:18px}
-                          .people{
-                            display:flex;
-                            overflow-x:auto;
-                            gap:5px;
-                            border-bottom:1px solid #e2e5d7;
-                            padding-bottom:14px;
-                            margin-bottom:18px}
-                            .people button{
-                              display:flex;
-                              flex-direction:column;
-                              align-items:center;
-                              gap:6px;
-                              flex:1 0 48px;
-                              background:transparent;
-                              border:1px solid transparent;
-                              border-radius:10px;
-                              padding:8px 5px;
-                              font-size:10px;
-                              color:#74816a}
-                              .people button[aria-pressed=true]{
-                                background:#edf0e0;
-                                border-color:#dae1c9;
-                                color:#31553f}
-                                .portrait{
-                                  width:29px;
-                                  height:29px;
-                                  display:grid;
-                                  place-items:center;
-                                  border-radius:50%;
-                                  font-family:Georgia,serif;
-                                  font-size:17px;
-                                  background:#dfb389;
-                                  color:#69442e}
-                                  .portrait.musa{
-                                    background:#a1bec7;
-                                    color:#355565}
-                                  .portrait.chris{background:#c0afd1;color:#504263}
-                                    .portrait.zainab{
-                                      background:#adc4a7;
-                                      color:#3c614c}
-                                      .portrait.large{
-                                        width:43px;
-                                        height:43px;
-                                        font-size:24px;
-                                        flex-shrink:0}
-                                        .person-heading{
-                                          display:flex;
-                                          gap:11px;
-                                          align-items:center}
-                                          .person-heading h2{
-                                            font:600 21px Georgia,serif;
-                                            margin:0 0 4px}
-                                            .person-heading p{
-                                              font-size:10px;
-                                              color:#7f8974;
-                                              margin:0}
-                                              .local-tag{
-                                                font-size:7px;
-                                                letter-spacing:1px;
-                                                margin-left:auto;
-                                                color:#8c977f}
-                                                .activity-line{
-                                                  display:flex;
-                                                  align-items:center;
-                                                  gap:8px;
-                                                  margin-top:18px;
-                                                  font-size:12px;
-                                                  line-height:1.5}
-                                                  .activity-line span{
-                                                    width:6px;
-                                                    height:6px;
-                                                    border-radius:50%;
-                                                    background:#7b9565;
-                                                    flex-shrink:0}
-                                                    .activity-line strong{
-                                                      font-weight:600}
-                                                      .intention{
-                                                        color:#8a927c;
-                                                        font-size:10px;
-                                                        line-height:1.7;
-                                                        margin:6px 0 14px}
-                                                        .person-facts{
-                                                          display:flex;
-                                                          gap:5px;
-                                                          flex-wrap:wrap}
-                                                          .person-facts span{
-                                                            border:1px solid #e2e6d6;
-                                                            border-radius:5px;
-                                                            font-size:9px;
-                                                            padding:5px 7px;
-                                                            color:#78866c;
-                                                            background:#f3f4e8}
-                                                            .recent-heading{
-                                                              font-size:8px;
-                                                              color:#929a84;
-                                                              font-weight:600;
-                                                              letter-spacing:1.2px;
-                                                              margin-top:21px}
-                                                              .person-recent{
-                                                                padding-left:14px;
-                                                                color:#73816b;
-                                                                font-size:10px;
-                                                                line-height:1.6;
-                                                                margin:10px 0 15px}
-                                                                .person-recent li{
-                                                                  padding-bottom:5px}
-                                                                  .conversation,.experiments{
-                                                                    border-top:1px solid #e4e7d8;
-                                                                    font-size:10px}
-                                                                    .conversation summary,.experiments summary{
-                                                                      padding:12px 0;
-                                                                      color:#526b4f;
-                                                                      cursor:pointer;
-                                                                      font-weight:600}
-                                                                      .coming-soon{
-                                                                        font-size:6px;
-                                                                        letter-spacing:.7px;
-                                                                        color:#9ba18c;
-                                                                        float:right;
-                                                                        padding-top:3px}
-                                                                        .conversation textarea{
-                                                                          font-size:10px;
-                                                                          height:62px;
-                                                                          margin-bottom:5px}
-                                                                          .conversation button{
-                                                                            width:100%;
-                                                                            border:0;
-                                                                            border-radius:7px;
-                                                                            padding:8px;
-                                                                            background:#e0e6d1;
-                                                                            color:#869276}
-                                                                            .conversation p,.experiments p{
-                                                                              font-size:9px;
-                                                                              line-height:1.6;
-                                                                              color:#8f9881}
-                                                                              .experiments label{
-                                                                                font-size:9px}
-                                                                                .experiments select{
-                                                                                  width:100%;
-                                                                                  border:1px solid #dce2cf;
-                                                                                  border-radius:6px;
-                                                                                  padding:9px;
-                                                                                  background:#f7f8ed;
-                                                                                  color:#576f4e;
-                                                                                  font:inherit}
-                                                                                  .experiments[open]{
-                                                                                    max-height:190px;
-                                                                                    overflow:auto}
-                                                                                    .activity-feed{
-                                                                                      position:absolute;
-                                                                                      right:40px;
-                                                                                      bottom:134px;
-                                                                                      width:290px;
-                                                                                      background:#fbfaf1eb;
-                                                                                      border:1px solid #fdfcf0;
-                                                                                      border-radius:13px;
-                                                                                      padding:15px;
-                                                                                      backdrop-filter:blur(12px);
-                                                                                      box-shadow:0 6px 24px #324c3410}
-                                                                                      .feed-heading{
-                                                                                        display:flex;
-                                                                                        justify-content:space-between;
-                                                                                        align-items:center}
-                                                                                        .feed-heading .eyebrow{
-                                                                                          font-size:7px;
-                                                                                          letter-spacing:1.2px}
-                                                                                          .feed-heading>span:last-child{
-                                                                                            font-size:7px;
-                                                                                            color:#98a186;
-                                                                                            letter-spacing:1px}
-                                                                                            .activity-feed ol{
-                                                                                              padding:0;
-                                                                                              list-style:none;
-                                                                                              margin:12px 0 0;
-                                                                                              max-height:150px;
-                                                                                              overflow:auto}
-                                                                                              .activity-feed li{
-                                                                                                display:flex;
-                                                                                                gap:10px;
-                                                                                                color:#607557;
-                                                                                                font-size:10px;
-                                                                                                line-height:1.6;
-                                                                                                padding:6px 0;
-                                                                                                border-bottom:1px solid #e6e9da}
-                                                                                                .activity-feed time{
-                                                                                                  font-size:8px;
-                                                                                                  color:#9aa38d;
-                                                                                                  min-width:27px;
-                                                                                                  padding-top:2px}
-                                                                                                  .activity-feed details{
-                                                                                                    font-size:8px;
-                                                                                                    color:#919c83;
-                                                                                                    margin-top:11px}
-                                                                                                    .activity-feed summary{
-                                                                                                      cursor:pointer}
-                                                                                                      .activity-feed pre{
-                                                                                                        font-size:8px;
-                                                                                                        line-height:1.5;
-                                                                                                        white-space:pre-wrap;
-                                                                                                        overflow-wrap:anywhere;
-                                                                                                        max-height:160px;
-                                                                                                        overflow:auto}
-                                                                                                        .neighbourhood-bar{
-                                                                                                          position:absolute;
-                                                                                                          left:40px;
-                                                                                                          right:40px;
-                                                                                                          bottom:30px;
-                                                                                                          min-height:80px;
-                                                                                                          display:flex;
-                                                                                                          align-items:center;
-                                                                                                          gap:25px;
-                                                                                                          padding:16px 21px;
-                                                                                                          background:#fbfaf2f5;
-                                                                                                          border:1px solid #fff9;
-                                                                                                          border-radius:14px;
-                                                                                                          box-shadow:0 12px 40px #30473212;
-                                                                                                          backdrop-filter:blur(12px)}
-                                                                                                          .neighbourhood-bar strong{
-                                                                                                            font-size:12px;
-                                                                                                            display:block;
-                                                                                                            margin-top:6px;
-                                                                                                            font-weight:600}
-                                                                                                            .neighbourhood-bar>div+div{
-                                                                                                              border-left:1px solid #dfe4d2;
-                                                                                                              padding-left:25px}
-                                                                                                              .cooperation-status{
-                                                                                                                flex:1}
-                                                                                                                .clock-controls{
-                                                                                                                  display:flex;
-                                                                                                                  gap:8px;
-                                                                                                                  align-items:center}
-                                                                                                                  .clock-controls>span{
-                                                                                                                    font-size:11px;
-                                                                                                                    color:#879478;
-                                                                                                                    min-width:32px;
-                                                                                                                    white-space:nowrap}
-                                                                                                                    .clock-controls select,.clock-controls button{
-                                                                                                                      border:1px solid #dce2cd;
-                                                                                                                      border-radius:7px;
-                                                                                                                      background:#f7f7ed;
-                                                                                                                      color:#6c7c5b;
-                                                                                                                      padding:10px;
-                                                                                                                      font:inherit;
-                                                                                                                      font-size:9px}
-                                                                                                                      @media(max-width:1100px){
-                                                                                                                        .inhabitant-panel{
-                                                                                                                          left:25px;
-                                                                                                                          width:285px}
-                                                                                                                          .activity-feed{
-                                                                                                                            right:25px;
-                                                                                                                            width:260px}
-                                                                                                                            .neighbourhood-bar{
-                                                                                                                              left:25px;
-                                                                                                                              right:25px;
-                                                                                                                              gap:14px}
-                                                                                                                              .neighbourhood-bar>div+div{
-                                                                                                                                padding-left:14px}
-                                                                                                                                .neighbourhood-bar strong{
-                                                                                                                                  font-size:10px}
-                                                                                                                                  .neighbourhood-bar .eyebrow{
-                                                                                                                                    font-size:7px;
-                                                                                                                                    letter-spacing:1px}
-                                                                                                                                    .clock-controls{
-                                                                                                                                      gap:5px}
-                                                                                                                                      .clock-controls select,.clock-controls button{
-                                                                                                                                        padding:9px 7px}
-                                                                                                                                      }
-                                                                                                                                      @media(max-height:820px) and (min-width:901px){
-                                                                                                                                        body[data-experience=neighbourhood] .scene-caption{
-                                                                                                                                          top:20px}
-                                                                                                                                          body[data-experience=neighbourhood] .scene-caption h1{
-                                                                                                                                            font-size:31px}
-                                                                                                                                            body[data-experience=neighbourhood] .inhabitant-panel{
-                                                                                                                                              top:155px;
-                                                                                                                                              padding:14px}
-                                                                                                                                              .people{
-                                                                                                                                                margin-bottom:12px;
-                                                                                                                                                padding-bottom:9px}
-                                                                                                                                                .people button{
-                                                                                                                                                  padding:5px}
-                                                                                                                                                  .activity-line{
-                                                                                                                                                    margin-top:13px}
-                                                                                                                                                    .recent-heading{
-                                                                                                                                                      margin-top:14px}
-                                                                                                                                                      .person-recent{
-                                                                                                                                                        margin-bottom:9px}
-                                                                                                                                                        .person-recent li{
-                                                                                                                                                          padding-bottom:3px}
-                                                                                                                                                          .intention{
-                                                                                                                                                            margin-bottom:9px}
-                                                                                                                                                            .activity-feed{
-                                                                                                                                                              bottom:124px}
-                                                                                                                                                              body[data-experience=neighbourhood] .scene-caption p{
-                                                                                                                                                                display:none}
-                                                                                                                                                              }
-                                                                                                                                                              @media(max-height:740px) and (min-width:901px){
-                                                                                                                                                                body[data-experience=neighbourhood] .inhabitant-panel{
-                                                                                                                                                                  top:20px}
-                                                                                                                                                                  .person-recent{
-                                                                                                                                                                    max-height:70px;
-                                                                                                                                                                    overflow:auto}
-                                                                                                                                                                  }
-                                                                                                                                                                  @media(max-width:900px) and (min-width:601px){
-                                                                                                                                                                    .inhabitant-panel{
-                                                                                                                                                                      top:auto;
-                                                                                                                                                                      bottom:130px;
-                                                                                                                                                                      width:260px;
-                                                                                                                                                                      left:20px;
-                                                                                                                                                                      padding:14px}
-                                                                                                                                                                      .people{
-                                                                                                                                                                        margin-bottom:12px;
-                                                                                                                                                                        padding-bottom:10px}
-                                                                                                                                                                        .activity-feed{
-                                                                                                                                                                          right:20px;
-                                                                                                                                                                          bottom:130px;
-                                                                                                                                                                          width:235px}
-                                                                                                                                                                          .neighbourhood-bar{
-                                                                                                                                                                            left:20px;
-                                                                                                                                                                            right:20px;
-                                                                                                                                                                            bottom:25px;
-                                                                                                                                                                            flex-wrap:wrap;
-                                                                                                                                                                            gap:12px}
-                                                                                                                                                                            .neighbourhood-bar .cooperation-status{
-                                                                                                                                                                              display:none}
-                                                                                                                                                                              .clock-controls{
-                                                                                                                                                                                margin-left:auto}
-                                                                                                                                                                                .neighbourhood-bar .clock-controls{
-                                                                                                                                                                                  padding-left:0;
-                                                                                                                                                                                  border:0}
-                                                                                                                                                                                  .person-recent{
-                                                                                                                                                                                    max-height:65px;
-                                                                                                                                                                                    overflow:auto}
-                                                                                                                                                                                    .conversation summary,.experiments summary{
-                                                                                                                                                                                      padding:10px 0}
-                                                                                                                                                                                      .experience-nav a{
-                                                                                                                                                                                        padding:7px 10px}
-                                                                                                                                                                                      }
-                                                                                                                                                                                      @media(max-width:600px){
-                                                                                                                                                                                        body[data-experience=neighbourhood] #experience{
-                                                                                                                                                                                          height:auto;
-                                                                                                                                                                                          min-height:0;
-                                                                                                                                                                                          padding-bottom:10px}
-                                                                                                                                                                                          body[data-experience=neighbourhood] #world,body[data-experience=neighbourhood] #labels,#inhabitant-labels{
-                                                                                                                                                                                            height:385px;
-                                                                                                                                                                                            bottom:auto}
-                                                                                                                                                                                            body[data-experience=neighbourhood] .scene-caption h1{
-                                                                                                                                                                                              font-size:29px}
-                                                                                                                                                                                              body[data-experience=neighbourhood] .scene-caption p{
-                                                                                                                                                                                                display:none}
-                                                                                                                                                                                                .inhabitant-panel{
-                                                                                                                                                                                                  position:relative;
-                                                                                                                                                                                                  top:auto;
-                                                                                                                                                                                                  bottom:auto;
-                                                                                                                                                                                                  left:auto;
-                                                                                                                                                                                                  width:auto;
-                                                                                                                                                                                                  margin:385px 14px 0;
-                                                                                                                                                                                                  padding:16px}
-                                                                                                                                                                                                  .people{
-                                                                                                                                                                                                    flex-direction:row;
-                                                                                                                                                                                                    margin-bottom:14px;
-                                                                                                                                                                                                    padding-bottom:12px}
-                                                                                                                                                                                                    .people button{
-                                                                                                                                                                                                      flex-direction:row;
-                                                                                                                                                                                                      justify-content:center;
-                                                                                                                                                                                                      gap:7px;
-                                                                                                                                                                                                      min-height:44px}
-                                                                                                                                                                                                      .portrait{
-                                                                                                                                                                                                        width:26px;
-                                                                                                                                                                                                        height:26px}
-                                                                                                                                                                                                        .person-heading h2{
-                                                                                                                                                                                                          font-size:23px}
-                                                                                                                                                                                                          .activity-line{
-                                                                                                                                                                                                            margin-top:14px}
-                                                                                                                                                                                                            .intention{
-                                                                                                                                                                                                              margin-bottom:10px}
-                                                                                                                                                                                                              .recent-heading{
-                                                                                                                                                                                                                margin-top:15px}
-                                                                                                                                                                                                                .person-recent{
-                                                                                                                                                                                                                  margin-bottom:10px}
-                                                                                                                                                                                                                  .conversation textarea{
-                                                                                                                                                                                                                    width:100%}
-                                                                                                                                                                                                                    .activity-feed{
-                                                                                                                                                                                                                      position:relative;
-                                                                                                                                                                                                                      right:auto;
-                                                                                                                                                                                                                      bottom:auto;
-                                                                                                                                                                                                                      width:auto;
-                                                                                                                                                                                                                      margin:12px 14px 0;
-                                                                                                                                                                                                                      padding:14px}
-                                                                                                                                                                                                                      .activity-feed ol{
-                                                                                                                                                                                                                        max-height:150px}
-                                                                                                                                                                                                                        .neighbourhood-bar{
-                                                                                                                                                                                                                          position:relative;
-                                                                                                                                                                                                                          left:auto;
-                                                                                                                                                                                                                          right:auto;
-                                                                                                                                                                                                                          bottom:auto;
-                                                                                                                                                                                                                          margin:12px 14px 0;
-                                                                                                                                                                                                                          display:grid;
-                                                                                                                                                                                                                          grid-template-columns:1fr 1fr;
-                                                                                                                                                                                                                          gap:15px;
-                                                                                                                                                                                                                          padding:15px}
-                                                                                                                                                                                                                          .neighbourhood-bar>div+div{
-                                                                                                                                                                                                                            padding-left:10px}
-                                                                                                                                                                                                                            .neighbourhood-bar .cooperation-status{
-                                                                                                                                                                                                                              grid-column:1/-1;
-                                                                                                                                                                                                                              border-left:0;
-                                                                                                                                                                                                                              padding-left:0}
-                                                                                                                                                                                                                              .clock-controls{
-                                                                                                                                                                                                                                grid-column:1/-1;
-                                                                                                                                                                                                                                justify-content:space-between}
-                                                                                                                                                                                                                                .neighbourhood-bar .clock-controls{
-                                                                                                                                                                                                                                  padding-left:0;
-                                                                                                                                                                                                                                  border:0}
-                                                                                                                                                                                                                                  .clock-controls button,.clock-controls select{
-                                                                                                                                                                                                                                    min-height:40px}
-                                                                                                                                                                                                                                    .clock-controls button{
-                                                                                                                                                                                                                                      flex:1}
-                                                                                                                                                                                                                                      .neighbourhood-bar strong{
-                                                                                                                                                                                                                                        font-size:12px}
-                                                                                                                                                                                                                                        .npc-marker{
-                                                                                                                                                                                                                                          font-size:8px;
-                                                                                                                                                                                                                                          padding:8px 9px;
-                                                                                                                                                                                                                                          min-height:32px}
-                                                                                                                                                                                                                                          body[data-experience=neighbourhood] .header-note{
-                                                                                                                                                                                                                                            display:block;
-                                                                                                                                                                                                                                            position:absolute;
-                                                                                                                                                                                                                                            top:68px;
-                                                                                                                                                                                                                                            left:14px;
-                                                                                                                                                                                                                                            z-index:6}
-                                                                                                                                                                                                                                            body[data-experience=neighbourhood] .experience-nav{
-                                                                                                                                                                                                                                              background:#e3e9d5cc;
-                                                                                                                                                                                                                                              backdrop-filter:blur(8px)}
-                                                                                                                                                                                                                                              body[data-experience=neighbourhood] .experience-nav a{
-                                                                                                                                                                                                                                                font-size:8px;
-                                                                                                                                                                                                                                                padding:6px 10px}
-                                                                                                                                                                                                                                                body[data-experience=neighbourhood] .scene-caption{
-                                                                                                                                                                                                                                                  top:49px}
-                                                                                                                                                                                                                                                  .view-controls{
-                                                                                                                                                                                                                                                    top:49px!important}
-                                                                                                                                                                                                                                                    .compass{
-                                                                                                                                                                                                                                                      top:130px!important}
-                                                                                                                                                                                                                                                      body[data-experience=taxi] .header-note{
-                                                                                                                                                                                                                                                        display:block;
-                                                                                                                                                                                                                                                        position:absolute;
-                                                                                                                                                                                                                                                        right:14px;
-                                                                                                                                                                                                                                                        top:67px;
-                                                                                                                                                                                                                                                        z-index:6}
-                                                                                                                                                                                                                                                        body[data-experience=taxi] .experience-nav a{
-                                                                                                                                                                                                                                                          padding:5px 7px;
-                                                                                                                                                                                                                                                          font-size:8px}
-                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                        body[data-experience=neighbourhood] .inhabitant-panel{
-                                                                                                                                                                                                                                                          max-height:calc(100% - 340px);
-                                                                                                                                                                                                                                                          overflow:auto}
-                                                                                                                                                                                                                                                          @media(max-height:820px) and (min-width:901px){
-                                                                                                                                                                                                                                                            body[data-experience=neighbourhood] .inhabitant-panel{
-                                                                                                                                                                                                                                                              max-height:calc(100% - 280px)}
-                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                            @media(max-height:740px) and (min-width:901px){
-                                                                                                                                                                                                                                                              body[data-experience=neighbourhood] .inhabitant-panel{
-                                                                                                                                                                                                                                                                max-height:calc(100% - 145px)}
-                                                                                                                                                                                                                                                              }
-                                                                                                                                                                                                                                                              @media(max-width:900px) and (min-width:601px){
-                                                                                                                                                                                                                                                                body[data-experience=neighbourhood] .inhabitant-panel{
-                                                                                                                                                                                                                                                                  max-height:calc(100% - 250px)}
-                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                                @media(max-width:600px){
-                                                                                                                                                                                                                                                                  body[data-experience=neighbourhood] .inhabitant-panel{
-                                                                                                                                                                                                                                                                    max-height:none;
-                                                                                                                                                                                                                                                                    overflow:visible}
-                                                                                                                                                                                                                                                                  }
-/* Backend access and bounded conversation use the existing character card. */
-#backend-access { margin-top: 16px; padding: 12px; border: 1px solid #d8ddd2; border-radius: 10px; }
-#backend-access label { display: block; font-size: 12px; margin-bottom: 6px; }
-#demo-token { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 8px; }
-#transcript { max-height: 180px; overflow: auto; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
-#connection-status, #conversation-status { font-size: 11px; line-height: 1.5; }
-#building-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}.building-marker{position:absolute;left:0;top:0;pointer-events:auto;border:1px solid #fff9;background:#fff6dcf2;color:#385747;border-radius:7px;padding:5px 9px;font-size:10px;box-shadow:0 3px 9px #17392b18;white-space:nowrap}.building-marker:hover{background:#f9e5ad}.resident-tools{display:flex;gap:7px;margin:8px 0 13px}.resident-tools button,#building-residents button{border:1px solid #c5d0b8;background:#f4f4e8;color:#2d5745;padding:8px 10px;border-radius:7px;font-size:11px;cursor:pointer}#building-residents{display:flex;flex-direction:column;gap:5px}#building-picker{width:100%;margin:7px 0;background:#f5f6ea;border:1px solid #d1d9c3;border-radius:6px;padding:7px;color:#2d5543}#building-name{font-size:14px;margin:10px 0 4px}
+/* Unity Gardens: the world is the canvas; information opens on demand. */
+[hidden] { display:none !important; }
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body[data-experience=neighbourhood]{--ink:#254b3d;--muted:#586d5e;--paper:#faf8ef;--line:#d8dfcc;--gold:#eac975;color:var(--ink)}
+body[data-experience=neighbourhood] #app{min-height:0;height:100dvh}
+body[data-experience=neighbourhood] .topbar{height:74px;padding:0 28px;background:#faf8ef}
+body[data-experience=neighbourhood] footer{height:28px;min-height:28px;padding:0 28px;font-size:9px}
+body[data-experience=neighbourhood][data-debug=false] #fps{display:none}
+body[data-experience=neighbourhood] .scene-caption{top:28px;left:28px;pointer-events:none}
+body[data-experience=neighbourhood] .scene-caption h1{font:500 clamp(25px,2.8vw,40px)/1.12 Georgia,serif;letter-spacing:-1.2px;margin:8px 0}
+body[data-experience=neighbourhood] .scene-caption p{font-size:12px;color:#3c6256;margin:8px 0}
+.title-dot{color:#af762c}.eyebrow{font-size:9px;letter-spacing:1.7px;font-weight:700}
+.town-navigation{position:absolute;top:28px;right:28px;display:flex;gap:5px;padding:5px;background:#faf8eff0;border:1px solid #fff8;border-radius:16px;box-shadow:0 8px 24px #234a3810}
+.town-navigation button{min-height:44px;padding:9px 15px;background:transparent;color:var(--ink);border:0;border-radius:11px;font-size:12px;font-weight:600}
+.town-navigation button span{margin-left:5px;padding:3px 5px;background:#e4ead8;border-radius:5px;font-size:10px}
+.town-navigation button[aria-expanded=true]{background:#254b3d;color:#fff9e6}
+.inhabitant-panel,.places-panel,.activity-feed{position:absolute;top:105px;right:28px;left:auto;bottom:auto;width:340px;max-height:calc(100% - 225px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:20px;background:#faf8eff5;border:1px solid #fff9;border-radius:20px;backdrop-filter:blur(16px);box-shadow:0 16px 48px #233e3526;z-index:4;font-size:12px;line-height:1.5}
+.panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.panel-title h2{font:500 22px/1.2 Georgia,serif;margin:0}.panel-title button{min-width:44px;min-height:44px;background:#e9eddc;color:var(--ink);border:0;border-radius:50%;font-size:24px}
+.panel-intro{color:var(--muted);margin:0 0 16px}
+#resident-search{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fffdf6;color:var(--ink);font:inherit;margin-bottom:10px}
+.people{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;max-height:155px;overflow:auto;padding:2px 0 12px;margin-bottom:17px;border-bottom:1px solid var(--line)}
+.people button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 3px;min-height:65px;min-width:0;border:1px solid transparent;background:transparent;border-radius:10px;color:var(--muted);font-size:11px}
+.people button[aria-pressed=true]{background:#e8eddc;border-color:#bacba8;color:var(--ink)}
+.portrait{display:grid;place-items:center;width:29px;height:29px;border-radius:50%;font:18px Georgia,serif;background:#dfb389;color:#533d29;flex-shrink:0}
+.portrait.musa{background:#a1bec7;color:#355565}.portrait.chris{background:#c0afd1;color:#504263}.portrait.zainab{background:#adc4a7;color:#3c614c}.portrait.large{width:44px;height:44px;font-size:24px}
+.person-heading{display:flex;gap:12px;align-items:center}.person-heading h2{font:500 24px Georgia,serif;margin:0 0 3px}.person-heading p{font-size:12px;margin:0;color:var(--muted)}.local-tag{font-size:8px;letter-spacing:1px;margin-left:auto;color:var(--muted)}
+.activity-line{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:17px}.activity-line span{width:7px;height:7px;border-radius:50%;background:#6e8b51;flex-shrink:0}.activity-line strong{font-weight:600}
+.intention{font-size:12px;line-height:1.65;color:var(--muted);margin:8px 0 12px;overflow-wrap:anywhere}
+.person-facts{display:flex;flex-wrap:wrap;gap:5px}.person-facts span{padding:5px 8px;border-radius:6px;background:#edf0e1;border:1px solid var(--line);font-size:11px}
+.resident-tools{display:flex;gap:7px;margin:14px 0}.resident-tools button,#building-residents button{border:1px solid #bccbb0;background:#f5f6e9;color:var(--ink);padding:10px 12px;min-height:44px;border-radius:10px;font-size:12px}.resident-tools button:first-child{background:#254b3d;color:#fff9e6;border-color:#254b3d;flex:1}
+.recent-heading{font-size:9px;letter-spacing:1.3px;font-weight:700;margin-top:20px;color:var(--muted)}.person-recent{padding-left:16px;color:var(--muted);font-size:12px;line-height:1.6}.person-recent li{padding-bottom:7px}
+.conversation,.experiments{border-top:1px solid var(--line);font-size:12px}.conversation summary,.experiments summary{cursor:pointer;padding:14px 0;min-height:44px;font-weight:600;color:var(--ink)}.conversation p,.experiments p{font-size:12px;line-height:1.6;color:var(--muted)}
+.coming-soon{font-size:8px;letter-spacing:.6px;float:right;color:var(--muted)}.conversation label,.experiments label{display:block;font-size:12px;margin:7px 0}
+.conversation textarea{width:100%;height:80px;border:1px solid #bac8ae;padding:10px;border-radius:9px;background:#fffdf5;color:var(--ink);font:inherit}
+.conversation button,.experiments button{min-height:44px;padding:10px 13px;background:#e7edda;color:var(--ink);border:1px solid #c8d4bb;border-radius:9px;margin:5px 3px 5px 0}
+.conversation select,.experiments select,#activity-filter{width:100%;min-height:44px;padding:9px;border:1px solid #c4cfb8;border-radius:9px;background:#fffdf5;color:var(--ink);font:inherit}
+#town-buildings>summary{display:none}#town-buildings{border:0}#town-buildings>label{margin-top:0}#building-inspector{margin:18px 0}#building-name{font:500 23px Georgia,serif;margin:10px 0}#building-residents{display:flex;flex-direction:column;gap:5px}
+#backend-access{margin-top:14px;padding:12px;border:1px solid #becbab;border-radius:10px}#backend-access label{display:block;margin-bottom:7px}#demo-token{width:100%;padding:10px;margin-bottom:8px}#sign-in{padding:10px;min-height:44px}#transcript{max-height:180px;overflow:auto;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.feed-heading{display:flex;align-items:center;gap:9px;margin-bottom:12px;font-size:11px}.feed-heading label{flex:none}#activity-filter{width:auto;flex:1;min-width:0}#feed-mode{font-size:9px;color:var(--muted);white-space:nowrap}
+#activity-feed{list-style:none;padding:0;margin:0}#activity-feed li{display:grid;grid-template-columns:38px 1fr;gap:9px;font-size:12px;line-height:1.6;border-bottom:1px solid var(--line);padding:12px 0;overflow-wrap:anywhere}#activity-feed time{font-size:10px;color:var(--muted);padding-top:2px;font-variant-numeric:tabular-nums}#event-details{max-height:200px;overflow:auto;font-size:10px}
+body[data-experience=neighbourhood] .view-controls{position:absolute;top:auto!important;bottom:112px;right:28px;display:flex;gap:6px;z-index:3}
+body[data-experience=neighbourhood] .view-controls button{min-height:44px;padding:10px 14px;border:1px solid #e8eddc;border-radius:12px;background:#faf8eff2;color:var(--ink);font-size:12px;box-shadow:0 5px 20px #254b3d12}
+body[data-experience=neighbourhood] .compass{top:110px!important;right:40px;pointer-events:none;font-size:10px;color:#496c5b}
+body[data-experience=neighbourhood] .neighbourhood-bar{position:absolute;left:28px;right:28px;bottom:34px;display:flex;align-items:center;gap:24px;padding:16px 20px;border-radius:16px;background:#faf8eff2;border:1px solid #fff8;box-shadow:0 8px 30px #254b3d0d;z-index:3}
+.neighbourhood-bar>div{min-width:0}.neighbourhood-bar .eyebrow{display:block;font-size:8px;letter-spacing:1.1px;margin-bottom:6px}.neighbourhood-bar strong{display:block;font-size:12px;font-weight:600}.neighbourhood-bar .cooperation-status{flex:1}.clock-controls{display:flex;gap:10px;align-items:center;font-size:12px}.clock-controls #world-clock{font-variant-numeric:tabular-nums;white-space:nowrap}.clock-controls select,.clock-controls button{min-height:42px;background:#f2f4e6;border:1px solid #ccd7be;color:var(--ink);border-radius:9px;padding:8px;font:inherit}
+body[data-experience=neighbourhood] #notice{position:absolute;bottom:8px;left:24px;right:24px;text-align:center;line-height:1.3;font-size:10px;color:#315a49;padding:0;pointer-events:none;z-index:3}
+#building-labels,#inhabitant-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}.building-marker,.npc-marker{position:absolute;left:0;top:0;pointer-events:auto;border:1px solid #fff9;background:#fff9e9ed;color:#254b3d;border-radius:9px;padding:7px 10px;font-size:11px;box-shadow:0 3px 12px #17392b18;white-space:nowrap;min-height:34px}
+.npc-marker{border-radius:22px;min-height:40px}.npc-marker[aria-pressed=true]{background:#f0d080;border-color:#d4ae4e;z-index:2}.building-marker:hover{background:#f7e4ad}
+body[data-experience=neighbourhood] input:focus-visible,body[data-experience=neighbourhood] select:focus-visible,body[data-experience=neighbourhood] textarea:focus-visible{outline:3px solid #b68734;outline-offset:3px}
+@media(max-width:900px){body[data-experience=neighbourhood] .topbar{height:66px;padding:0 18px}.brand{font-size:16px}.brand-mark{width:37px;height:37px}.mode-pill{font-size:10px;padding:9px}.inhabitant-panel,.places-panel,.activity-feed{width:320px;right:18px}.town-navigation{right:18px}.scene-caption{left:18px!important}.neighbourhood-bar .cooperation-status .eyebrow{display:none}body[data-experience=neighbourhood] .neighbourhood-bar{gap:16px;left:18px;right:18px}}
+@media(max-width:600px){
+ body[data-experience=neighbourhood] .topbar{height:62px;padding:0 12px;gap:8px}body[data-experience=neighbourhood] .brand{font-size:14px;gap:8px}body[data-experience=neighbourhood] .brand small{font-size:7px;letter-spacing:2px}.brand-mark{width:32px;height:35px;font-size:27px}body[data-experience=neighbourhood] .header-note{display:none}.mode-pill{font-size:9px;padding:8px;max-width:145px}body[data-experience=neighbourhood] footer{display:none}
+ body[data-experience=neighbourhood] .scene-caption{top:18px;left:16px!important}body[data-experience=neighbourhood] .scene-caption h1{font-size:29px;margin:6px 0}body[data-experience=neighbourhood] .scene-caption p{font-size:11px;max-width:240px}.scene-caption .eyebrow{font-size:8px}
+ .town-navigation{top:auto;bottom:107px;left:50%;right:auto;transform:translateX(-50%);gap:2px;padding:4px;white-space:nowrap;z-index:5;border-radius:15px}.town-navigation button{padding:9px 13px;font-size:12px}
+ .inhabitant-panel,.places-panel,.activity-feed{top:auto;bottom:166px;left:10px;right:10px;width:auto;max-height:calc(100% - 192px);padding:16px;border-radius:19px;z-index:6}.people{grid-template-columns:repeat(4,minmax(0,1fr));max-height:145px}.panel-title h2{font-size:21px}.person-heading h2{font-size:23px}
+ body[data-experience=neighbourhood] .view-controls{bottom:166px;right:12px;gap:5px}body[data-experience=neighbourhood] .view-controls button{font-size:11px;padding:9px 10px}.compass{display:none}
+ body[data-experience=neighbourhood] .neighbourhood-bar{left:10px;right:10px;bottom:32px;padding:11px 13px;gap:12px;border-radius:14px;min-height:64px}.neighbourhood-bar .eyebrow{font-size:7px;letter-spacing:.7px;margin-bottom:4px}.neighbourhood-bar strong{font-size:10px}.neighbourhood-bar .cooperation-status{display:none}.clock-controls{margin-left:auto;gap:6px;font-size:11px}.clock-controls select{max-width:76px;padding:6px}.neighbourhood-bar>div{flex-shrink:0}body[data-experience=neighbourhood] #notice{font-size:9px;left:12px;right:12px;bottom:6px}.building-marker{font-size:10px;padding:5px 7px;min-height:30px}
+}
+@media(prefers-reduced-motion:reduce){body[data-experience=neighbourhood] button{transition:none}body[data-experience=neighbourhood] button:hover{transform:none}}
+.connection-card{position:absolute;top:115px;left:28px;width:min(340px,calc(100% - 56px));z-index:8;background:#faf8eff5;box-shadow:0 12px 35px #254b3d25;font-size:12px;color:#254b3d}.connection-card button{background:#254b3d;color:#fff9e6;border:0;border-radius:8px}.connection-card p{line-height:1.6}
+body[data-experience=neighbourhood] #notice{transform:none;max-width:none;width:auto;background:transparent;border:0;box-shadow:none}
+/* Keep the town canvas within the viewport on mobile. */
+body[data-experience=neighbourhood] #experience{flex:1;min-height:0;height:auto;padding:0;overflow:hidden}
+body[data-experience=neighbourhood] #world,body[data-experience=neighbourhood] #labels{height:100%;bottom:0}
+body[data-experience=neighbourhood] .view-controls{flex-direction:row}
+body[data-experience=neighbourhood] .view-controls button{height:auto}
+body[data-experience=neighbourhood] .scene-caption{z-index:2}body[data-experience=neighbourhood] .scene-caption p{display:block}
+@media(max-width:360px){body[data-experience=neighbourhood] .neighbourhood-bar>div:nth-child(2){display:none}body[data-experience=neighbourhood] .view-controls button{font-size:10px;padding:8px}body[data-experience=neighbourhood] .view-controls{left:12px;justify-content:flex-end}}

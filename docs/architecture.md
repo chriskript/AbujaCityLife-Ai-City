@@ -1,5 +1,8 @@
 # Simulation architecture
 
+> Historical record: Taxi Lab, its headless scenarios and standalone taxi Meta probe have been retired. Unity Gardens is the only supported app experience; taxi-related results below describe the earlier implementation.
+
+
 For the current cross-system assessment, Milestone 6C quantity correction, and proposed AI Town extension sequence, see [AI Town foundations](ai-town-assessment.md). This document records the earlier taxi/browser architecture; backend and provider status below is historical and superseded by the [backend guide](backend.md).
 
 The current implementation combines the headless taxi-agent testbed with a browser-based Three.js neighbourhood. A public inference backend and live gameplay remain later milestones.

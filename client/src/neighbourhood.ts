@@ -6,14 +6,18 @@ import { PresentationStore, type NeighbourhoodSession, type NeighbourhoodFrame, 
 import type { NpcId } from '../../shared/neighbourhood/types.js';
 import { ResidentPhone } from './resident-phone.js';
 import { mapFor,buildingFor } from '../../shared/world/town-layout.js';
+import { zoneFor, publicSpaces } from '../../shared/world/town-planning.js';
 
 document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = 'Observe life in Unity Gardens, a fictional residential community in Abuja.';
 document.querySelector('#experience')!.innerHTML = `
   <div id="world" aria-label="Living 3D neighbourhood with autonomous residents"></div>
   <div id="building-labels" aria-label="Select a town building"></div>
   <div id="labels" aria-hidden="true"></div><div id="inhabitant-labels" aria-label="Select an inhabitant in the scene"></div>
-  <div class="scene-caption"><span class="eyebrow">UNITY GARDENS · ABUJA</span><h1>Life happens<br />around you.</h1><p>Watch their day unfold. Choose someone to get closer.</p></div>
-  <section class="inhabitant-panel" aria-label="Inhabitants">
+  <div class="scene-caption"><span class="eyebrow">ABUJA CITY LIFE · AI TOWN</span><h1>Unity Gardens<span class="title-dot">.</span></h1><p>Sixteen neighbours. A shared place to call home.</p></div>
+  <nav class="town-navigation" aria-label="Explore Unity Gardens"><button data-panel="residents" aria-controls="residents-panel" aria-expanded="false">Residents <span>16</span></button><button data-panel="places" aria-controls="places-panel" aria-expanded="false">Places</button><button data-panel="activity" aria-controls="activity-panel" aria-expanded="false">Activity</button></nav>
+  <section id="residents-panel" class="inhabitant-panel" aria-label="Inhabitants" hidden>
+    <div class="panel-title"><h2>Your neighbours</h2><button data-close-panel aria-label="Close residents">×</button></div>
+    <label class="sr-only" for="resident-search">Find a resident</label><input id="resident-search" type="search" placeholder="Find a neighbour…" autocomplete="off" />
     <div class="people" role="group" aria-label="Choose an inhabitant">
     </div>
     <div class="person-heading"><span id="person-avatar" class="portrait large amina">A</span><div><h2 id="person-name">Amina</h2><p id="person-role">Market trader</p></div><span class="local-tag">NEIGHBOUR</span></div>
@@ -21,18 +25,27 @@ document.querySelector('#experience')!.innerHTML = `
     <p id="person-intention" class="intention">The neighbourhood is waking up.</p>
     <div class="person-facts"><span id="person-location">Market Square</span><span id="person-goods">No goods carried</span></div><p id="person-wallet" class="intention" hidden></p>
     <p id="person-address" class="intention"></p><div class="resident-tools"><button id="open-phone">Open phone</button><button id="show-home">Show home</button></div>
-    <details id="town-buildings" class="conversation"><summary>Town buildings</summary><label for="building-picker">Choose a building</label><select id="building-picker"><option value="">Choose…</option></select><section id="building-inspector" hidden><h3 id="building-name"></h3><p id="building-address" class="intention"></p><div id="building-residents"></div></section><p class="intention">Drag to pan · scroll or pinch to zoom</p><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button></details>
+    <details id="town-buildings" class="conversation"><summary>Town buildings</summary><label for="building-picker">Choose a place</label><select id="building-picker"><option value="">Choose…</option></select><section id="building-inspector" hidden><h3 id="building-name"></h3><p id="building-address" class="intention"></p><div id="building-residents"></div></section><p class="intention">Drag to pan · scroll or pinch to zoom</p><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button></details>
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
     <details id="resident-communications" class="conversation"><summary>Calls &amp; messages <span id="communication-count"></span></summary><p id="resident-contacts" class="intention"></p><p class="intention">Observer history. Residents receive only their own delivered messages. Discussion is separate from a job commitment.</p><ol id="communication-history" class="person-recent"></ol></details>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
     <section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
     <details class="experiments"><summary>Neighbourhood experiments</summary><button id="town-road">Close supply–market road</button><p id="road-status">Residents learn about closures locally. Occupied roads cannot close.</p><p id="progression-status"></p><label for="experiment">Mock decision policy</label><select id="experiment"><option value="cooperate">Cooperation</option><option value="decline">Driver declines</option><option value="wait">Trader waits</option><option value="self-collect">Trader collects supplies herself</option><option value="reduce-sales">Trader pauses sales</option></select><p>Choose an alternative, then reset. These are labelled mock policies, not guaranteed live AI outcomes.</p></details>
   </section>
-  <div class="view-controls" role="group" aria-label="Neighbourhood controls"><button id="focus" aria-pressed="false">◎ Focus Amina</button><button id="pause" aria-pressed="false">Ⅱ Pause</button></div>
+  <div class="view-controls" role="group" aria-label="Neighbourhood controls"><button id="overview">Town overview</button><button id="focus" aria-pressed="false">◎ Focus Amina</button><button id="pause" aria-pressed="false">Ⅱ Pause</button></div>
   <div class="compass" aria-hidden="true"><span>↑</span>N</div>
-  <section class="activity-feed" aria-label="Neighbourhood activity"><div class="feed-heading"><span class="eyebrow">AROUND THE NEIGHBOURHOOD</span><span id="feed-mode">MOCK</span></div><ol id="activity-feed"></ol><details id="event-inspection"><summary>Inspect recorded events</summary><pre id="event-details"></pre></details></section>
+  <section id="activity-panel" class="activity-feed" aria-label="Neighbourhood activity" hidden><div class="panel-title"><h2>Around the gardens</h2><button data-close-panel aria-label="Close activity">×</button></div><div class="feed-heading"><label for="activity-filter">Show</label><select id="activity-filter"><option value="all">All activity</option><option value="selected">Selected resident</option><option value="work">Work &amp; deliveries</option><option value="social">Social &amp; phone</option></select><span id="feed-mode">MOCK</span></div><ol id="activity-feed" aria-live="off"></ol><details id="event-inspection"><summary>Inspect recorded events</summary><pre id="event-details"></pre></details></section>
   <section class="neighbourhood-bar" aria-label="Shared world status"><div><span class="eyebrow">AT THE MARKET</span><strong id="market-stock">1 portion available</strong></div><div><span class="eyebrow">SUPPLY DESK</span><strong id="supplier-stock">8 goods</strong></div><div class="cooperation-status"><span class="eyebrow">NEIGHBOURS HELPING NEIGHBOURS</span><strong id="task-status" role="status">A new day begins</strong></div><div class="clock-controls"><span id="world-clock">00:00</span><label class="sr-only" for="speed">Simulation speed</label><select id="speed"><option value="1">1× time</option><option value="2" selected>2× time</option><option value="4">4× time</option></select><button id="reset">↻ Reset neighbourhood</button></div></section>
   <div id="notice" role="status">Activities use scripted mock decisions. No Meta requests are made.</div>`;
+
+// Reuse the existing inspector as an independent contextual places panel.
+const placesPanel=document.createElement('section');placesPanel.id='places-panel';placesPanel.className='places-panel';placesPanel.hidden=true;placesPanel.setAttribute('aria-label','Town places');
+placesPanel.innerHTML='<div class="panel-title"><h2>Explore the neighbourhood</h2><button data-close-panel aria-label="Close places">×</button></div><p class="panel-intro">Homes on Acacia Lane and Centre Gardens. Trade at Market Square. Meet at the green or lakeside.</p>';
+const inspector=document.querySelector<HTMLDetailsElement>('#town-buildings')!;inspector.open=true;placesPanel.append(inspector);document.querySelector('#experience')!.append(placesPanel);
+const debug=new URLSearchParams(location.search).get('debug')==='1';
+const access=document.querySelector<HTMLElement>('#backend-access')!;access.className='connection-card';document.querySelector('#experience')!.append(access);
+for(const selector of ['.experiments','#event-inspection','#reset'])document.querySelector<HTMLElement>(selector)!.hidden=!debug;
+document.body.dataset.debug=String(debug);
 
 const el = <T extends HTMLElement>(selector: string): T => document.querySelector<T>(selector)!;
 const local = new URLSearchParams(location.search).get('authority') === 'local';
@@ -56,6 +69,12 @@ let fps = 0;
 let previousWorld = '';
 let uiKey = '';
 let scene: NeighbourhoodScene;
+function openPanel(name:string|null):void {
+  for(const id of ['residents','places','activity']) {
+    const open=id===name;el(`#${id}-panel`).hidden=!open;
+    el(`[data-panel="${id}"]`).setAttribute('aria-expanded',String(open));
+  }
+}
 const names: Record<string,string> = {};
 const locations: Record<string, string> = { stand: 'Taxi Stand', centre: 'Community Centre', market: 'Market Square', overlook: 'Lake Overlook', hill: 'Hill Garden', west: 'West road', junction: 'Road junction', bridge: 'Lake junction' };
 
@@ -113,9 +132,9 @@ function timeLabel(time: number): string { return `${String(Math.floor(time / 60
 
 function select(id: NpcId): void {
   void phone.close();
-  selected = id; focused = true; proposalId = null; el('#confirm-proposal').hidden = true; scene.setFollow(true); updateUi(true); void loadHistory();
+  selected = id; focused = true; proposalId = null; el('#confirm-proposal').hidden = true; scene.setFollow(true);openPanel('residents'); updateUi(true); void loadHistory();
 }
-function selectBuilding(id:string):void {selectedBuilding=id;focused=false;scene.focusBuilding(id);el<HTMLDetailsElement>('#town-buildings').open=true;updateUi(true);el('#building-inspector').scrollIntoView({block:'nearest'});}
+function selectBuilding(id:string):void {selectedBuilding=id;focused=false;scene.focusBuilding(id.replace('place:',''));openPanel('places');el<HTMLDetailsElement>('#town-buildings').open=true;updateUi(true);}
 function updateUi(force = false): void {
   if (!frame) return;
   const view = frame.snapshot;
@@ -139,11 +158,17 @@ function updateUi(force = false): void {
   el('#person-address').textContent=actor.homeAddress?`Home: ${actor.homeAddress} · Work: ${actor.workplaceAddress ?? 'Mobile work'}`:'';
   el<HTMLButtonElement>('#open-phone').disabled=!actor.contacts;
   const buildings=mapFor(view.mapId).buildings;
-  if(buildingMap!==view.mapId){buildingMap=view.mapId;el<HTMLSelectElement>('#building-picker').replaceChildren(new Option('Choose a building',''),...buildings.map(building=>new Option(building.name,building.id)));selectedBuilding=null;}
-  const building=buildings.find(item=>item.id===selectedBuilding);el('#building-inspector').hidden=!building;
+  if(buildingMap!==view.mapId){buildingMap=view.mapId;el<HTMLSelectElement>('#building-picker').replaceChildren(new Option('Choose a destination',''),...publicSpaces.filter(place=>mapFor(view.mapId).nodes.some(node=>node.id===place.id)).map(place=>new Option(place.name,`place:${place.id}`)),...buildings.map(building=>new Option(`${zoneFor(building)} · ${building.name}`,building.id)));selectedBuilding=null;}
+  const publicPlace=publicSpaces.find(place=>`place:${place.id}`===selectedBuilding);
+  const building=buildings.find(item=>item.id===selectedBuilding);el('#building-inspector').hidden=!building && !publicPlace;
+  if(publicPlace){
+    el('#building-name').textContent=publicPlace.name;el('#building-address').textContent=publicPlace.description;el<HTMLSelectElement>('#building-picker').value=`place:${publicPlace.id}`;
+    const visitors=view.actors.filter(actor=>actor.node===publicPlace.id && !actor.moving);el('#building-residents').replaceChildren(...visitors.map(actor=>{const button=document.createElement('button');button.textContent=`${actor.name} · ${actor.activity}`;button.addEventListener('click',()=>select(actor.id));return button;}));
+    if(!visitors.length)el('#building-residents').textContent='A public place to visit. Nobody is here right now.';
+  }
   if(building){
     const assigned=view.actors.filter(person=>person.homeNode && building.units.includes(person.homeNode)).length;
-    el('#building-name').textContent=building.name;el('#building-address').textContent=`${building.address}${building.units.length?` · ${building.units.length} homes · ${assigned} occupied · ${building.units.length-assigned} vacant`:''}`;
+    el('#building-name').textContent=building.name;el('#building-address').textContent=`${zoneFor(building)} · ${building.address}${building.units.length?` · ${building.units.length} homes · ${assigned} occupied · ${building.units.length-assigned} vacant`:''}`;
     el<HTMLSelectElement>('#building-picker').value=building.id;const residents=el('#building-residents');residents.replaceChildren();
     const occupants=view.actors.filter(person=>person.insideBuildingId===building.id || person.homeNode && buildingFor(person.homeNode,view.mapId)?.id===building.id);
     for(const person of occupants){const button=document.createElement('button');button.textContent=`${person.name} · ${person.insideBuildingId===building.id?'indoors':person.homeAddress ?? person.activity}`;button.addEventListener('click',()=>select(person.id));residents.append(button);}
@@ -164,7 +189,7 @@ function updateUi(force = false): void {
   el('#town-road').textContent = roadClosed ? 'Reopen supply–market road' : 'Close supply–market road';
   el('#road-status').textContent = roadClosed ? 'Supply–market road closed. Residents can discover it and seek another route.' : 'Supply–market road open. Occupied roads cannot close.';
   el('#progression-status').textContent = frame.progression ? `Server advances without an observer: ${Math.floor(frame.progression.used)} / ${frame.progression.limit} simulated seconds used. Pause stops the clock; restart and reset preserve this allowance.` : '';
-  const focus = el<HTMLButtonElement>('#focus'); focus.setAttribute('aria-pressed', String(focused)); focus.textContent = focused ? '◎ Whole neighbourhood' : `◎ Focus ${actor.name}`;
+  const focus = el<HTMLButtonElement>('#focus'); focus.setAttribute('aria-pressed', String(focused)); focus.textContent = focused ? '◎ Stop following' : `◎ Focus ${actor.name}`;
   el<HTMLSelectElement>('#speed').value = String(frame.speed);
   el('#market-stock').textContent = `${view.resources.marketGoods} ${view.resources.marketGoods === 1 ? 'portion' : 'portions'}${view.resources.salesOpen ? ' available' : ' · sales paused'}`;
   el('#supplier-stock').textContent = `${view.resources.supplierGoods} goods`;
@@ -172,11 +197,14 @@ function updateUi(force = false): void {
   const statuses = { proposed: 'Transport requested', accepted: `${names[task?.recipient ?? ''] ?? 'Resident'} agreed to help`, declined: `${names[task?.recipient ?? ''] ?? 'Resident'} declined the request`, collected: 'Supplies on board', delivered: 'Delivery completed', expired: 'Request expired' };
   el('#task-status').textContent = task ? statuses[task.status] : 'Neighbours at work';
   const events = frame.events.filter(event => !['action-validated', 'action-proposed', 'intention-selected'].includes(event.type));
+  const filter=el<HTMLSelectElement>('#activity-filter').value;
+  const filteredEvents=events.filter(event=>filter==='selected'?event.actor===selected:filter==='work'?/work|transport|delivery|stock|purchase/.test(event.type):filter==='social'?/communication|call|contact|encounter|social|visit|introduced/.test(event.type):true);
   const feed = el('#activity-feed'); feed.replaceChildren();
-  for (const event of events.slice(-5).reverse()) {
+  for (const event of filteredEvents.slice(-12).reverse()) {
     const item = document.createElement('li'); const timestamp = document.createElement('time');
     timestamp.textContent = timeLabel(event.time); item.append(timestamp, document.createTextNode(describeObservable(event))); feed.append(item);
   }
+  if(!feed.children.length){const item=document.createElement('li');item.textContent='No activity in this view yet. Let the day unfold.';feed.append(item);}
   const relevant = events.filter(event => event.actor === selected || view.tasks.some(task => task.id === event.subject && (task.recipient === selected || task.requester === selected)));
   const recent = el('#person-recent'); recent.replaceChildren();
   for (const event of relevant.slice(-2).reverse()) { const item = document.createElement('li'); item.textContent = describeObservable(event); recent.append(item); }
@@ -240,6 +268,11 @@ try {
     updateUi();
   });
   const options = { signal: listeners.signal };
+  for(const button of document.querySelectorAll<HTMLButtonElement>('[data-panel]'))button.addEventListener('click',()=>openPanel(button.getAttribute('aria-expanded')==='true'?null:button.dataset.panel!),options);
+  for(const button of document.querySelectorAll<HTMLButtonElement>('[data-close-panel]'))button.addEventListener('click',()=>{openPanel(null);el<HTMLButtonElement>(`[data-panel="${button.closest('section')!.id.replace('-panel','')}"]`).focus();},options);
+  el('#resident-search').addEventListener('input',()=>{const query=el<HTMLInputElement>('#resident-search').value.trim().toLowerCase();for(const button of document.querySelectorAll<HTMLButtonElement>('[data-person]'))button.hidden=!button.textContent!.toLowerCase().includes(query);},options);
+  el('#activity-filter').addEventListener('change',()=>updateUi(true),options);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape' && !document.querySelector<HTMLDialogElement>('#resident-phone')?.open){const opener=document.querySelector<HTMLButtonElement>('[data-panel][aria-expanded="true"]');openPanel(null);opener?.focus();}},options);
   el('#open-phone').addEventListener('click',()=>{void phone.open(selected);},options);
   el('#show-home').addEventListener('click',()=>{const actor=frame?.snapshot.actors.find(person=>person.id===selected);if(actor?.homeNode && frame){const building=buildingFor(actor.homeNode,frame.snapshot.mapId);if(building)selectBuilding(building.id);}},options);
   el('#building-picker').addEventListener('change',()=>{const id=el<HTMLSelectElement>('#building-picker').value;if(id)selectBuilding(id);},options);
@@ -247,7 +280,7 @@ try {
   remote?.onConnection(state => {
     el('#backend-access').hidden = state === 'ready';
     el('#demo-token').hidden = state !== 'unauthorized'; el('#sign-in').hidden = state !== 'unauthorized';
-    el('#connection-status').textContent = state === 'unauthorized' ? 'Controlled local demonstration. Use the token from runtime/demo-access.json.' : state === 'offline' ? 'Backend unavailable. Start npm run backend, then reload. The visible snapshot is frozen.' : state === 'connecting' ? 'Connecting to authoritative backend…' : '';
+    el('#connection-status').textContent = state === 'incompatible' ? 'A town update is ready. Restart the backend to load the new layout and migrate your saved town, then reload.' : state === 'unauthorized' ? 'Controlled local demonstration. Use the token from runtime/demo-access.json.' : state === 'offline' ? 'Backend unavailable. Start npm run backend, then reload. The visible snapshot is frozen.' : state === 'connecting' ? 'Connecting to authoritative backend…' : '';
     if (state !== 'ready') el('#notice').textContent = 'Waiting for the secured backend. No local fallback or inference is running.';
   });
   el('#sign-in').addEventListener('click', () => {
@@ -278,6 +311,7 @@ try {
   }, options);
   el('#speed').addEventListener('change', () => { void command({ type: 'speed', speed: Number(el<HTMLSelectElement>('#speed').value) as 1 | 2 | 4 }); }, options);
   el('#focus').addEventListener('click', () => { focused = !focused; scene.setFollow(focused); updateUi(true); }, options);
+  el('#overview').addEventListener('click',()=>{focused=false;scene.setFollow(false);updateUi(true);},options);
   document.addEventListener('visibilitychange', () => { lastTime = 0; session.setVisible(!document.hidden && !lostContext); }, options);
   window.addEventListener('pagehide', event => { if (!(event as PageTransitionEvent).persisted) dispose(); }, options);
   scene.renderer.setAnimationLoop(time => {

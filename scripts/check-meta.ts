@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs';
 import { loadEnvFile } from 'node:process';
 import { spawnSync } from 'node:child_process';
-import { modelRates } from '../server/inference/meta-probe.js';
+import { modelRates } from '../server/inference/model-pricing.js';
 import { usdToMicroUsd, effectiveDailyProbeUsd, effectiveTotalProbeUsd } from '../server/controls/probe-budget.js';
 
-// Offline only. Never import or invoke the live probe CLI from this check.
+// Offline only. Never invoke live inference from this check.
 function git(...args: string[]): number | null {
   return spawnSync('git', args, { stdio: 'ignore', windowsHide: true }).status;
 }

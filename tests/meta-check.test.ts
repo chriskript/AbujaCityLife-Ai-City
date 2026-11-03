@@ -16,7 +16,7 @@ async function fixture(ignoreEnv = true): Promise<string> {
   const initialized = spawnSync('git', ['init', '--quiet'], { cwd: directory, windowsHide: true });
   if (initialized.status !== 0) throw new Error('Test Git initialization failed');
   await writeFile(join(directory, '.gitignore'), ignoreEnv ? '.env\n' : 'node_modules/\n');
-  await writeFile(join(directory, '.env'), `MODEL_API_KEY=${dummySecret}\nMETA_PROBE_ENABLED=true\n`);
+  await writeFile(join(directory, '.env'), `MODEL_API_KEY=${dummySecret}\n`);
   // Fail if this supposedly offline check ever starts to use fetch.
   await writeFile(join(directory, 'block-network.mjs'), "globalThis.fetch = () => { throw new Error('Unexpected network request'); };\n");
   return directory;
@@ -24,7 +24,7 @@ async function fixture(ignoreEnv = true): Promise<string> {
 
 function check(directory: string, overrides: NodeJS.ProcessEnv = {}) {
   const env = { ...process.env };
-  for (const key of ['MODEL_API_KEY', 'META_MODEL', 'META_PROBE_ENABLED', 'META_PROBE_DAILY_USD', 'META_PROBE_TOTAL_USD']) delete env[key];
+  for (const key of ['MODEL_API_KEY', 'META_MODEL', 'META_PROBE_DAILY_USD', 'META_PROBE_TOTAL_USD']) delete env[key];
   return spawnSync(process.execPath, ['--import', pathToFileURL(join(directory, 'block-network.mjs')).href, '--import', pathToFileURL(tsx).href, script], {
     cwd: directory, env: { ...env, ...overrides }, encoding: 'utf8', windowsHide: true,
   });
@@ -35,7 +35,7 @@ afterEach(async () => {
   await Promise.all(directories.splice(0).map(directory => rm(directory, { recursive: true, force: true })));
 });
 
-it('loads ignored local credentials without displaying them or making calls even when the probe is enabled', async () => {
+it('loads ignored local credentials without displaying them or making calls', async () => {
   const result = check(await fixture());
   expect(result.status, result.stderr).toBe(0);
   expect(result.stdout).toContain('MODEL_API_KEY is configured');

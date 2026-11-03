@@ -20,6 +20,7 @@ const text = (value: unknown, limit = 500): boolean => typeof value === 'string'
 export function assertSnapshot(value: unknown): asserts value is WorldState {
   check(object(value)); const state = value as WorldState;
   check(state.version === 4 && ['legacy-v1','town-v1'].includes(state.mapId) && text(state.id, 120) && integer(state.revision) && Number.isFinite(state.time) && state.time >= 0);
+  check(state.layoutRevision === undefined || state.layoutRevision === 2);
   const {nodes,edges,places}=mapFor(state.mapId);
   check(state.mapUpgradedAt===undefined || state.mapId==='town-v1' && Number.isFinite(state.mapUpgradedAt) && state.mapUpgradedAt>=0 && state.mapUpgradedAt<=state.time);
   check(object(state.npcs) && Object.keys(state.npcs).length >= 3 && Object.keys(state.npcs).length <= maximumResidents && object(state.resources) && object(state.roads) && object(state.tasks) && object(state.triggers));
@@ -175,6 +176,27 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
 // Explicit shape migration: identities, inventories, tasks, relationships, memories,
 // accounting IDs and historical evidence are retained. No new resident is invented here.
 export function migrateSnapshot(value: unknown): unknown {
+  if (object(value) && (value as WorldState).version===4 && (value as WorldState).mapId==='town-v1' && (value as WorldState).layoutRevision===undefined) {
+    const state=structuredClone(value) as WorldState;
+    check(object(state.npcs));
+    for(const npc of Object.values(state.npcs)) {
+      check(object(npc) && object(npc.activity));
+      if(npc.activity.kind!=='travel')continue;
+      const path=npc.activity.path;
+      check(object(path) && Array.isArray(path.edgeIds));
+      // Revision 1 had a zero-length civic entrance on its street junction.
+      // Only that known edge changed length. Preserve current-leg progress and
+      // every historical ID; malformed or unrelated paths still fail validation.
+      const changed=path.edgeIds.filter(id=>id==='north-office--community-office-entrance').length;
+      if(changed) {
+        const distance=path.edgeIds.reduce((sum,id)=>sum+(mapFor('town-v1').edges.find(edge=>edge.id===id)?.distance ?? NaN),0);
+        check(Number.isFinite(path.distance) && Math.abs(path.distance-(distance-8*changed))<.001);
+        path.distance=distance;
+      }
+    }
+    state.layoutRevision=2;
+    return state;
+  }
   if (!object(value) || ![1,2,3].includes((value as {version:number}).version)) return value;
   if ((value as {version:number}).version === 3) return {...structuredClone(value as Record<string,unknown>),version:4,mapId:'legacy-v1'};
   if ((value as {version:number}).version === 2) return migrateSnapshot({...structuredClone(value as Record<string,unknown>),version:3});

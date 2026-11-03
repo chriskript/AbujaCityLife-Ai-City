@@ -1,5 +1,8 @@
 # Milestone 7C: bounded unattended progression and road closure
 
+> Historical record: Taxi Lab, its headless scenarios and standalone taxi Meta probe have been retired. Unity Gardens is the only supported app experience; taxi-related results below describe the earlier implementation.
+
+
 Follow-up: [Milestone 7D](milestone-7d.md) adds bounded contact-based calls and texts to this same town. References below to phones/messaging as future work describe the 7C development checkpoint.
 
 Implemented offline on October 31, 2026. The existing sixteen-resident town now advances through its authoritative server without an authenticated browser or event-stream observer. The same world, policies, executor, ledger, observations and checkpoint remain in use. No live Meta calls, commits, pushes, deployment or repository rename occurred.

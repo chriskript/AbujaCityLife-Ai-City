@@ -1,16 +1,14 @@
-import { destinations, edges, nodes } from '../world/neighbourhood.js';
+import { edges, nodes } from '../world/neighbourhood.js';
 import type { TownMap } from '../world/town-layout.js';
 
-export interface Route {
-  id: string;
-  destinationId: string;
+export interface NodePath {
   nodeIds: string[];
   edgeIds: string[];
   distance: number;
 }
 
 // Dijkstra with stable tie-breaking. Small graph: a sorted queue is sufficient.
-function shortestPath(start: string, end: string, blocked: ReadonlySet<string>, graphEdges=edges): Omit<Route, 'id' | 'destinationId'> | null {
+function shortestPath(start: string, end: string, blocked: ReadonlySet<string>, graphEdges=edges): NodePath | null {
   const queue = [{ nodeIds: [start], edgeIds: [] as string[], distance: 0 }];
   const visited = new Set<string>();
   while (queue.length) {
@@ -30,28 +28,8 @@ function shortestPath(start: string, end: string, blocked: ReadonlySet<string>, 
   return null;
 }
 
-// General node routing for inhabitants; existing taxi destination routing is unchanged.
-export function pathToNode(start: string, end: string, blocked: ReadonlySet<string>,map?:TownMap): Omit<Route, 'id' | 'destinationId'> | null {
+// Node routing for inhabitants across current and legacy maps.
+export function pathToNode(start: string, end: string, blocked: ReadonlySet<string>,map?:TownMap): NodePath | null {
   if (![start, end].every(id => (map?.nodes ?? nodes).some(node => node.id === id))) return null;
   return shortestPath(start, end, blocked,map?.edges ?? edges);
-}
-
-export function routeCandidates(start: string, blocked: ReadonlySet<string>): Route[] {
-  if (!nodes.some(node => node.id === start)) throw new Error('Unknown start node');
-  const routes: Route[] = [];
-  for (const destination of destinations) {
-    const first = shortestPath(start, destination.nodeId, blocked);
-    if (!first) continue;
-    const alternatives = [first];
-    // Offer one shortest detour by excluding each edge of the primary route.
-    for (const edgeId of first.edgeIds) {
-      const alternative = shortestPath(start, destination.nodeId, new Set([...blocked, edgeId]));
-      if (alternative && !alternatives.some(route => route.edgeIds.join('/') === alternative.edgeIds.join('/'))) alternatives.push(alternative);
-    }
-    alternatives.sort((a, b) => a.distance - b.distance || a.edgeIds.join('/').localeCompare(b.edgeIds.join('/')));
-    for (const path of alternatives.slice(0, 2)) {
-      routes.push({ ...path, destinationId: destination.id, id: `${destination.id}:${path.edgeIds.join('/') || 'here'}` });
-    }
-  }
-  return routes;
 }

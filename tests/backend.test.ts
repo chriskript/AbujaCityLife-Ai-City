@@ -147,6 +147,24 @@ describe('authoritative durable session', () => {
 });
 
 describe('controlled HTTP boundary', () => {
+  it('serves the Unity Gardens entry point for both current and retired taxi URLs', async () => {
+    const { value } = await session();
+    const dist = await directory();
+    const html = await readFile('client/index.html', 'utf8');
+    await writeFile(join(dist, 'index.html'), html);
+    const app = createNeighbourhoodHttp(value, 'test-only-operator-token-'.repeat(3), { tick: false, dist });
+    await new Promise<void>(resolve => app.server.listen(0, '127.0.0.1', resolve));
+    cleanup.push(() => app.close());
+    const url = `http://127.0.0.1:${(app.server.address() as { port: number }).port}`;
+    for (const path of ['/', '/?experience=taxi']) {
+      const response = await fetch(url + path);
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe(html);
+    }
+    expect(html).toContain('data-experience="neighbourhood"');
+    expect(html).toContain('Unity Gardens</title>');
+    expect(html).not.toMatch(/Taxi instructions|data-scenario|goal-form|experience-nav/);
+  });
   async function http() {
     const { value } = await session(); const token = 'test-only-operator-token-'.repeat(3); const app = createNeighbourhoodHttp(value, token, { tick: false });
     await new Promise<void>(resolve => app.server.listen(0, '127.0.0.1', resolve)); cleanup.push(() => app.close());

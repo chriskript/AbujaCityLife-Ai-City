@@ -6,7 +6,7 @@ The normal backend defaults to the [sixteen-resident 7B town](milestone-7b.md), 
 
 For resident-registry migration and autonomous encounters, see [Milestone 7A](milestone-7a.md). Autonomous mock routines use a separate persisted simulation-time rate window. The bounded standalone headless driver remains available with its own checkpoint; do not run it against the authoritative server checkpoint.
 
-Milestone 5 adds a single authoritative Node service around the existing `Neighbourhood` core. The default browser receives public snapshots through SSE; it sends controls, messages and confirmations over HTTP. Rendering never applies inventory, task or memory changes. The original local taxi lab remains an explicitly mock regression experience; `/?authority=local` selects the previous local neighbourhood test adapter.
+Milestone 5 adds a single authoritative Node service around the existing `Neighbourhood` core. The default browser receives public snapshots through SSE; it sends controls, messages and confirmations over HTTP. Rendering never applies inventory, task or memory changes. `/?authority=local` selects the previous local neighbourhood test adapter.
 
 ## Run locally in mock mode
 
@@ -90,11 +90,11 @@ npm run build
 npm run meta:check
 ```
 
-Automated backend tests use temporary checkpoints and ledgers, HTTP bound to ephemeral loopback ports and mocked Meta responses. They cover snapshot consistency, auth/Origin/body guards, scoped requests, conversation/action separation, task/inventory regression, stale results, concurrency, deduplication, restart, failures, throttles and persistent budget exhaustion. Existing headless, taxi and presentation tests remain intact.
+Automated backend tests use temporary checkpoints and ledgers, HTTP bound to ephemeral loopback ports and mocked Meta responses. They cover snapshot consistency, auth/Origin/body guards, scoped requests, conversation/action separation, task/inventory regression, stale results, concurrency, deduplication, restart, failures, throttles and persistent budget exhaustion. Headless town, shared geometry, spending-control and presentation tests cover the supported experience.
 
 ## Milestone 7E map and phone contract
 
-Normal town checkpoints use world snapshot v4 (`town-v1`) and presentation contract v2. Legacy fixture/taxi paths remain `legacy-v1`; old snapshots migrate through the retained v1?v3 paths. Existing server and CLI checkpoints get exclusive `.pre-7e-backup` copies before map migration. Restart the rebuilt backend and reload the browser together. Active routes and grandfathered work sites retain their progress; subsequent work uses the catalogue premises.
+Normal town checkpoints use world snapshot v4 (`town-v1`) and presentation contract v2. Legacy neighbourhood fixtures remain `legacy-v1`; old snapshots migrate through the retained v1?v3 paths. Existing server and CLI checkpoints get exclusive `.pre-7e-backup` copies before map migration. Restart the rebuilt backend and reload the browser together. Active routes and grandfathered work sites retain their progress; subsequent work uses the catalogue premises.
 
 Authenticated phone endpoints are `GET /api/phone?actorId=?`, `POST /api/phone/control` (`worldId`, `actorId`, `operation`, and `leaseId` for renew/release), and `POST /api/phone/actions` (`id`, `worldId`, `actorId`, `leaseId`, `action`). Inspection is read-only and scoped to the phone owner. One transient 60-wall-second lease pauses only that resident?s new decisions, renews every 20 seconds while visible, and clears on restart. Manual phone actions require a valid lease and existing authoritative eligibility; they make no inference request themselves. Tokens never enter checkpoints or public frames.
 

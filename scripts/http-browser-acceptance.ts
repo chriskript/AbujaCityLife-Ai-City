@@ -10,7 +10,7 @@ import {validateLivePlan,type LivePlan} from '../server/session.js';
 import {Neighbourhood} from '../shared/neighbourhood/world.js';
 import {MetaNeighbourhoodProvider,neighbourhoodModelConfiguration} from '../server/inference/neighbourhood-provider.js';
 import {generationReservation} from '../server/inference/model-limits.js';
-import {modelRates} from '../server/inference/meta-probe.js';
+import {modelRates} from '../server/inference/model-pricing.js';
 import {startHttpBrowserProbe} from '../server/evaluation/http-browser-probe.js';
 
 // Never opens the operating session or enables live mode by default. A fresh

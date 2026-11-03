@@ -41,7 +41,7 @@ npm run backend
 
 Open **http://127.0.0.1:8787/** and use the local access token in `runtime/demo-access.json`. The default offline town needs no Meta key. Keep API keys in backend configuration, never browser code or Git.
 
-For frontend development, leave the backend running and run `npm run dev` in another terminal. For setup, controls and troubleshooting, see the [local operation guide](docs/backend.md). The original Taxi lab is also available in the app.
+For frontend development, leave the backend running and run `npm run dev` in another terminal. For setup, controls and troubleshooting, see the [local operation guide](docs/backend.md).
 
 ## Built with
 
@@ -57,6 +57,7 @@ AI Town is a separate hackathon entry that builds on the broader Abuja City Life
 
 ## Learn more
 
+- [Unity Gardens redesign: planning, migration, screenshots and verification](docs/unity-gardens-redesign.md)
 - [Unity Gardens: history and residents](docs/unity-gardens.md)
 - [Local operation and controls](docs/backend.md)
 - [Simulation architecture](docs/architecture.md)

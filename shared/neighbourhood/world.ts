@@ -48,7 +48,7 @@ export class Neighbourhood {
   upgradeTownMap(options:{fresh?:boolean}={}):boolean {
     if(!this.state.town)return false;
     const candidate=copy(this.state),map=mapFor('town-v1');let changed=candidate.mapId!=='town-v1';
-    candidate.mapId='town-v1';if(changed && !options.fresh)candidate.mapUpgradedAt ??= candidate.time;
+    candidate.mapId='town-v1';candidate.layoutRevision=2;if(changed && !options.fresh)candidate.mapUpgradedAt ??= candidate.time;
     const occupied=new Set(Object.values(candidate.npcs).map(npc=>npc.home).filter((home):home is string=>!!home && map.nodes.some(n=>n.id===home && n.kind==='home')));
     for(const npc of Object.values(candidate.npcs)) {
       if(!npc.home || !occupied.has(npc.home)) {
@@ -774,19 +774,22 @@ export class Neighbourhood {
           this.record('activity-completed', id, [id], activity.kind, 'Selected activity finished', {}, 'observed'); this.trigger(id, 'activity-completed');
           if (this.state.town) for (const witness of this.witnesses(id)) this.perceive(witness);
         } else if (activity.kind === 'travel') {
-          let distance = (npc.mobility === 'taxi' ? 14 : 4) * dt;
+          let remainingSeconds = dt;
           while (npc.activity === activity) {
             const edge = this.map.edges.find(item => item.id === activity.path.edgeIds[activity.step]);
             if (!edge) { this.arrive(id); break; }
             // Co-located entrance/street connectors consume no distance. Finish
             // them even when the preceding edge used this tick's last metre,
             // so every persisted travel step remains a valid checkpoint.
-            if (distance <= 0 && edge.distance > 0) break;
+            if (remainingSeconds <= 0 && edge.distance > 0) break;
             if (this.state.roads.blockedEdges.includes(edge.id)) {
               this.fail(id, `Encountered blocked edge ${edge.id}`); this.perceive(id); break;
             }
-            const travel = Math.min(distance, edge.distance - activity.progress);
-            activity.progress += travel; distance -= travel;
+            // Drivers finish pedestrian access legs on foot; fast vehicle travel
+            // belongs on the carriageway. Carry remaining time across junctions.
+            const speed=npc.mobility==='taxi' && edge.kind!=='walk' && edge.kind!=='indoor'?14:4;
+            const travel = Math.min(remainingSeconds*speed, edge.distance - activity.progress);
+            activity.progress += travel; remainingSeconds -= travel/speed;
             if (activity.progress >= edge.distance - 0.000001) {
               npc.node = activity.path.nodeIds[activity.step + 1]!; npc.revision++;
               activity.step++; activity.progress = 0;

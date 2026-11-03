@@ -2,11 +2,14 @@ import { mapFor, buildingFor, addressFor, type MapId } from '../world/town-layou
 import { type NpcId, type WorldState, type WorldEvent, type TaskStatus, type Encounter, type Communication } from './types.js';
 import type { PhoneView,PhoneControlInput,PhoneLease,PhoneActionInput } from './phone.js';
 
+export interface ActorPose { x: number; z: number; heading: number }
+
 export interface ActorView {
   id: NpcId; name: string; occupation: string; node: string;
-  pose: { x: number; z: number; heading: number };
+  pose: ActorPose;
   moving: boolean; activity: string; intention: string | null; goods: number; rewards: number;
   mobility: 'walk' | 'taxi';
+  pathKind?: 'road' | 'walk' | 'indoor';
   coins?: number; food?: number;
   contacts?: string[];
   homeAddress?:string; workplaceAddress?:string; insideBuildingId?:string;
@@ -16,6 +19,7 @@ export interface PublicTask { id: string; requester: NpcId; recipient: NpcId; qu
 export type ObservableEvent = Pick<WorldEvent, 'id' | 'time' | 'type' | 'actor' | 'subject' | 'detail' | 'data'>;
 export interface NeighbourhoodView {
   mapId:MapId;
+  layoutRevision?:2;
   worldId: string; revision: number; time: number; actors: ActorView[];
   resources: { supplierGoods: number; marketGoods: number; salesOpen: boolean };
   tasks: PublicTask[]; blockedEdges: string[];
@@ -84,6 +88,7 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
     const inside=indoor ? buildingFor(npc.node,state.mapId) ?? (motion.kind==='travel'?buildingFor(motion.path.nodeIds[motion.step+1]!,state.mapId):undefined):undefined;
     if(inside && !['travel'].includes(motion.kind))activity=`${motion.kind==='work'?'Working':motion.kind==='wait' && motion.resting?'Resting':'Indoors'} · ${inside.name}`;
     return { id, name: npc.name, occupation: npc.occupation, node: npc.node, pose, mobility: npc.mobility ?? 'walk',
+      ...(motion.kind==='travel'?{pathKind:edges.find(edge=>edge.id===motion.path.edgeIds[motion.step])?.kind ?? 'road'}:{}),
       moving: motion.kind === 'travel', activity,
       intention: npc.goals.find(goal => goal.id === npc.intention?.goalId)?.description ?? null,
       goods: npc.inventory.goods, rewards: npc.inventory.rewards,
@@ -95,7 +100,7 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
     };
   });
   return {
-    snapshot: { mapId:state.mapId,worldId: state.id, revision: state.revision, time: state.time, actors,
+    snapshot: { mapId:state.mapId,...(state.mapId==='town-v1'?{layoutRevision:2 as const}:{}),worldId: state.id, revision: state.revision, time: state.time, actors,
       resources: { supplierGoods: state.resources.supplierGoods, marketGoods: state.resources.marketGoods, salesOpen: state.resources.salesOpen },
       tasks: Object.values(state.tasks).map(({ id, requester, recipient, quantity, status }) => ({ id, requester, recipient, quantity, status })),
       encounters: Object.values(state.social.interactions).slice(-16).map(({id,initiator,recipient,purpose,status,createdAt}) => ({id,initiator,recipient,purpose,status,createdAt})),

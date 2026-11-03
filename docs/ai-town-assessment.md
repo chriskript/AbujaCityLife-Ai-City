@@ -1,5 +1,8 @@
 # Abuja City Life: AI Town — foundation assessment and implementation path
 
+> Historical record: Taxi Lab, its headless scenarios and standalone taxi Meta probe have been retired. Unity Gardens is the only supported app experience; taxi-related results below describe the earlier implementation.
+
+
 Current implementation: [Milestone 7B](milestone-7b.md) provides sixteen residents with connected work, food, rest, credits and resource production. The original assessment remains the accepted direction and records the earlier capability inventory.
 
 Implementation follow-up: [Milestone 7A](milestone-7a.md) now provides extensible residents, Chris, autonomous face-to-face encounters and bounded offline headless progression. The assessment below records the pre-7A findings and accepted direction; its capability statuses describe that earlier point.

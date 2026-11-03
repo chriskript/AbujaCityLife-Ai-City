@@ -2,7 +2,7 @@ import { npcDecisionSchema, isNpcDecision } from '../../shared/neighbourhood/dec
 import { NeighbourhoodMockProvider } from '../../shared/neighbourhood/mock-provider.js';
 import type { NpcDecisionRequest, NpcInferenceResult, NpcObservation } from '../../shared/neighbourhood/types.js';
 import type { ConversationContext, ConversationDecision, GenerationMetrics } from '../../shared/neighbourhood/conversation.js';
-import { inferenceCost } from './meta-probe.js';
+import { inferenceCost } from './model-pricing.js';
 import { withProbeBudget } from '../controls/probe-budget.js';
 import { socialContextInstructions } from '../../shared/neighbourhood/social-context.js';
 import { employmentInstructions } from './employment-grounding.js';

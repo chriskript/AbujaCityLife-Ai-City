@@ -12,7 +12,7 @@ export class ResidentPhone {
  private listeners=new AbortController();
  constructor(private readonly session:NeighbourhoodSession){
   this.dialog.id='resident-phone';this.dialog.className='resident-phone';this.dialog.setAttribute('aria-labelledby','phone-title');
-  this.dialog.innerHTML=`<header class="phone-top"><span id="phone-clock">00:00</span><span>Town phone</span><button id="phone-close" aria-label="Close resident phone">×</button></header><div class="phone-heading"><p id="phone-owner"></p><h2 id="phone-title">Messages</h2><button id="phone-control">Take phone control</button><p id="phone-mode">Inspecting · autonomy continues</p></div><div id="phone-content" class="phone-content"></div><section id="phone-compose" class="phone-compose"><label for="phone-message">Message</label><textarea id="phone-message" maxlength="160" rows="2" placeholder="Write a message…"></textarea><div class="phone-options"><label>Purpose<select id="phone-purpose"><option value="chat">Conversation</option><option value="request-help">Supply assistance</option></select></label><label>Attach my observation<select id="phone-memory"><option value="">None</option></select></label><label>Delivery quantity<input id="phone-quantity" type="number" min="1" max="6" step="1" value="4" /></label></div><div class="phone-send"><button id="phone-send">Send text</button><button id="phone-call">Call</button></div></section><p id="phone-status" role="status"></p><nav class="phone-tabs" aria-label="Phone apps"><button data-phone-tab="chats" aria-pressed="true">◯<span>Chats</span></button><button data-phone-tab="calls" aria-pressed="false">♧<span>Calls</span></button><button data-phone-tab="contacts" aria-pressed="false">▣<span>Contacts</span></button></nav>`;
+  this.dialog.innerHTML=`<header class="phone-top"><span id="phone-clock">00:00</span><span>Town phone</span><button id="phone-close" aria-label="Close resident phone">×</button></header><div class="phone-heading"><p id="phone-owner"></p><h2 id="phone-title">Messages</h2><button id="phone-control">Take phone control</button><p id="phone-mode">Inspecting · autonomy continues</p></div><label class="sr-only" for="phone-search">Search contacts and conversations</label><input id="phone-search" type="search" placeholder="Search your contacts…" autocomplete="off" /><div id="phone-content" class="phone-content"></div><section id="phone-compose" class="phone-compose"><label for="phone-message">Message</label><textarea id="phone-message" maxlength="160" rows="2" placeholder="Write a message…"></textarea><details class="phone-compose-details"><summary>Purpose &amp; attachments</summary><div class="phone-options"><label>Purpose<select id="phone-purpose"><option value="chat">Conversation</option><option value="request-help">Supply assistance</option></select></label><label>Attach my observation<select id="phone-memory"><option value="">None</option></select></label><label>Delivery quantity<input id="phone-quantity" type="number" min="1" max="6" step="1" value="4" /></label></div></details><div class="phone-send"><button id="phone-send">Send text</button><button id="phone-call">Call</button></div></section><p id="phone-status" role="status"></p><nav class="phone-tabs" aria-label="Phone apps"><button data-phone-tab="chats" aria-pressed="true">◯<span>Chats</span></button><button data-phone-tab="calls" aria-pressed="false">☎<span>Calls</span></button><button data-phone-tab="contacts" aria-pressed="false">▣<span>Contacts</span></button></nav>`;
   document.body.append(this.dialog);const options={signal:this.listeners.signal};
   this.el('#phone-close').addEventListener('click',()=>{void this.close();},options);
   this.dialog.addEventListener('cancel',event=>{event.preventDefault();void this.close();},options);
@@ -20,13 +20,14 @@ export class ResidentPhone {
   for(const button of this.dialog.querySelectorAll<HTMLButtonElement>('[data-phone-tab]'))button.addEventListener('click',()=>{this.tab=button.dataset.phoneTab as typeof this.tab;this.signature='';this.render();},options);
   this.el('#phone-control').addEventListener('click',()=>{void this.toggleControl();},options);
   this.el<HTMLTextAreaElement>('#phone-message').addEventListener('input',()=>this.controls(),options);
+  this.el('#phone-search').addEventListener('input',()=>{this.signature='';this.render();},options);
   this.el('#phone-send').addEventListener('click',()=>this.send('text'),options);this.el('#phone-call').addEventListener('click',()=>this.send('call'),options);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)void this.release();else if(this.dialog.open)void this.load();},options);
  }
  private el<T extends HTMLElement=HTMLElement>(selector:string):T{return this.dialog.querySelector<T>(selector)!;}
  async open(owner:string):Promise<void>{
   if(this.owner!==owner)await this.release();this.owner=owner;this.view=null;this.contact=null;this.signature='';this.generation++;this.opener=document.activeElement as HTMLElement;
-  if(!this.dialog.open)this.dialog.showModal();this.el('#phone-content').replaceChildren(this.paragraph('Opening this resident’s phone…'));this.controls();this.stopTimers();await this.load();
+  this.status('');this.el<HTMLInputElement>('#phone-search').value='';if(!this.dialog.open)this.dialog.showModal();this.el('#phone-content').replaceChildren(this.paragraph('Opening this resident’s phone…'));this.controls();this.stopTimers();await this.load();
   this.poll=setInterval(()=>{if(!document.hidden)void this.load();},2000);this.renewal=setInterval(()=>{void this.renew();},20000);
  }
  private stopTimers(){if(this.poll)clearInterval(this.poll);if(this.renewal)clearInterval(this.renewal);this.poll=null;this.renewal=null;}
@@ -55,7 +56,10 @@ export class ResidentPhone {
   this.el('#phone-mode').textContent=owned?'Player control · other residents continue':view?.control?'Phone controlled by another observer':'Inspecting · autonomy continues';
   this.el<HTMLButtonElement>('#phone-send').disabled=!this.canAct() || !this.contact || !view?.communication.canContact.includes(this.contact) || !this.el<HTMLTextAreaElement>('#phone-message').value.trim();
   this.el<HTMLButtonElement>('#phone-call').disabled=!this.canAct() || !this.contact || !view?.communication.canCall.includes(this.contact);
-  this.el('#phone-compose').hidden=!this.contact && !view?.communication.threads.some(item=>item.recipient===this.owner && item.status==='pending');
+  this.el('#phone-compose').hidden=this.tab==='contacts' || !this.contact && !view?.communication.threads.some(item=>item.recipient===this.owner && item.status==='pending');
+  this.el('#phone-search').hidden=!!this.contact && this.tab==='chats';
+  this.el<HTMLTextAreaElement>('#phone-message').disabled=!this.canAct();
+  this.el<HTMLTextAreaElement>('#phone-message').placeholder=owned?'Write a message…':'Take phone control to write or reply';
   if(view && owned && !view.canAct)this.status(view.reason || 'Finish the current activity first');
  }
  private send(channel:'text'|'call'){
@@ -96,19 +100,21 @@ export class ResidentPhone {
   for(const tab of this.dialog.querySelectorAll<HTMLButtonElement>('[data-phone-tab]'))tab.setAttribute('aria-pressed',String(tab.dataset.phoneTab===this.tab));
   this.controls();
   const signature=JSON.stringify([view.owner,view.communication,view.tasks,view.canAct,!!this.lease,this.busy,this.tab,this.contact]);if(signature===this.signature)return;this.signature=signature;
-  const content=this.el('#phone-content');content.replaceChildren();
+  const content=this.el('#phone-content'),previousScroll=content.scrollTop,atBottom=content.scrollHeight-content.clientHeight-previousScroll<40;
+  content.replaceChildren();
+  const query=this.el<HTMLInputElement>('#phone-search').value.trim().toLowerCase();
   const memory=this.el<HTMLSelectElement>('#phone-memory'),selectedMemory=memory.value;memory.replaceChildren(new Option('None',''),...view.memories.map(item=>new Option(item.detail.slice(0,80),item.id)));if(view.memories.some(item=>item.id===selectedMemory))memory.value=selectedMemory;
   const threads=[...view.communication.threads].sort((a,b)=>a.createdAt-b.createdAt);
   if(this.tab==='contacts'){
-   for(const person of view.communication.contacts){const row=this.button(`${person.name}${person.canTransport?' · transport contact':''}`,()=>{this.contact=person.id;this.tab='chats';this.signature='';this.render();});row.className='phone-row';content.append(row);}
+   for(const person of view.communication.contacts.filter(person=>person.name.toLowerCase().includes(query))){const row=this.button(`${person.name}${person.canTransport?' · transport contact':''}`,()=>{this.contact=person.id;this.tab='chats';this.signature='';this.render();});row.className='phone-row';content.append(row);}
    if(!view.communication.contacts.length)content.append(this.paragraph('No phone contacts yet. Introductions and voluntary sharing can change this.'));
    if(view.nearby.length){content.append(this.paragraph('Share my number nearby','phone-note'));for(const person of view.nearby)content.append(this.button(`Share with ${person.name}`,()=>{void this.act({type:'offer-contact',recipient:person.id});},this.canAct()));}
   }else if(this.tab==='calls'){
-   for(const item of [...threads].reverse().filter(item=>item.channel==='call')){const card=document.createElement('article');card.className='phone-row';card.append(this.paragraph(`${item.initiator===this.owner?'Outgoing':'Incoming'} · ${this.name(item.initiator===this.owner?item.recipient:item.initiator)}`),this.paragraph(`${clock(item.createdAt)} · ${item.status}`),this.paragraph(item.message));this.responses(item,card);if(item.status==='connected')card.append(this.button('End call',()=>{void this.act({type:'end-call',communicationId:item.id});},this.canAct()));this.tasks(item,card);content.append(card);}
+   for(const item of [...threads].reverse().filter(item=>item.channel==='call' && this.name(item.initiator===this.owner?item.recipient:item.initiator).toLowerCase().includes(query))){const card=document.createElement('article');card.className='phone-row';card.append(this.paragraph(`${item.initiator===this.owner?'Outgoing':'Incoming'} · ${this.name(item.initiator===this.owner?item.recipient:item.initiator)}`),this.paragraph(`${clock(item.createdAt)} · ${item.status}`),this.paragraph(item.message));this.responses(item,card);if(item.status==='connected')card.append(this.button('End call',()=>{void this.act({type:'end-call',communicationId:item.id});},this.canAct()));this.tasks(item,card);content.append(card);}
    if(!threads.some(item=>item.channel==='call'))content.append(this.paragraph('No calls yet. Select a saved contact to place one.'));
   }else if(!this.contact){
    const peers=[...new Set([...threads].reverse().filter(item=>item.channel==='text').map(item=>item.initiator===this.owner?item.recipient:item.initiator))];
-   for(const peer of peers){const items=threads.filter(item=>item.channel==='text' && [item.initiator,item.recipient].includes(peer)),last=items.at(-1)!;const row=this.button('',()=>{this.contact=peer;this.signature='';this.render();});row.className='phone-row phone-preview';const avatar=document.createElement('span');avatar.className='phone-avatar';avatar.textContent=this.name(peer).slice(0,1);const text=document.createElement('span');text.append(this.paragraph(this.name(peer),'phone-peer'),this.paragraph((last.reply && last.response!=='ignore'?last.reply:last.message).slice(0,80)),this.paragraph(clock(last.createdAt),'phone-note'));row.append(avatar,text);content.append(row);}
+   for(const peer of peers.filter(peer=>this.name(peer).toLowerCase().includes(query))){const items=threads.filter(item=>item.channel==='text' && [item.initiator,item.recipient].includes(peer)),last=items.at(-1)!;const row=this.button('',()=>{this.contact=peer;this.signature='';this.render();});row.className='phone-row phone-preview';const avatar=document.createElement('span');avatar.className='phone-avatar';avatar.textContent=this.name(peer).slice(0,1);const text=document.createElement('span');text.append(this.paragraph(this.name(peer),'phone-peer'),this.paragraph((last.reply && last.response!=='ignore'?last.reply:last.message).slice(0,80)),this.paragraph(clock(last.createdAt),'phone-note'));row.append(avatar,text);content.append(row);}
    content.append(this.button('Choose a contact',()=>{this.tab='contacts';this.signature='';this.render();}));
   }else{
    content.append(this.button('‹ All messages',()=>{this.contact=null;this.signature='';this.render();}));
@@ -121,6 +127,8 @@ export class ResidentPhone {
    if(!saved)content.append(this.paragraph('This contact is not saved. You can respond to a delivered invitation, but cannot start another call or text.','phone-note'));
    else if(!view.communication.canContact.includes(this.contact))content.append(this.paragraph('Another exchange or the pair cooldown prevents a new message right now. You can still respond to an open invitation.','phone-note'));
   }
+  if(query && !content.children.length)content.append(this.paragraph('No matching contacts. Try another name.','phone-note'));
+  content.scrollTop=this.contact && this.tab==='chats' && atBottom?content.scrollHeight:previousScroll;
  }
  dispose(){this.stopTimers();void this.release();this.listeners.abort();this.dialog.remove();}
 }

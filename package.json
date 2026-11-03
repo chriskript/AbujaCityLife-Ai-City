@@ -15,7 +15,6 @@
     "preview": "vite preview --config vite.config.ts --host 127.0.0.1",
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc --project client/tsconfig.json",
-    "demo": "tsx scripts/demo.ts",
     "demo:neighbourhood": "tsx scripts/demo-neighbourhood.ts",
     "town:headless": "tsx scripts/town-headless.ts",
     "rehearse:town": "tsx scripts/rehearse-town.ts",
@@ -31,7 +30,6 @@
     "society:phase-d:dry-run": "tsx scripts/society-evaluation.ts --offline --phase-d",
     "society:phase-d:evaluate": "tsx scripts/society-evaluation.ts --live --phase-d",
     "context:profile": "tsx scripts/profile-model-context.ts",
-    "probe:meta": "tsx scripts/probe-meta.ts",
     "meta:check": "tsx scripts/check-meta.ts",
     "autonomy:dry-run": "tsx scripts/autonomy-dry-run.ts",
     "social-context:compare": "tsx scripts/compare-social-context.ts"
