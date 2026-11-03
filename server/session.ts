@@ -141,6 +141,9 @@ export class NeighbourhoodServerSession {
   get frame(): NeighbourhoodFrame { return structuredClone(this.current); }
   hasResident(id: string): boolean { return this.world.hasResident(id); }
   get mode(): 'mock' | 'live-meta' { return this.provider.mode; }
+  // Only the explicitly approved bounded society may run Muse autonomously
+  // without an observer. Legacy live demonstrations retain their observer gate.
+  get advancesWithoutObserver():boolean {return this.mode==='mock'||this.options.plan?.phase==='7g-d-society'&&this.options.plan.allowAutonomy;}
   get paused(): boolean { return this.data.paused; }
   private get boundedTown():boolean { return this.mode==='mock' || this.provider.routineDecisions===true; }
   get operational():boolean{return !this.failed && !this.closed;}
@@ -235,6 +238,7 @@ export class NeighbourhoodServerSession {
         Object.assign(this.data.receipts[command.id]!, { status: 'done', value }); await this.commit(); return value;
       } else {
         if(this.interruptions.length)throw new SessionError(409,'Pending Muse decisions require manual review before any reset');
+        if(this.options.plan?.phase==='7g-d-society')throw new SessionError(409,'Muse society resets require a fresh isolated approved session');
         this.world = this.options.townPopulation===false || this.options.initialWorld && !this.world.hasTownEconomy ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,this.options.townPopulation || prototypePopulation,{map:this.options.townMap ?? 'town-v1'}); this.proposals.clear(); this.epoch++;
         this.data.routineRecent = [];
         this.data.history = Object.fromEntries(this.world.residentIds.map(id => [id, []])); this.data.paused = this.boundedTown && (this.data.progression!.used >= this.data.progression!.limit || this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions);

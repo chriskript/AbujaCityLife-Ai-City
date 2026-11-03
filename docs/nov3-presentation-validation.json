@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-03",
+  "mode": "offline-only",
+  "liveMetaCallsDuringFix": 0,
+  "tests": {
+    "passed": 395,
+    "failed": 0,
+    "files": 29,
+    "durationSeconds": 421.02
+  },
+  "focusedTests": {
+    "passed": 32,
+    "failed": 0
+  },
+  "typecheck": "passed both projects",
+  "productionBuild": "passed",
+  "fix": "Expose actual validated social, replenishment and rejection/interruption events to existing operator event stream; no world or NPC observation changes",
+  "browserSocialFixture": {
+    "readOnly": true,
+    "sourceRun": "7g-informed-20261103T054118Z",
+    "socialEventsVisible": 7,
+    "liveConversationTurns": 0,
+    "worldExecution": false
+  },
+  "baselineBeforeFix": {
+    "passed": 393,
+    "files": 29
+  },
+  "offlineRehearsal": {
+    "seconds": 1800,
+    "decisions": 868,
+    "actors": 16,
+    "meals": 49,
+    "delivered": 6,
+    "restarts": [
+      600,
+      1200
+    ],
+    "passed": true
+  }
+}

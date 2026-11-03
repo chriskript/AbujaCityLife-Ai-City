@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { NeighbourhoodServerSession, SessionError } from './session.js';
 import { ServerProgression } from './progression.js';
+import {ordinaryRejection} from '../shared/neighbourhood/decision-recovery.js';
 
 const digest = (value: string): Buffer => createHash('sha256').update(value).digest();
 export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, accessToken: string, options: { dist?: string; tick?: boolean } = {}) {
@@ -12,6 +13,7 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
   let authenticatedUntil = 0;
   const streams = new Set<ServerResponse>(); const rates = new Map<string, number[]>();
   const progression = new ServerProgression(session);
+  let reviewStopped=false;
   function limit(key: string, maximum: number): void {
     const now = Date.now(); const recent = (rates.get(key) ?? []).filter(time => time > now - 60_000);
     if (recent.length >= maximum) throw new SessionError(429, 'Request throttled'); recent.push(now); rates.set(key, recent);
@@ -83,7 +85,19 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
   });
   server.requestTimeout = 25_000; server.headersTimeout = 10_000; server.maxHeadersCount = 32;
   const timer = setInterval(() => {
-    if (options.tick === false || (session.mode === 'live-meta' && !streams.size)) return;
+    if(options.tick===false||reviewStopped)return;
+    if(session.mode==='live-meta'&&session.advancesWithoutObserver){
+      const frame=session.frame;
+      const seriousProposal=frame.events.some(e=>e.type==='action-validated'&&e.data.accepted===false&&!ordinaryRejection(e.detail)&&frame.events.some(p=>p.type==='action-proposed'&&p.subject===e.subject&&p.data.mode==='meta'));
+      if(session.interruptions.length||seriousProposal){
+        // The HTTP clock has no evaluation coordinator to stop it. Retain the
+        // failed evidence, pause durably once, and never retry/resume inference.
+        reviewStopped=true;
+        void session.command({id:'http-society-review-stop',worldId:frame.snapshot.worldId,type:'pause',paused:true}).catch(()=>{console.error('Autonomous society review pause failed; authoritative progression remains stopped.');for(const stream of streams)stream.end();});
+        return;
+      }
+    }
+    if(!streams.size&&!session.advancesWithoutObserver)return;
     void progression.pulse().catch(error => { console.error(error instanceof SessionError?error.message:'Authoritative progression stopped; inspect the checkpoint before restarting.');for(const stream of streams)stream.end(); });
   }, 250); timer.unref();
   return { server, async close() { clearInterval(timer); await progression.stop().catch(() => {}); for (const stream of streams) stream.end(); await new Promise<void>(resolve => server.close(() => resolve())); await session.close(); } };

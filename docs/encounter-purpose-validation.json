@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-03",
+  "mode": "offline-only",
+  "liveMetaCalls": 0,
+  "tests": {
+    "passed": 393,
+    "failed": 0,
+    "files": 29,
+    "durationSeconds": 287.01
+  },
+  "typecheck": "passed both projects",
+  "productionBuild": "passed; existing routes chunk-size advisory",
+  "reprojectedRequests": 94,
+  "maxProjectedCharacters": 15864,
+  "protectedHashesPassed": 14,
+  "recordedMeetingCheck": "synthetic offline turns and shared-time completion at 295.75s; original checkpoint and ledger unchanged",
+  "socialSchedulingChanges": 0,
+  "gitDiffCheck": "passed"
+}

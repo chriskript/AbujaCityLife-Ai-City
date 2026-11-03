@@ -4,6 +4,9 @@ import type { CommunicationHost } from './communication.js';
 
 // Fail closed for every reason not explicitly classified as an ordinary world outcome.
 const ordinary=new Set(['not-at-workplace','not-at-rest-place','not-at-supplier','not-at-market','not-at-order-desk','missing-skill','stale-actor','actor-busy','communication-inbox-full','communication-cooldown','conversation-already-open','phone-busy','communication-not-open','call-not-connected','social-inbox-full','social-invitation-already-open','social-invitation-closed','social-recipient-not-nearby','social-visit-already-joined','existing-social-visit','no-known-social-route','social-partner-not-present','social-partner-busy','social-turn-awaiting-partner','insufficient-stock','insufficient-funds','insufficient-payer-funds','insufficient-supplies','work-unavailable','offer-not-open','task-not-active','encounter-not-open','encounter-unavailable','initiator-not-nearby','initiator-busy','trader-not-nearby','sales-paused','existing-commitment','missing-personal-food','missing-goods','missing-stall-supplies','carrying-capacity','no-known-route','order-pending','wholesale-cooldown','external-source-exhausted','storage-capacity','input-storage-capacity']);
+// This guard concerns only the initiator's own transport capability. It is
+// checked before effects; recovery reveals no recipient/private information.
+ordinary.add('missing-assistance-capability');
 export const ordinaryRejection=(reason:string):boolean=>ordinary.has(reason);
 export function recordRejection(host:CommunicationHost,id:string,requestId:string,reason:string,action:Action):void {
   const {state,record,trigger}=host;
@@ -13,7 +16,7 @@ export function recordRejection(host:CommunicationHost,id:string,requestId:strin
   state.decisionRecovery ??={};
   state.decisionRecovery[id]={version:1,action:fingerprint,reason,requestId,at:state.time,repetitions:Math.min(3,repetitions),blockedUntil};
   const npc=state.npcs[id]!,cargo=Object.values(state.tasks).filter(t=>t.recipient===id&&t.status==='collected').reduce((s,t)=>s+t.quantity,0),goods=carriedGoods(npc.inventory.goods,npc.inventory.food ?? 0,cargo);
-  const explanation=reason==='missing-stall-supplies'?` Total goods ${goods.total} includes personal food ${goods.personalFood} and committed cargo ${goods.committedCargo}; only ${goods.restockable} can stock the stall. These categories cannot be substituted.`:'';
+  const explanation=reason==='missing-stall-supplies'?` Total goods ${goods.total} includes personal food ${goods.personalFood} and committed cargo ${goods.committedCargo}; only ${goods.restockable} can stock the stall. These categories cannot be substituted.`:reason==='missing-assistance-capability'?' request-help is restricted to transport assistance and requires your own propose-transport capability. General face-to-face questions use ask; remote general discussion uses chat. These are optional alternatives, not an executed correction.':'';
   record('action-rejected',id,[id],requestId,`Attempt failed: ${reason}. No transaction or commitment was applied.${explanation}`,{reason,action:action.type,blockedUntil},'outcome');
   if(repetitions>=3)record('repeated-rejection-paused',id,[id],requestId,'Three identical failures within 120 seconds; this resident has a 120-second inference cooldown. Other residents and deterministic mechanics continue.',{blockedUntil},'outcome');
   trigger(id,'action-rejected');

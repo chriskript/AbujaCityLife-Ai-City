@@ -5,6 +5,7 @@ import { assertSnapshot } from '../shared/neighbourhood/snapshot.js';
 import { isNpcDecision, npcDecisionSchema } from '../shared/neighbourhood/decision-schema.js';
 import { prepareModelInput } from '../server/inference/model-context.js';
 import type { Action } from '../shared/neighbourhood/types.js';
+import {reasoningOpportunity} from '../server/inference/selective-provider.js';
 
 function town(){const w=createTown('social-contract');w.enableSocialVisits();return w;}
 function apply(w:Neighbourhood,id:string,action:Action){
@@ -19,6 +20,34 @@ function invite(w:Neighbourhood,destination='town-green'){
 function accepted(w:Neighbourhood){const id=invite(w);expect(apply(w,'musa',{type:'respond-social',invitationId:id,response:'accept',destination:null,message:'Yes, I would like to meet.'}).accepted).toBe(true);w.advance(5);return id;}
 
 describe('scoped, consented social invitations and visits',()=>{
+  it('schedules separate conversational choices after attendance, preserves turns through recovery and completes shared time',()=>{
+    let w=town();const id=accepted(w);
+    for(const actor of ['amina','musa'])expect(apply(w,actor,{type:'join-social',invitationId:id}).accepted).toBe(true);
+    for(let seconds=0;seconds<180&&w.snapshot.socialVisits!.invitations[id]!.metAt===null;seconds++)w.advance(1);
+    const met=w.snapshot.socialVisits!.invitations[id]!.metAt!;expect(met).not.toBeNull();
+    for(const actor of ['amina','musa']){
+      // No requestInteractionDecision: real arrival/utterance triggers must make
+      // a new inference opportunity available without player intervention.
+      const request=w.requestDecision(actor)!;expect(request).not.toBeNull();
+      expect(reasoningOpportunity(request.observation,request.triggers)).toBe('social-rendezvous-choice');
+      const prepared=prepareModelInput(request,'decision');
+      expect(prepared.schema.properties.action.anyOf.some(b=>b.properties.type.enum[0]==='socialise')).toBe(true);
+      expect(prepared.input.observation.socialVisits!.invitations[0]!.canConverse).toBe(true);
+      expect(w.applyDecision(request.id,{goalId:request.observation.actor.goals[0]!.id,reason:'Synthetic offline choice; live conversation is not being claimed',action:{type:'socialise',invitationId:id,seconds:10,message:actor==='amina'?'How have things been going?':'I have been busy with deliveries, thanks for asking.'}},{mode:'meta',model:'synthetic-conversation-contract'}).accepted).toBe(true);
+      if(actor==='amina'){
+        expect(w.observe('amina').socialVisits!.invitations[0]!.canConverse).toBe(false);
+        w=Neighbourhood.restore(w.serialize());
+      }
+    }
+    expect(w.snapshot.events.filter(e=>e.type==='social-conversation')).toHaveLength(2);
+    expect(w.snapshot.npcs.amina.relationships.musa!.socialExchanges).toBe(2);
+    while(w.snapshot.time<met+90)w.advance(Math.min(60,met+90-w.snapshot.time));
+    expect(w.snapshot.events.filter(e=>e.type==='social-time-completed')).toHaveLength(1);
+    expect(w.snapshot.socialVisits!.invitations[id]!.joined).toEqual([]);
+    expect(w.requestDecision('musa')).not.toBeNull();
+    expect(Neighbourhood.restore(w.serialize()).snapshot.events.filter(e=>e.type==='social-time-completed')).toHaveLength(1);
+    expect(()=>assertSnapshot(w.snapshot)).not.toThrow();
+  });
   it('lets newly introduced residents invite and answer nearby without acquiring phone numbers or trust',()=>{
     const w=town();const actor=w.residentIds.find(id=>w.observe(id).nearbyPeople.some(p=>!p.known&&w.observe(id).encounterOpportunities.includes(p.id)))!;
     expect(actor).toBeTruthy();const recipient=w.observe(actor).nearbyPeople.find(p=>!p.known&&w.observe(actor).encounterOpportunities.includes(p.id))!.id;

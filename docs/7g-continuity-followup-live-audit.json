@@ -1,0 +1,100 @@
+{
+  "id": "7g-continuity-followup-20261103T090800Z",
+  "liveCallsDuringAudit": 0,
+  "eventIds": 1739,
+  "repeatedSnapshotsChecked": 137531,
+  "eventPayloadsIdentical": true,
+  "eventTimesAndRevisionsOrdered": true,
+  "requestIdsUniqueWithinRun": true,
+  "recovery": [
+    {
+      "actor": "zainab",
+      "rejectedNumber": 54,
+      "reason": "encounter-unavailable",
+      "nextNumber": 61,
+      "nextId": "society-7g-initial:decision-61",
+      "nextAction": {
+        "channel": "text",
+        "memoryId": null,
+        "message": "Hi Amina, market still shows no food - do you expect restock soon? I have errands nearby.",
+        "purpose": "chat",
+        "recipient": "amina",
+        "type": "communicate"
+      },
+      "failureFeedbackActuallySupplied": true,
+      "otherResidentsDidNotReceiveFailureMemory": true,
+      "actorNode": "market",
+      "targetNode": "market",
+      "activePending": [
+        "encounter-3"
+      ],
+      "newInvitationEligible": []
+    },
+    {
+      "actor": "grace",
+      "rejectedNumber": 59,
+      "reason": "initiator-not-nearby",
+      "nextNumber": 67,
+      "nextId": "society-7g-initial:decision-67",
+      "nextAction": {
+        "seconds": 30,
+        "type": "wait"
+      },
+      "failureFeedbackActuallySupplied": true,
+      "otherResidentsDidNotReceiveFailureMemory": true,
+      "actorNode": "community-office-work",
+      "targetNode": null,
+      "activePending": [
+        "encounter-2"
+      ],
+      "newInvitationEligible": []
+    }
+  ],
+  "exposure": {
+    "inputs": 200,
+    "ownSocialContext": 200,
+    "inviteSocialSchema": 200,
+    "knownNearby": 94,
+    "remoteContactsAvailable": 187,
+    "publicVenues": 200
+  },
+  "sourceCheckpointAndLedgerUnchanged": true,
+  "pausedRecoveryPreservedGameplayMemoriesConnectionsAndAccounting": true,
+  "duplicateCompletedRequestHasNoEffects": true,
+  "protectedFiles": {
+    "runtime/approved-7g-phase-d-plan.json": true,
+    "output/society-7g/7g-d-society-20261101T175236Z/evidence.ndjson": true,
+    "output/society-7g/7g-d-society-20261101T175236Z/report.json": true,
+    ".env": true,
+    "runtime/neighbourhood-session.json": true,
+    "runtime/town-headless.json": true,
+    "runtime/approved-7g-phase-b-plan.json": true,
+    "runtime/approved-7g-phase-c-plan.json": true,
+    "output/society-7g/7g-c-unity-20261101T085502Z/evidence.ndjson": true,
+    "runtime/approved-7g-economic-recovery-plan.json": true,
+    "output/society-7g/7g-d-economy-20261102T143947Z/evidence.ndjson": true,
+    "output/society-7g/7g-d-economy-20261102T143947Z/report.json": true,
+    "output/society-7g/7g-d-economy-20261102T143947Z/session.json": true,
+    "output/society-7g/7g-d-economy-20261102T143947Z/offline-session.json": true,
+    "runtime/approved-7g-informed-autonomy-plan.json": true,
+    "output/society-7g/7g-informed-20261103T054118Z/evidence.ndjson": true,
+    "output/society-7g/7g-informed-20261103T054118Z/report.json": true,
+    "output/society-7g/7g-informed-20261103T054118Z/session.json": true,
+    "output/society-7g/7g-informed-20261103T054118Z/offline-session.json": true,
+    "runtime/approved-7g-continuity-plan.json": true,
+    "output/society-7g/7g-continuity-20261103T084357Z/evidence.ndjson": true,
+    "output/society-7g/7g-continuity-20261103T084357Z/report.json": true,
+    "output/society-7g/7g-continuity-20261103T084357Z/session.json": true,
+    "output/society-7g/7g-continuity-20261103T084357Z/offline-session.json": true
+  },
+  "sourceFilesUnchangedAtRunEnd": true,
+  "postRunSourceFix": "HTTP observer gate fixed only after run-end source audit; not attributed to this live run",
+  "historicalReservationsPreserved": true,
+  "newReservations": 200,
+  "newReservedMicroUsd": 3740800,
+  "totalReservationEntries": 555,
+  "totalReservedMicroUsd": 10321894,
+  "moneyConserved": true,
+  "evidenceSha256": "f6aaa7abb23950037165db1349893b87331e199bbe46d90ac6fd02ea631c4584",
+  "checkpointSha256": "a8759b1f1243009153644fb4569e358f9ac894608b659afe2a820ed060828f2c"
+}

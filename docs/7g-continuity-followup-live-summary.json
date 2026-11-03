@@ -1,0 +1,1562 @@
+{
+  "id": "7g-continuity-followup-20261103T090800Z",
+  "profile": "7g-d-society",
+  "calls": 200,
+  "returned": 200,
+  "accepted": 198,
+  "ordinaryRejected": 2,
+  "providerFailed": false,
+  "stopReason": "generation-limit",
+  "wallMs": 2134514,
+  "simulationSeconds": 513.25,
+  "deterministicDrainSeconds": 0,
+  "usage": {
+    "knownEstimatedUsd": 1.8233080000000002,
+    "unknownInvocations": 0,
+    "measuredGenerations": 200,
+    "inputTokens": 1135405,
+    "outputTokens": 95071,
+    "measuredLatencyMs": 1479338
+  },
+  "reservedUsd": 3.7408,
+  "latencyMs": {
+    "min": 3563,
+    "median": 7020,
+    "p95": 12847,
+    "mean": 7396.69,
+    "max": 15991,
+    "maxSharedObserved": 17858
+  },
+  "maxTokens": {
+    "preflight": 6733,
+    "input": 6590,
+    "output": 1246
+  },
+  "actionCounts": {
+    "travel": 40,
+    "order-external": 4,
+    "rest": 7,
+    "take-work": 72,
+    "buy": 13,
+    "wait": 28,
+    "encounter": 8,
+    "respond-encounter": 6,
+    "eat": 13,
+    "communicate": 4,
+    "respond-communication": 3,
+    "offer-contact": 2
+  },
+  "eventCounts": {
+    "encounter-noticed": 60,
+    "action-proposed": 200,
+    "action-validated": 200,
+    "intention-selected": 198,
+    "travel-started": 40,
+    "external-order-placed": 4,
+    "rest-started": 7,
+    "paid-work-started": 72,
+    "edge-executed": 180,
+    "arrived": 38,
+    "work-observed": 318,
+    "stock-observed": 75,
+    "purchase-paid": 13,
+    "buy": 13,
+    "activity-started": 28,
+    "encounter-invited": 7,
+    "paid-work-completed": 64,
+    "activity-completed": 79,
+    "supplies-observed": 16,
+    "encounter-accepted": 5,
+    "external-order-delivered": 4,
+    "rest-completed": 7,
+    "food-consumed": 13,
+    "resident-introduced": 9,
+    "communication-sent": 4,
+    "action-rejected": 2,
+    "text-delivered": 4,
+    "communication-response-chosen": 3,
+    "contact-offered": 2,
+    "communication-replied": 3,
+    "encounter-expired": 2
+  },
+  "contacts": [
+    {
+      "actor": "grace",
+      "changes": {
+        "musa": {
+          "before": null,
+          "after": true
+        }
+      }
+    },
+    {
+      "actor": "sadiq",
+      "changes": {
+        "musa": {
+          "before": null,
+          "after": true
+        }
+      }
+    }
+  ],
+  "relationshipCounterChanges": 0,
+  "residents": [
+    {
+      "id": "musa",
+      "generations": 18,
+      "needs": {
+        "initial": {
+          "food": 0,
+          "stock": 0,
+          "income": 0.8,
+          "rest": 0.1
+        },
+        "final": {
+          "food": 0.08,
+          "stock": 0,
+          "income": 0.44,
+          "rest": 0.12
+        },
+        "baseline": {
+          "food": 0.64,
+          "stock": 0,
+          "income": 0.14,
+          "rest": 0.42
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 10,
+          "food": 0
+        },
+        "final": {
+          "goods": 2,
+          "rewards": 0,
+          "coins": 6,
+          "food": 2
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 3,
+          "coins": 16,
+          "food": 0
+        }
+      },
+      "node": "stand",
+      "activity": {
+        "kind": "idle"
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "amina",
+      "generations": 23,
+      "needs": {
+        "initial": {
+          "food": 0,
+          "stock": 0.8,
+          "income": 0.4,
+          "rest": 0.1
+        },
+        "final": {
+          "food": 0.16,
+          "stock": 0.1,
+          "income": 0.03,
+          "rest": 0.42
+        },
+        "baseline": {
+          "food": 0.64,
+          "stock": 0.1,
+          "income": 0,
+          "rest": 0.62
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 24,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 19,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 32,
+          "food": 0
+        }
+      },
+      "node": "market",
+      "activity": {
+        "kind": "wait",
+        "until": 573.25
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "zainab",
+      "generations": 19,
+      "needs": {
+        "initial": {
+          "food": 0.8,
+          "stock": 0,
+          "income": 0,
+          "rest": 0.1
+        },
+        "final": {
+          "food": 0.32,
+          "stock": 0,
+          "income": 0.24,
+          "rest": 0.5
+        },
+        "baseline": {
+          "food": 0.64,
+          "stock": 0,
+          "income": 0.12,
+          "rest": 0.16
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 6,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 0,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 6,
+          "food": 0
+        }
+      },
+      "node": "community-office-work",
+      "activity": {
+        "kind": "wait",
+        "until": 526
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "chris",
+      "generations": 9,
+      "needs": {
+        "initial": {
+          "food": 0,
+          "stock": 0,
+          "income": 0.7,
+          "rest": 0.1
+        },
+        "final": {
+          "food": 0.64,
+          "stock": 0,
+          "income": 0,
+          "rest": 0.7
+        },
+        "baseline": {
+          "food": 0.64,
+          "stock": 0,
+          "income": 0.34,
+          "rest": 0.54
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 4,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 18,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 1,
+          "rewards": 0,
+          "coins": 6,
+          "food": 1
+        }
+      },
+      "node": "repair-shop-work",
+      "activity": {
+        "kind": "work",
+        "until": 559.25,
+        "job": {
+          "businessId": "repair-workshop",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "fatima",
+      "generations": 11,
+      "needs": {
+        "initial": {
+          "food": 0.35,
+          "stock": 0,
+          "income": 0.3,
+          "rest": 0.65
+        },
+        "final": {
+          "food": 0.4,
+          "stock": 0,
+          "income": 0,
+          "rest": 0.48
+        },
+        "baseline": {
+          "food": 0.24,
+          "stock": 0,
+          "income": 0.24,
+          "rest": 0
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 14,
+          "food": 0
+        },
+        "final": {
+          "goods": 1,
+          "rewards": 0,
+          "coins": 14,
+          "food": 1
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 14,
+          "food": 0
+        }
+      },
+      "node": "care-office-work",
+      "activity": {
+        "kind": "work",
+        "until": 586.25,
+        "job": {
+          "businessId": "care-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "tunde",
+      "generations": 9,
+      "needs": {
+        "initial": {
+          "food": 0.2,
+          "stock": 0,
+          "income": 0.5,
+          "rest": 0.15
+        },
+        "final": {
+          "food": 0.84,
+          "stock": 0,
+          "income": 0.03,
+          "rest": 0.79
+        },
+        "baseline": {
+          "food": 0.16,
+          "stock": 0,
+          "income": 0.44,
+          "rest": 0.32
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 22,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 36,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 22,
+          "food": 0
+        }
+      },
+      "node": "repair-shop-work",
+      "activity": {
+        "kind": "work",
+        "until": 533.25,
+        "job": {
+          "businessId": "repair-workshop",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "halima",
+      "generations": 16,
+      "needs": {
+        "initial": {
+          "food": 0.4,
+          "stock": 0,
+          "income": 0.55,
+          "rest": 0.2
+        },
+        "final": {
+          "food": 0,
+          "stock": 0,
+          "income": 0.15,
+          "rest": 0.12
+        },
+        "baseline": {
+          "food": 0.32,
+          "stock": 0,
+          "income": 0.09,
+          "rest": 0.16
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 12,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 18,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 20,
+          "food": 0
+        }
+      },
+      "node": "hill",
+      "activity": {
+        "kind": "travel",
+        "path": {
+          "nodeIds": [
+            "hill",
+            "junction",
+            "centre"
+          ],
+          "edgeIds": [
+            "junction-hill",
+            "centre-junction"
+          ],
+          "distance": 153.1370849898476
+        },
+        "step": 0,
+        "progress": 44,
+        "taskId": null,
+        "leg": null
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "ibrahim",
+      "generations": 13,
+      "needs": {
+        "initial": {
+          "food": 0.55,
+          "stock": 0,
+          "income": 0.9,
+          "rest": 0.25
+        },
+        "final": {
+          "food": 0.39,
+          "stock": 0,
+          "income": 0.24,
+          "rest": 0.11
+        },
+        "baseline": {
+          "food": 0.56,
+          "stock": 0,
+          "income": 0.09,
+          "rest": 0.21
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 3,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 7,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 9,
+          "food": 0
+        }
+      },
+      "node": "market",
+      "activity": {
+        "kind": "idle"
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "yusuf",
+      "generations": 6,
+      "needs": {
+        "initial": {
+          "food": 0.3,
+          "stock": 0,
+          "income": 0.6,
+          "rest": 0.25
+        },
+        "final": {
+          "food": 0.94,
+          "stock": 0,
+          "income": 0.03,
+          "rest": 0.89
+        },
+        "baseline": {
+          "food": 0.24,
+          "stock": 0,
+          "income": 0.24,
+          "rest": 0.21000000000000008
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 9,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 19,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 11,
+          "food": 0
+        }
+      },
+      "node": "learning-centre-work",
+      "activity": {
+        "kind": "work",
+        "until": 566.75,
+        "job": {
+          "businessId": "learning-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "ngozi",
+      "generations": 9,
+      "needs": {
+        "initial": {
+          "food": 0.6,
+          "stock": 0.8,
+          "income": 0.85,
+          "rest": 0.15
+        },
+        "final": {
+          "food": 0.44,
+          "stock": 0.1,
+          "income": 0.03,
+          "rest": 0.75
+        },
+        "baseline": {
+          "food": 0.64,
+          "stock": 0.1,
+          "income": 0.19,
+          "rest": 0.63
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 5,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 9,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 6,
+          "food": 0
+        }
+      },
+      "node": "market",
+      "activity": {
+        "kind": "work",
+        "until": 516,
+        "job": {
+          "businessId": "market",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "emeka",
+      "generations": 8,
+      "needs": {
+        "initial": {
+          "food": 0.4,
+          "stock": 0,
+          "income": 0.5,
+          "rest": 0.35
+        },
+        "final": {
+          "food": 1,
+          "stock": 0,
+          "income": 0.09,
+          "rest": 0.010000000000000009
+        },
+        "baseline": {
+          "food": 0.32,
+          "stock": 0,
+          "income": 0.14,
+          "rest": 0.44
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 13,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 21,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 15,
+          "food": 0
+        }
+      },
+      "node": "stand",
+      "activity": {
+        "kind": "travel",
+        "path": {
+          "nodeIds": [
+            "west-flats-flat-2",
+            "west-flats-entrance",
+            "west-court",
+            "west-lane",
+            "stand",
+            "centre",
+            "market"
+          ],
+          "edgeIds": [
+            "west-flats-entrance--west-flats-flat-2",
+            "west-court--west-flats-entrance",
+            "west-lane--west-court",
+            "stand--west-lane",
+            "stand-centre",
+            "centre-market"
+          ],
+          "distance": 204.32091952673164
+        },
+        "step": 4,
+        "progress": 6.67908047326835,
+        "taskId": null,
+        "leg": null
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "grace",
+      "generations": 15,
+      "needs": {
+        "initial": {
+          "food": 0.7,
+          "stock": 0,
+          "income": 0.9,
+          "rest": 0.25
+        },
+        "final": {
+          "food": 0.56,
+          "stock": 0,
+          "income": 0,
+          "rest": 0.77
+        },
+        "baseline": {
+          "food": 0.54,
+          "stock": 0,
+          "income": 0.03,
+          "rest": 0.85
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 2,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 5,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 5,
+          "food": 0
+        }
+      },
+      "node": "community-office-work",
+      "activity": {
+        "kind": "work",
+        "until": 549.75,
+        "job": {
+          "businessId": "community-errands",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {
+        "musa": {
+          "before": null,
+          "after": true
+        }
+      },
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "ladi",
+      "generations": 11,
+      "needs": {
+        "initial": {
+          "food": 0.25,
+          "stock": 0,
+          "income": 0.85,
+          "rest": 0.3
+        },
+        "final": {
+          "food": 0.89,
+          "stock": 0,
+          "income": 0,
+          "rest": 0.9
+        },
+        "baseline": {
+          "food": 0.09,
+          "stock": 0,
+          "income": 0.49,
+          "rest": 0.28
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 4,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 13,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 4,
+          "food": 0
+        }
+      },
+      "node": "community-office-work",
+      "activity": {
+        "kind": "work",
+        "until": 528.75,
+        "job": {
+          "businessId": "community-errands",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "sadiq",
+      "generations": 12,
+      "needs": {
+        "initial": {
+          "food": 0.5,
+          "stock": 0,
+          "income": 0.95,
+          "rest": 0.2
+        },
+        "final": {
+          "food": 1,
+          "stock": 0,
+          "income": 1,
+          "rest": 0.72
+        },
+        "baseline": {
+          "food": 0.4,
+          "stock": 0,
+          "income": 0.06,
+          "rest": 0.76
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 1,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 1,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 6,
+          "food": 0
+        }
+      },
+      "node": "repair-shop-work",
+      "activity": {
+        "kind": "idle"
+      },
+      "contactsChanged": {
+        "musa": {
+          "before": null,
+          "after": true
+        }
+      },
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "maryam",
+      "generations": 14,
+      "needs": {
+        "initial": {
+          "food": 0.2,
+          "stock": 0,
+          "income": 0.35,
+          "rest": 0.45
+        },
+        "final": {
+          "food": 0,
+          "stock": 0,
+          "income": 0.12,
+          "rest": 0
+        },
+        "baseline": {
+          "food": 0.16,
+          "stock": 0,
+          "income": 0.29,
+          "rest": 0
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 18,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 17,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 17,
+          "food": 0
+        }
+      },
+      "node": "overlook",
+      "activity": {
+        "kind": "idle"
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    },
+    {
+      "id": "bisi",
+      "generations": 7,
+      "needs": {
+        "initial": {
+          "food": 0.45,
+          "stock": 0,
+          "income": 0.65,
+          "rest": 0.2
+        },
+        "final": {
+          "food": 1,
+          "stock": 0,
+          "income": 0,
+          "rest": 0.84
+        },
+        "baseline": {
+          "food": 0.32,
+          "stock": 0,
+          "income": 0.29,
+          "rest": 0.24
+        }
+      },
+      "inventory": {
+        "initial": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 8,
+          "food": 0
+        },
+        "final": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 20,
+          "food": 0
+        },
+        "baseline": {
+          "goods": 0,
+          "rewards": 0,
+          "coins": 10,
+          "food": 0
+        }
+      },
+      "node": "tailoring-shop-work",
+      "activity": {
+        "kind": "work",
+        "until": 588,
+        "job": {
+          "businessId": "tailoring-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      },
+      "contactsChanged": {},
+      "relationshipsChanged": {}
+    }
+  ],
+  "economy": {
+    "initial": {
+      "time": 0,
+      "trade": {
+        "version": 1,
+        "nextId": 1,
+        "sourceRemaining": 240,
+        "spent": 0,
+        "importedFood": 0,
+        "importedInputs": 0,
+        "orders": []
+      },
+      "money": {
+        "residents": 155,
+        "businesses": 400,
+        "heldWages": 0,
+        "escrow": 0,
+        "externalPayments": 0,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 8,
+        "marketGoods": 1,
+        "salesOpen": true,
+        "revision": 0
+      },
+      "rawInputs": 96,
+      "produced": 0,
+      "consumed": 0,
+      "taskStatuses": {},
+      "activeWork": [],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 0
+        },
+        {
+          "id": "supply-desk",
+          "coins": 100
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 60
+        },
+        {
+          "id": "care-desk",
+          "coins": 40
+        },
+        {
+          "id": "community-errands",
+          "coins": 80
+        },
+        {
+          "id": "learning-desk",
+          "coins": 40
+        },
+        {
+          "id": "utility-work",
+          "coins": 40
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 40
+        }
+      ]
+    },
+    "final": {
+      "time": 513.25,
+      "trade": {
+        "version": 1,
+        "nextId": 5,
+        "sourceRemaining": 220,
+        "spent": 20,
+        "importedFood": 20,
+        "importedInputs": 0,
+        "orders": [
+          {
+            "id": "wholesale-1",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 2,
+            "cost": 2,
+            "createdAt": 0.5,
+            "dueAt": 60.5,
+            "status": "delivered"
+          },
+          {
+            "id": "wholesale-2",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 6,
+            "cost": 6,
+            "createdAt": 135.5,
+            "dueAt": 195.5,
+            "status": "delivered"
+          },
+          {
+            "id": "wholesale-3",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 6,
+            "cost": 6,
+            "createdAt": 287.5,
+            "dueAt": 347.5,
+            "status": "delivered"
+          },
+          {
+            "id": "wholesale-4",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 6,
+            "cost": 6,
+            "createdAt": 411.75,
+            "dueAt": 471.75,
+            "status": "delivered"
+          }
+        ]
+      },
+      "decisionRecovery": {},
+      "money": {
+        "residents": 223,
+        "businesses": 299,
+        "heldWages": 13,
+        "escrow": 0,
+        "externalPayments": 20,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 24,
+        "marketGoods": 5,
+        "salesOpen": true,
+        "revision": 25
+      },
+      "rawInputs": 80,
+      "produced": 16,
+      "consumed": 13,
+      "taskStatuses": {},
+      "activeWork": [
+        {
+          "actor": "chris",
+          "businessId": "repair-workshop",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "fatima",
+          "businessId": "care-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "tunde",
+          "businessId": "repair-workshop",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "yusuf",
+          "businessId": "learning-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "ngozi",
+          "businessId": "market",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "grace",
+          "businessId": "community-errands",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "ladi",
+          "businessId": "community-errands",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "bisi",
+          "businessId": "tailoring-desk",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        }
+      ],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 8
+        },
+        {
+          "id": "supply-desk",
+          "coins": 84
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 28
+        },
+        {
+          "id": "care-desk",
+          "coins": 34
+        },
+        {
+          "id": "community-errands",
+          "coins": 59
+        },
+        {
+          "id": "learning-desk",
+          "coins": 28
+        },
+        {
+          "id": "utility-work",
+          "coins": 32
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 26
+        }
+      ]
+    },
+    "baseline": {
+      "time": 513.25,
+      "trade": {
+        "version": 1,
+        "nextId": 1,
+        "sourceRemaining": 240,
+        "spent": 0,
+        "importedFood": 0,
+        "importedInputs": 0,
+        "orders": []
+      },
+      "money": {
+        "residents": 199,
+        "businesses": 349,
+        "heldWages": 7,
+        "escrow": 0,
+        "externalPayments": 0,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 8,
+        "marketGoods": 5,
+        "salesOpen": true,
+        "revision": 35
+      },
+      "rawInputs": 74,
+      "produced": 18,
+      "consumed": 13,
+      "taskStatuses": {
+        "delivered": 3
+      },
+      "activeWork": [
+        {
+          "actor": "tunde",
+          "businessId": "repair-workshop",
+          "wage": 2,
+          "inputs": 0,
+          "output": 0
+        },
+        {
+          "actor": "halima",
+          "businessId": "supply-desk",
+          "wage": 2,
+          "inputs": 2,
+          "output": 2
+        },
+        {
+          "actor": "ibrahim",
+          "businessId": "supply-desk",
+          "wage": 2,
+          "inputs": 2,
+          "output": 2
+        },
+        {
+          "actor": "ladi",
+          "businessId": "community-errands",
+          "wage": 1,
+          "inputs": 0,
+          "output": 0
+        }
+      ],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 11
+        },
+        {
+          "id": "supply-desk",
+          "coins": 78
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 46
+        },
+        {
+          "id": "care-desk",
+          "coins": 38
+        },
+        {
+          "id": "community-errands",
+          "coins": 68
+        },
+        {
+          "id": "learning-desk",
+          "coins": 36
+        },
+        {
+          "id": "utility-work",
+          "coins": 36
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 36
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "same": 55,
+    "different": 145,
+    "unsupported": 0,
+    "unavailable": 0
+  },
+  "recovery": [
+    {
+      "number": 54,
+      "actor": "zainab",
+      "classification": "ordinary-world-rejection",
+      "reason": "encounter-unavailable",
+      "decision": {
+        "action": {
+          "message": "Hello, I'm Zainab - lovely to meet you here at the market!",
+          "purpose": "introduce",
+          "recipient": "fatima",
+          "type": "encounter"
+        },
+        "goalId": "errands",
+        "reason": "Market stock is empty so buying is impossible and needs are low; using time to introduce to nearby Fatima fits errands."
+      },
+      "inputInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 4,
+        "food": 0
+      },
+      "priorFailureMemories": [],
+      "next": {
+        "number": 61,
+        "requestId": "society-7g-initial:decision-61",
+        "decision": {
+          "action": {
+            "channel": "text",
+            "memoryId": null,
+            "message": "Hi Amina, market still shows no food - do you expect restock soon? I have errands nearby.",
+            "purpose": "chat",
+            "recipient": "amina",
+            "type": "communicate"
+          },
+          "goalId": "food",
+          "reason": "Market stock is currently zero so I cannot buy; asking known trader Amina for restock info fits errands while hunger is low."
+        },
+        "validation": {
+          "id": "event-554",
+          "time": 163.75,
+          "type": "action-validated",
+          "actor": "zainab",
+          "subject": "society-7g-initial:decision-61",
+          "detail": "accepted",
+          "data": {
+            "accepted": true
+          }
+        },
+        "recoveryVisible": {
+          "version": 1,
+          "action": "{\"message\":\"Hello, I'm Zainab - lovely to meet you here at the market!\",\"purpose\":\"introduce\",\"recipient\":\"fatima\",\"type\":\"encounter\"}",
+          "reason": "encounter-unavailable",
+          "requestId": "society-7g-initial:decision-54",
+          "at": 143.75,
+          "repetitions": 1,
+          "blockedUntil": 143.75
+        }
+      }
+    },
+    {
+      "number": 59,
+      "actor": "grace",
+      "classification": "ordinary-world-rejection",
+      "reason": "initiator-not-nearby",
+      "decision": {
+        "action": {
+          "interactionId": "encounter-2",
+          "message": "Hi Amina, nice to meet you! I'm Grace, studying nearby.",
+          "response": "accept",
+          "type": "respond-encounter"
+        },
+        "goalId": "personal",
+        "reason": "No errands work open here now, so accepting Amina's introduction uses the wait well for new friends."
+      },
+      "inputInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 0,
+        "food": 0
+      },
+      "priorFailureMemories": [],
+      "next": {
+        "number": 67,
+        "requestId": "society-7g-initial:decision-67",
+        "decision": {
+          "action": {
+            "seconds": 30,
+            "type": "wait"
+          },
+          "goalId": "livelihood",
+          "reason": "Income need is very high but no eligible work is open here now, so waiting briefly at the offices to catch an opening."
+        },
+        "validation": {
+          "id": "event-604",
+          "time": 180,
+          "type": "action-validated",
+          "actor": "grace",
+          "subject": "society-7g-initial:decision-67",
+          "detail": "accepted",
+          "data": {
+            "accepted": true
+          }
+        },
+        "recoveryVisible": {
+          "version": 1,
+          "action": "{\"interactionId\":\"encounter-2\",\"message\":\"Hi Amina, nice to meet you! I'm Grace, studying nearby.\",\"response\":\"accept\",\"type\":\"respond-encounter\"}",
+          "reason": "initiator-not-nearby",
+          "requestId": "society-7g-initial:decision-59",
+          "at": 159.75,
+          "repetitions": 1,
+          "blockedUntil": 159.75
+        }
+      }
+    }
+  ],
+  "audit": {
+    "id": "7g-continuity-followup-20261103T090800Z",
+    "liveCallsDuringAudit": 0,
+    "eventIds": 1739,
+    "repeatedSnapshotsChecked": 137531,
+    "eventPayloadsIdentical": true,
+    "eventTimesAndRevisionsOrdered": true,
+    "requestIdsUniqueWithinRun": true,
+    "recovery": [
+      {
+        "actor": "zainab",
+        "rejectedNumber": 54,
+        "reason": "encounter-unavailable",
+        "nextNumber": 61,
+        "nextId": "society-7g-initial:decision-61",
+        "nextAction": {
+          "channel": "text",
+          "memoryId": null,
+          "message": "Hi Amina, market still shows no food - do you expect restock soon? I have errands nearby.",
+          "purpose": "chat",
+          "recipient": "amina",
+          "type": "communicate"
+        },
+        "failureFeedbackActuallySupplied": true,
+        "otherResidentsDidNotReceiveFailureMemory": true,
+        "actorNode": "market",
+        "targetNode": "market",
+        "activePending": [
+          "encounter-3"
+        ],
+        "newInvitationEligible": []
+      },
+      {
+        "actor": "grace",
+        "rejectedNumber": 59,
+        "reason": "initiator-not-nearby",
+        "nextNumber": 67,
+        "nextId": "society-7g-initial:decision-67",
+        "nextAction": {
+          "seconds": 30,
+          "type": "wait"
+        },
+        "failureFeedbackActuallySupplied": true,
+        "otherResidentsDidNotReceiveFailureMemory": true,
+        "actorNode": "community-office-work",
+        "targetNode": null,
+        "activePending": [
+          "encounter-2"
+        ],
+        "newInvitationEligible": []
+      }
+    ],
+    "exposure": {
+      "inputs": 200,
+      "ownSocialContext": 200,
+      "inviteSocialSchema": 200,
+      "knownNearby": 94,
+      "remoteContactsAvailable": 187,
+      "publicVenues": 200
+    },
+    "sourceCheckpointAndLedgerUnchanged": true,
+    "pausedRecoveryPreservedGameplayMemoriesConnectionsAndAccounting": true,
+    "duplicateCompletedRequestHasNoEffects": true,
+    "protectedFiles": {
+      "runtime/approved-7g-phase-d-plan.json": true,
+      "output/society-7g/7g-d-society-20261101T175236Z/evidence.ndjson": true,
+      "output/society-7g/7g-d-society-20261101T175236Z/report.json": true,
+      ".env": true,
+      "runtime/neighbourhood-session.json": true,
+      "runtime/town-headless.json": true,
+      "runtime/approved-7g-phase-b-plan.json": true,
+      "runtime/approved-7g-phase-c-plan.json": true,
+      "output/society-7g/7g-c-unity-20261101T085502Z/evidence.ndjson": true,
+      "runtime/approved-7g-economic-recovery-plan.json": true,
+      "output/society-7g/7g-d-economy-20261102T143947Z/evidence.ndjson": true,
+      "output/society-7g/7g-d-economy-20261102T143947Z/report.json": true,
+      "output/society-7g/7g-d-economy-20261102T143947Z/session.json": true,
+      "output/society-7g/7g-d-economy-20261102T143947Z/offline-session.json": true,
+      "runtime/approved-7g-informed-autonomy-plan.json": true,
+      "output/society-7g/7g-informed-20261103T054118Z/evidence.ndjson": true,
+      "output/society-7g/7g-informed-20261103T054118Z/report.json": true,
+      "output/society-7g/7g-informed-20261103T054118Z/session.json": true,
+      "output/society-7g/7g-informed-20261103T054118Z/offline-session.json": true,
+      "runtime/approved-7g-continuity-plan.json": true,
+      "output/society-7g/7g-continuity-20261103T084357Z/evidence.ndjson": true,
+      "output/society-7g/7g-continuity-20261103T084357Z/report.json": true,
+      "output/society-7g/7g-continuity-20261103T084357Z/session.json": true,
+      "output/society-7g/7g-continuity-20261103T084357Z/offline-session.json": true
+    },
+    "sourceFilesUnchangedAtRunEnd": true,
+    "postRunSourceFix": "HTTP observer gate fixed only after run-end source audit; not attributed to this live run",
+    "historicalReservationsPreserved": true,
+    "newReservations": 200,
+    "newReservedMicroUsd": 3740800,
+    "totalReservationEntries": 555,
+    "totalReservedMicroUsd": 10321894,
+    "moneyConserved": true,
+    "evidenceSha256": "f6aaa7abb23950037165db1349893b87331e199bbe46d90ac6fd02ea631c4584",
+    "checkpointSha256": "a8759b1f1243009153644fb4569e358f9ac894608b659afe2a820ed060828f2c"
+  }
+}

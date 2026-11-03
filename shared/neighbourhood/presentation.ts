@@ -58,6 +58,9 @@ const observableTypes = new Set([
   'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'road-observed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
   'encounter-noticed', 'encounter-invited', 'encounter-accepted', 'encounter-declined', 'encounter-deferred', 'encounter-clarified', 'encounter-expired', 'resident-introduced', 'information-shared',
   'paid-work-started','paid-work-completed','purchase-paid','food-consumed','rest-started','rest-completed','transport-paid',
+  // Operator presentation of actual validated outcomes, never NPC knowledge.
+  'social-choice','social-update-delivered','social-visit-started','social-arrival','social-met','social-conversation','social-time-completed','social-expired','social-withdrawal-chosen',
+  'external-order-placed','external-order-delivered','business-funded','action-rejected','repeated-rejection-paused','inference-interrupted',
 ]);
 
 export function projectNeighbourhood(state: WorldState): { snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null } {

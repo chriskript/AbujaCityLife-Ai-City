@@ -5,6 +5,8 @@ import { DecisionScheduler } from '../shared/neighbourhood/scheduler.js';
 import { PresentationStore, projectNeighbourhood, type NeighbourhoodFrame, type SessionCommand } from '../shared/neighbourhood/presentation.js';
 import { LocalNeighbourhoodSession } from '../client/src/simulation/local-neighbourhood-session.js';
 import { createInhabitants } from '../client/src/rendering/inhabitants.js';
+import {createTown} from '../shared/neighbourhood/town.js';
+import type {Action} from '../shared/neighbourhood/types.js';
 
 function connected() {
   const session = new LocalNeighbourhoodSession({legacy:true}); let latest!: NeighbourhoodFrame;
@@ -15,6 +17,32 @@ function connected() {
 }
 
 describe('observer snapshots and event transport', () => {
+  it('retains real invitation, attendance, conversational and shared-time outcomes in the operator event stream without inventing them',()=>{
+    const world=createTown('social-presentation');world.enableSocialVisits();
+    const apply=(actor:string,action:Action)=>{const r=world.requestInteractionDecision(actor)!;expect(world.applyDecision(r.id,{goalId:r.observation.actor.goals[0]!.id,reason:'Synthetic offline presentation fixture',action},{mode:'mock',model:'offline-contract'}).accepted).toBe(true);};
+    apply('amina',{type:'invite-social',recipient:'musa',channel:'text',destination:'town-green',seconds:90,message:'Would you like to meet?'});world.advance(5);
+    apply('musa',{type:'respond-social',invitationId:'social-1',response:'accept',destination:null,message:'Yes, I would.'});world.advance(5);
+    for(const actor of ['amina','musa'])apply(actor,{type:'join-social',invitationId:'social-1'});
+    world.advance(60);const met=world.snapshot.socialVisits!.invitations['social-1']!.metAt!;expect(met).not.toBeNull();
+    apply('amina',{type:'socialise',invitationId:'social-1',seconds:10,message:'How are you?'});
+    apply('musa',{type:'socialise',invitationId:'social-1',seconds:10,message:'Glad we could meet.'});
+    while(world.snapshot.time<met+90)world.advance(Math.min(60,met+90-world.snapshot.time));
+    const before=world.serialize(),view=projectNeighbourhood(world.snapshot),events=view.events.filter(e=>e.subject==='social-1');
+    expect(events.map(e=>e.type)).toEqual(expect.arrayContaining(['social-choice','social-update-delivered','social-visit-started','social-arrival','social-met','social-conversation','social-time-completed']));
+    expect(events.filter(e=>e.type==='social-conversation').map(e=>e.detail)).toEqual(['How are you?','Glad we could meet.']);
+    expect(events.every(e=>world.snapshot.events.some(original=>original.id===e.id&&original.detail===e.detail&&original.time===e.time))).toBe(true);
+    expect(events.filter(e=>e.type==='social-time-completed')).toHaveLength(1);expect(world.serialize()).toBe(before);
+    for(const actor of view.snapshot.actors)for(const field of ['knowledge','needs','memories'])expect(actor).not.toHaveProperty(field);
+  });
+  it('shows paid external supply orders and deliveries as distinct actual events, preserving actor knowledge boundaries',()=>{
+    const world=createTown('order-presentation'),grace=world.observe('grace');const r=world.requestInteractionDecision('amina')!;
+    expect(world.applyDecision(r.id,{goalId:r.observation.actor.goals[0]!.id,reason:'Synthetic offline contract',action:{type:'order-external',businessId:'market',quantity:2}},{mode:'mock',model:'offline-contract'}).accepted).toBe(true);
+    expect(projectNeighbourhood(world.snapshot).events.filter(e=>e.type==='external-order-placed')).toHaveLength(1);
+    expect(projectNeighbourhood(world.snapshot).events.some(e=>e.type==='external-order-delivered')).toBe(false);
+    world.advance(60);expect(projectNeighbourhood(world.snapshot).events.filter(e=>e.type==='external-order-delivered')).toHaveLength(1);
+    expect(world.observe('grace').resources).toEqual(grace.resources);
+    expect(world.observe('grace').wholesale!.offers).toEqual([]);
+  });
   it('projects all four correct locations without exposing private NPC knowledge or memory', () => {
     const { snapshot, events } = projectNeighbourhood(new Neighbourhood('projection').snapshot);
     expect(snapshot.actors.map(actor => [actor.id, actor.node, actor.pose.x, actor.pose.z])).toEqual([

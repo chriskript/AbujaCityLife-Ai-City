@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-03",
+  "browser": "Installed desktop Chrome controlled through cached Playwright CLI",
+  "mode": "isolated offline mock backend plus separate read-only recorded-event rendering fixture",
+  "liveMetaCalls": 0,
+  "operatingCheckpointUsed": false,
+  "liveEvaluationCheckpointModified": false,
+  "integratedTown": {
+    "checkpoint": "output/browser-acceptance-nov3/session.json",
+    "allSixteenResidentsSelectedSuccessfully": true,
+    "phoneViews": [
+      "Chats",
+      "Calls",
+      "Contacts"
+    ],
+    "inspectionAutomaticallyAcquiresControl": false,
+    "explicitControlAcquiredFor": "grace",
+    "controlReleased": true,
+    "phoneMessagesOrCallsSent": 0,
+    "buildingInspection": [
+      "Centre Gardens",
+      "Hill Court via Show home"
+    ],
+    "pausedRefresh": {
+      "worldId": "server-14514cb3-562d-432c-8bcc-3ac1f11c07c9",
+      "beforeTime": 888.5,
+      "afterTime": 888.5,
+      "pausedPreserved": true
+    },
+    "mobileViewport": {
+      "width": 390,
+      "height": 844,
+      "measuredDocumentScrollWidth": 375,
+      "horizontalPageOverflow": false,
+      "physicalMobileHardwareTested": false
+    },
+    "desktopViewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "progressText": "Server advances without an observer: 888 / 1800 simulated seconds used. Pause stops the clock; restart and reset preserve this allowance.",
+    "observerFree": {
+      "browserLocation": "about:blank",
+      "sameWorld": true,
+      "fromSimulatedSeconds": 516.5,
+      "toSimulatedSeconds": 697.5,
+      "advancedSimulatedSeconds": 181,
+      "wallMs": 46618,
+      "scope": "offline backend; headless live evaluation runs separately without a browser. This is not proof of observer-free live HTTP mode."
+    },
+    "actualEndedCallHistory": {
+      "owner": "amina",
+      "callsDisplayed": 2,
+      "peer": "musa",
+      "linkedCompletedDeliveryVisible": true,
+      "playerCallsSent": 0
+    },
+    "finalBound": {
+      "used": 1800,
+      "limit": 1800,
+      "paused": true,
+      "routineRequests": 889
+    }
+  },
+  "socialEventRendering": {
+    "kind": "read-only recorded snapshot fixture; no world execution or new inference",
+    "sourceRun": "7g-informed-20261103T054118Z",
+    "recordedAcceptanceVisible": true,
+    "recordedMutualAttendanceVisible": true,
+    "socialEventsVisible": 7,
+    "newConversationTurns": 0,
+    "fix": "Existing authoritative social events are now included in operator presentation. No resident observations changed."
+  },
+  "console": {
+    "initialUnauthenticated401": "expected before local login",
+    "authenticatedAcceptanceConsole": "browser password-field-outside-form notice only in inspected log",
+    "note": "No application exception was reported in the inspected acceptance console. This is not a claim of exhaustive browser-error coverage."
+  },
+  "screenshots": [
+    "output/playwright/nov3-phone-mobile.png",
+    "output/playwright/nov3-town-mobile.png",
+    "output/playwright/nov3-town-desktop.png",
+    "output/playwright/nov3-roster-mobile.png",
+    "output/playwright/nov3-recorded-social-events.png",
+    "output/playwright/nov3-actual-call-history-mobile.png"
+  ]
+}

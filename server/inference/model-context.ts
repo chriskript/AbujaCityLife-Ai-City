@@ -111,6 +111,13 @@ export function prepareModelInput(input:NpcDecisionRequest|ConversationContext,m
   schema.properties.action.anyOf=schema.properties.action.anyOf.filter(branch=>o.permittedActions.includes(branch.properties.type.enum[0] as NpcDecision['action']['type']));
   schema.properties.action.anyOf=schema.properties.action.anyOf.filter(branch=>{
     const type=branch.properties.type.enum[0],properties=branch.properties as Record<string,unknown>;
+    if(type==='encounter'||type==='communicate'){
+      // Ground purpose eligibility in the actor's own capabilities only. The
+      // authoritative guard still rejects invalid external/stale proposals.
+      properties.purpose={type:'string',enum:type==='encounter'
+        ? ['introduce','ask',...(o.actor.capabilities.includes('propose-transport')?['request-help']:[])]
+        : ['chat',...(o.actor.capabilities.includes('propose-transport')?['request-help']:[])]};
+    }
     const invitations=o.socialVisits?.invitations ?? [];
     if(type==='order-external'||type==='fund-business'){
       const ids=(o.wholesale?.offers ?? []).filter(f=>type==='fund-business'||f.product!==null).map(f=>f.businessId);
