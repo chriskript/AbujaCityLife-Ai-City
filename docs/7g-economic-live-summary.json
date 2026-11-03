@@ -1,0 +1,683 @@
+{
+  "id": "7g-d-economy-20261102T143947Z",
+  "dateLagos": "2026-11-02",
+  "startedAt": "Monday, 2 November 2026 at 15:40:07 GMT+1",
+  "completedAt": "Monday, 2 November 2026 at 16:07:56 GMT+1",
+  "stopReason": "provider-failed",
+  "providerFailure": "20-second shared deadline during generation HTTP request after successful 4465-token preflight; response/usage unknown",
+  "attempts": 165,
+  "returnedDecisions": 164,
+  "accepted": 159,
+  "ordinaryRejections": [
+    {
+      "number": 72,
+      "actor": "amina",
+      "reason": "missing-stall-supplies",
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall shows zero stock while open, so stocking my 2 goods keeps it serving."
+      },
+      "inputInventory": {
+        "goods": 2,
+        "rewards": 0,
+        "coins": 23,
+        "food": 2
+      },
+      "priorFailureMemories": [],
+      "next": {
+        "number": 85,
+        "requestId": "society-7g-initial:decision-85",
+        "decision": {
+          "action": {
+            "businessId": "market",
+            "quantity": 2,
+            "type": "order-external"
+          },
+          "goalId": "restock",
+          "reason": "At market stall with zero current stock and sales open, ordering external supply restocks to serve customers."
+        },
+        "validation": {
+          "id": "event-802",
+          "time": 356.25,
+          "type": "action-validated",
+          "actor": "amina",
+          "subject": "society-7g-initial:decision-85",
+          "detail": "accepted",
+          "data": {
+            "accepted": true
+          }
+        },
+        "recoveryVisible": {
+          "version": 1,
+          "action": "{\"quantity\":2,\"type\":\"stock-stall\"}",
+          "reason": "missing-stall-supplies",
+          "requestId": "society-7g-initial:decision-72",
+          "at": 297.5,
+          "repetitions": 1,
+          "blockedUntil": 297.5
+        }
+      }
+    },
+    {
+      "number": 92,
+      "actor": "amina",
+      "reason": "missing-stall-supplies",
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall is open but empty with high stock need, so stocking carried goods restores service while wholesale order is pending."
+      },
+      "inputInventory": {
+        "goods": 2,
+        "rewards": 0,
+        "coins": 21,
+        "food": 2
+      },
+      "priorFailureMemories": [
+        {
+          "id": "event-664:amina",
+          "kind": "outcome",
+          "source": "world",
+          "subject": "society-7g-initial:decision-72",
+          "detail": "Attempt failed: missing-stall-supplies. No transaction or commitment was applied.",
+          "time": 297.5,
+          "certainty": "certain",
+          "interpretation": "verified-outcome"
+        }
+      ],
+      "next": {
+        "number": 99,
+        "requestId": "society-7g-initial:decision-99",
+        "decision": {
+          "action": {
+            "interactionId": "encounter-1",
+            "message": "Hello Zainab, I have 2 portions ordered and due to arrive soon. Please wait a little. Thank you.",
+            "response": "accept",
+            "type": "respond-encounter"
+          },
+          "goalId": "serve",
+          "reason": "Answering Zainab's waiting question about incoming food while wholesale order is pending delivery."
+        },
+        "validation": {
+          "id": "event-906",
+          "time": 398.25,
+          "type": "action-validated",
+          "actor": "amina",
+          "subject": "society-7g-initial:decision-99",
+          "detail": "accepted",
+          "data": {
+            "accepted": true
+          }
+        },
+        "recoveryVisible": {
+          "version": 1,
+          "action": "{\"quantity\":2,\"type\":\"stock-stall\"}",
+          "reason": "missing-stall-supplies",
+          "requestId": "society-7g-initial:decision-92",
+          "at": 378,
+          "repetitions": 1,
+          "blockedUntil": 378
+        }
+      }
+    },
+    {
+      "number": 119,
+      "actor": "amina",
+      "reason": "missing-stall-supplies",
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall shows 0 stock and I hold 2 goods, so restocking now to serve customers."
+      },
+      "inputInventory": {
+        "goods": 2,
+        "rewards": 0,
+        "coins": 23,
+        "food": 2
+      },
+      "priorFailureMemories": [
+        {
+          "id": "event-850:amina",
+          "kind": "outcome",
+          "source": "world",
+          "subject": "society-7g-initial:decision-92",
+          "detail": "Attempt failed: missing-stall-supplies. No transaction or commitment was applied.",
+          "time": 378,
+          "certainty": "certain",
+          "interpretation": "verified-outcome"
+        }
+      ],
+      "next": {
+        "number": 132,
+        "requestId": "society-7g-initial:decision-132",
+        "decision": {
+          "action": {
+            "businessId": "market",
+            "quantity": 2,
+            "type": "order-external"
+          },
+          "goalId": "restock",
+          "reason": "Stall shows 0 stock and sales are open, so ordering 2 portions to restock."
+        },
+        "validation": {
+          "id": "event-1190",
+          "time": 528.75,
+          "type": "action-validated",
+          "actor": "amina",
+          "subject": "society-7g-initial:decision-132",
+          "detail": "accepted",
+          "data": {
+            "accepted": true
+          }
+        },
+        "recoveryVisible": {
+          "version": 1,
+          "action": "{\"quantity\":2,\"type\":\"stock-stall\"}",
+          "reason": "missing-stall-supplies",
+          "requestId": "society-7g-initial:decision-119",
+          "at": 471,
+          "repetitions": 1,
+          "blockedUntil": 471
+        }
+      }
+    },
+    {
+      "number": 143,
+      "actor": "amina",
+      "reason": "missing-stall-supplies",
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall is empty with sales open and I hold 2 goods, so stocking now to serve customers."
+      },
+      "inputInventory": {
+        "goods": 2,
+        "rewards": 0,
+        "coins": 21,
+        "food": 2
+      },
+      "priorFailureMemories": [
+        {
+          "id": "event-1084:amina",
+          "kind": "outcome",
+          "source": "world",
+          "subject": "society-7g-initial:decision-119",
+          "detail": "Attempt failed: missing-stall-supplies. No transaction or commitment was applied.",
+          "time": 471,
+          "certainty": "certain",
+          "interpretation": "verified-outcome"
+        }
+      ],
+      "next": {
+        "number": 154,
+        "requestId": "society-7g-initial:decision-154",
+        "decision": {
+          "action": {
+            "quantity": 2,
+            "type": "stock-stall"
+          },
+          "goalId": "restock",
+          "reason": "Stall shows 1 left and I carry 2 goods, so stocking to avoid empty."
+        },
+        "validation": {
+          "id": "event-1369",
+          "time": 627.25,
+          "type": "action-validated",
+          "actor": "amina",
+          "subject": "society-7g-initial:decision-154",
+          "detail": "missing-stall-supplies",
+          "data": {
+            "accepted": false
+          }
+        },
+        "recoveryVisible": {
+          "version": 1,
+          "action": "{\"quantity\":2,\"type\":\"stock-stall\"}",
+          "reason": "missing-stall-supplies",
+          "requestId": "society-7g-initial:decision-143",
+          "at": 576,
+          "repetitions": 1,
+          "blockedUntil": 576
+        }
+      }
+    },
+    {
+      "number": 154,
+      "actor": "amina",
+      "reason": "missing-stall-supplies",
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall shows 1 left and I carry 2 goods, so stocking to avoid empty."
+      },
+      "inputInventory": {
+        "goods": 2,
+        "rewards": 0,
+        "coins": 22,
+        "food": 2
+      },
+      "priorFailureMemories": [
+        {
+          "id": "event-1084:amina",
+          "kind": "outcome",
+          "source": "world",
+          "subject": "society-7g-initial:decision-119",
+          "detail": "Attempt failed: missing-stall-supplies. No transaction or commitment was applied.",
+          "time": 471,
+          "certainty": "certain",
+          "interpretation": "verified-outcome"
+        },
+        {
+          "id": "event-1274:amina",
+          "kind": "outcome",
+          "source": "world",
+          "subject": "society-7g-initial:decision-143",
+          "detail": "Attempt failed: missing-stall-supplies. No transaction or commitment was applied.",
+          "time": 576,
+          "certainty": "certain",
+          "interpretation": "verified-outcome"
+        }
+      ],
+      "next": null
+    }
+  ],
+  "unknownUsageAttempts": 1,
+  "actors": [
+    "musa",
+    "amina",
+    "zainab",
+    "chris",
+    "fatima",
+    "tunde",
+    "halima",
+    "ibrahim",
+    "yusuf",
+    "ngozi",
+    "emeka",
+    "grace",
+    "ladi",
+    "sadiq",
+    "maryam",
+    "bisi"
+  ],
+  "simulationAtInterruption": 676,
+  "deterministicDrainSeconds": 60,
+  "finalSimulationSeconds": 736,
+  "wallMs": 1668799,
+  "actualUsage": {
+    "knownEstimatedUsd": 1.2442895000000003,
+    "unknownInvocations": 1,
+    "measuredGenerations": 164,
+    "inputTokens": 768349,
+    "outputTokens": 66789,
+    "measuredLatencyMs": 804928
+  },
+  "reservedUsd": 3.08616,
+  "latency": {
+    "minimumMs": 2789,
+    "medianMs": 4590.5,
+    "meanMs": 4908.09756097561,
+    "maximumMs": 10049,
+    "failedAttemptMs": 20033
+  },
+  "preflight": {
+    "minimum": 3901,
+    "maximum": 5807,
+    "ceiling": 8000,
+    "maximumReportedInput": 5664,
+    "maximumOutput": 1367,
+    "outputCeiling": 2048
+  },
+  "actions": {
+    "wait": 27,
+    "order-external": 4,
+    "travel": 28,
+    "rest": 6,
+    "take-work": 73,
+    "buy": 10,
+    "eat": 8,
+    "stock-stall": 5,
+    "encounter": 1,
+    "respond-encounter": 1,
+    "communicate": 1
+  },
+  "counterfactuals": {
+    "same": 49,
+    "different": 115,
+    "unsupported": 0,
+    "unavailable": 0
+  },
+  "baselinePolicyDecisions": 306,
+  "economy": {
+    "initial": {
+      "time": 0,
+      "trade": {
+        "version": 1,
+        "nextId": 1,
+        "sourceRemaining": 240,
+        "spent": 0,
+        "importedFood": 0,
+        "importedInputs": 0,
+        "orders": []
+      },
+      "money": {
+        "residents": 155,
+        "businesses": 400,
+        "heldWages": 0,
+        "escrow": 0,
+        "externalPayments": 0,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 8,
+        "marketGoods": 1,
+        "salesOpen": true,
+        "revision": 0
+      },
+      "rawInputs": 96,
+      "produced": 0,
+      "consumed": 0,
+      "taskStatuses": {},
+      "activeWork": [],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 0
+        },
+        {
+          "id": "supply-desk",
+          "coins": 100
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 60
+        },
+        {
+          "id": "care-desk",
+          "coins": 40
+        },
+        {
+          "id": "community-errands",
+          "coins": 80
+        },
+        {
+          "id": "learning-desk",
+          "coins": 40
+        },
+        {
+          "id": "utility-work",
+          "coins": 40
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 40
+        }
+      ]
+    },
+    "final": {
+      "time": 736,
+      "trade": {
+        "version": 1,
+        "nextId": 5,
+        "sourceRemaining": 228,
+        "spent": 12,
+        "importedFood": 12,
+        "importedInputs": 0,
+        "orders": [
+          {
+            "id": "wholesale-1",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 2,
+            "cost": 2,
+            "createdAt": 0.5,
+            "dueAt": 60.5,
+            "status": "delivered"
+          },
+          {
+            "id": "wholesale-2",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 6,
+            "cost": 6,
+            "createdAt": 121,
+            "dueAt": 181,
+            "status": "delivered"
+          },
+          {
+            "id": "wholesale-3",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 2,
+            "cost": 2,
+            "createdAt": 356.25,
+            "dueAt": 416.25,
+            "status": "delivered"
+          },
+          {
+            "id": "wholesale-4",
+            "actor": "amina",
+            "businessId": "market",
+            "quantity": 2,
+            "cost": 2,
+            "createdAt": 528.75,
+            "dueAt": 588.75,
+            "status": "delivered"
+          }
+        ]
+      },
+      "decisionRecovery": {
+        "amina": {
+          "version": 1,
+          "action": "{\"quantity\":2,\"type\":\"stock-stall\"}",
+          "reason": "missing-stall-supplies",
+          "requestId": "society-7g-initial:decision-154",
+          "at": 627.25,
+          "repetitions": 2,
+          "blockedUntil": 627.25
+        }
+      },
+      "money": {
+        "residents": 251,
+        "businesses": 292,
+        "heldWages": 0,
+        "escrow": 0,
+        "externalPayments": 12,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 24,
+        "marketGoods": 0,
+        "salesOpen": true,
+        "revision": 22
+      },
+      "rawInputs": 80,
+      "produced": 16,
+      "consumed": 9,
+      "taskStatuses": {},
+      "activeWork": [],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 4
+        },
+        {
+          "id": "supply-desk",
+          "coins": 84
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 26
+        },
+        {
+          "id": "care-desk",
+          "coins": 40
+        },
+        {
+          "id": "community-errands",
+          "coins": 60
+        },
+        {
+          "id": "learning-desk",
+          "coins": 28
+        },
+        {
+          "id": "utility-work",
+          "coins": 24
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 26
+        }
+      ]
+    },
+    "baseline": {
+      "time": 736,
+      "trade": {
+        "version": 1,
+        "nextId": 1,
+        "sourceRemaining": 240,
+        "spent": 0,
+        "importedFood": 0,
+        "importedInputs": 0,
+        "orders": []
+      },
+      "money": {
+        "residents": 209,
+        "businesses": 346,
+        "heldWages": 0,
+        "escrow": 0,
+        "externalPayments": 0,
+        "initialMoney": 555
+      },
+      "resources": {
+        "supplierGoods": 14,
+        "marketGoods": 0,
+        "salesOpen": true,
+        "revision": 43
+      },
+      "rawInputs": 72,
+      "produced": 24,
+      "consumed": 19,
+      "taskStatuses": {
+        "delivered": 3,
+        "declined": 1
+      },
+      "activeWork": [],
+      "businesses": [
+        {
+          "id": "market",
+          "coins": 15
+        },
+        {
+          "id": "supply-desk",
+          "coins": 76
+        },
+        {
+          "id": "repair-workshop",
+          "coins": 44
+        },
+        {
+          "id": "care-desk",
+          "coins": 38
+        },
+        {
+          "id": "community-errands",
+          "coins": 65
+        },
+        {
+          "id": "learning-desk",
+          "coins": 36
+        },
+        {
+          "id": "utility-work",
+          "coins": 36
+        },
+        {
+          "id": "tailoring-desk",
+          "coins": 36
+        }
+      ]
+    }
+  },
+  "interruption": {
+    "actor": "musa",
+    "requestId": "society-7g-initial:decision-165",
+    "retries": 0,
+    "resumed": false
+  },
+  "hungryResidents": [
+    "musa",
+    "amina",
+    "chris",
+    "tunde",
+    "ibrahim",
+    "yusuf",
+    "emeka",
+    "ladi",
+    "sadiq",
+    "bisi"
+  ],
+  "baselineHungryResidents": [],
+  "completedWork": 73,
+  "paidWages": 119,
+  "workCompletedDuringDrain": 8,
+  "restCompletedDuringDrain": 1,
+  "marketPurchases": 10,
+  "marketUnitsPurchased": 13,
+  "retailCreditsPaid": 22,
+  "foodConsumed": 9,
+  "encounterInitiations": 1,
+  "independentEncounterReplies": 1,
+  "followupTexts": 1,
+  "textReplies": 0,
+  "socialVisits": 0,
+  "relationshipChanges": 0,
+  "contactChanges": 0,
+  "integrity": {
+    "protectedFiles": {
+      "runtime/approved-7g-phase-d-plan.json": true,
+      "output/society-7g/7g-d-society-20261101T175236Z/evidence.ndjson": true,
+      "output/society-7g/7g-d-society-20261101T175236Z/report.json": true,
+      ".env": true,
+      "runtime/neighbourhood-session.json": true,
+      "runtime/town-headless.json": true,
+      "runtime/approved-7g-phase-b-plan.json": true,
+      "runtime/approved-7g-phase-c-plan.json": true,
+      "output/society-7g/7g-c-unity-20261101T085502Z/evidence.ndjson": true
+    },
+    "sourceFilesUnchanged": true,
+    "priorReservationsUnchanged": true,
+    "newReservationCount": 165,
+    "newReservationMicroUsd": 3086160,
+    "allNewReservationsExact": true,
+    "totalReservationCount": 205,
+    "totalReservedMicroUsd": 3775494,
+    "sessionRequests": 165,
+    "planUsed": 165,
+    "planReservedUsd": 3.08616,
+    "sessionPaused": true,
+    "baselinePaused": true,
+    "routinePolicyDecisions": 0,
+    "allRejectionsAtomic": true,
+    "scopeAllPassed": true,
+    "uniqueRequestIds": true,
+    "evidenceSha256": "2001a9a02f5e34888e2d757cb2b6aae85b2d99f7983e9df174fd839ad503f72a"
+  }
+}

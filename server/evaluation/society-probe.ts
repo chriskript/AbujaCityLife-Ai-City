@@ -23,6 +23,8 @@ export async function runSocietyProbe(options:{directory:string;provider:Neighbo
   const limits=options.limits ?? societyProbeLimits, wallNow=options.wallNow ?? (()=>performance.now());
   validateLivePlan(plan);
   const expanded=limits.maximumGenerations>=36,longer=limits.maximumGenerations===48,society=limits.maximumGenerations===200;
+  const inferenceTimeoutMs=plan.inferenceTimeoutMs ?? neighbourhoodModelConfiguration.timeoutMs;
+  if((provider.inferenceTimeoutMs ?? 20000)!==inferenceTimeoutMs)throw new Error('Provider deadline does not match reviewed execution plan');
   const perCall=generationReservation(plan.inputTokenLimit ?? 6000);
   if(provider.mode!=='live-meta' || ![firstSocietyLimits,phaseBSocietyLimits,phaseCSocietyLimits,contextSocietyLimits,phaseDSocietyLimits].some(profile=>JSON.stringify(profile)===JSON.stringify(limits)) || plan.maxGenerations>limits.maximumGenerations || plan.maxEstimatedUsd>limits.maximumIncrementalUsd || !plan.allowAutonomy || expanded && (plan.phase!==(society?'7g-d-society':longer?'7g-d-context':'7g-c-unity') || JSON.stringify(options.selectedResidents)!==JSON.stringify(phaseCResidents)))throw new Error('Probe exceeds the reviewed evaluation limits');
   const initial=createTown('society-7g-initial');
@@ -77,7 +79,7 @@ export async function runSocietyProbe(options:{directory:string;provider:Neighbo
     async converse(){throw new Error('Player conversation is outside this autonomous probe');},
   };
   try{
-    await append({stage:'started',kind:options.kind,modelConfiguration:{...neighbourhoodModelConfiguration,inputTokenLimit:plan.inputTokenLimit ?? 6000},instructionPolicy:'scoped-v1; exact instructions per invocation',prioritiseResponses:expanded,limits,selectedResidents:options.selectedResidents,plan,initialWorld:initial.snapshot});
+    await append({stage:'started',kind:options.kind,modelConfiguration:{...neighbourhoodModelConfiguration,inputTokenLimit:plan.inputTokenLimit ?? 6000,timeoutMs:inferenceTimeoutMs},instructionPolicy:'scoped-v1; exact instructions per invocation',prioritiseResponses:expanded,limits,selectedResidents:options.selectedResidents,plan,initialWorld:initial.snapshot});
     await writeFile(join(directory,'initial-world.json'),initial.serialize());
     const selective=new SelectiveNeighbourhoodProvider(options.selectedResidents,recording,offline,expanded);
     session=await NeighbourhoodServerSession.open({checkpoint,provider:selective,plan,initialWorld:initial.serialize(),...(options.now?{now:options.now}:{})});
@@ -85,7 +87,7 @@ export async function runSocietyProbe(options:{directory:string;provider:Neighbo
     await baseline.command({id:'normal-speed',worldId:baseline.frame.snapshot.worldId,type:'speed',speed:1});
     for(let pulse=0;pulse<limits.maximumSimulationSeconds*4 && session.frame.snapshot.time<limits.maximumSimulationSeconds;pulse++){
       if(failed)break;
-      if(wallNow()-started>=limits.maximumWallMs-neighbourhoodModelConfiguration.timeoutMs){stopReason='wall-bound';break;}
+      if(wallNow()-started>=limits.maximumWallMs-inferenceTimeoutMs){stopReason='wall-bound';break;}
       if(calls>=plan.maxGenerations){stopReason='generation-limit';break;}
       if((calls+1)*perCall>plan.maxEstimatedUsd){stopReason='reservation-limit';break;}
       await session.tick(.25);await session.decide();

@@ -22,12 +22,12 @@ interface Checkpoint {
   version: 1; sessionId: string; sequence: number; world: string; paused: boolean; speed: 1 | 2 | 4;
   requests: number; recent: number[]; last: Partial<Record<NpcId, { wall: number; simulation: number; worldId?: string }>>;
   receipts: Record<string, Receipt>; history: Record<NpcId, ConversationTurn[]>;
-  metrics: (GenerationMetrics & { requestId: string; actorId: NpcId; recordedAt: number })[]; plan: { id: string; used: number; reservedUsd: number;profile?:'7g-d-society';inputTokenLimit?:8000 } | null;
+  metrics: (GenerationMetrics & { requestId: string; actorId: NpcId; recordedAt: number })[]; plan: { id: string; used: number; reservedUsd: number;profile?:'7g-d-society';inputTokenLimit?:8000;inferenceTimeoutMs?:20000|30000 } | null;
   routineRecent?: number[];
   routineRequests?: number;
   progression?: { used: number; limit: number; cursor: number };
 }
-export interface LivePlan { id: string; approved: true; expiresAt: string; maxGenerations: number; maxEstimatedUsd: number; allowAutonomy: boolean; phase?:string; residents?:string[]; notBefore?:string; inputTokenLimit?:6000|8000 }
+export interface LivePlan { id: string; approved: true; expiresAt: string; maxGenerations: number; maxEstimatedUsd: number; allowAutonomy: boolean; phase?:string; residents?:string[]; notBefore?:string; inputTokenLimit?:6000|8000; inferenceTimeoutMs?:20000|30000 }
 export function validateLivePlan(value: unknown): asserts value is LivePlan {
   const p = value as LivePlan;
   const invalid=()=>new Error('A valid separately approved live evaluation plan is required');
@@ -35,6 +35,7 @@ export function validateLivePlan(value: unknown): asserts value is LivePlan {
   const society=p?.phase==='7g-d-society',longer=p?.phase==='7g-d-context',expanded=society||longer||p?.phase==='7g-c-unity';
   const maximumCalls=society?200:longer?48:expanded?36:12,maximumUsd=society?5:longer?.90:expanded?.60:.25;
   if(p.approved!==true||typeof p.id!=='string'||!/^[\w-]{1,80}$/.test(p.id)||typeof p.expiresAt!=='string'||!Number.isFinite(Date.parse(p.expiresAt))||Date.parse(p.expiresAt)<=Date.now()||!Number.isSafeInteger(p.maxGenerations)||p.maxGenerations<1||p.maxGenerations>maximumCalls||!Number.isFinite(p.maxEstimatedUsd)||p.maxEstimatedUsd<maximumGenerationUsd||p.maxEstimatedUsd>maximumUsd||typeof p.allowAutonomy!=='boolean')throw invalid();
+  if(p.inferenceTimeoutMs!==undefined&&(!society||![20000,30000].includes(p.inferenceTimeoutMs)))throw invalid();
   if(p.inputTokenLimit!==undefined&&p.inputTokenLimit!==(longer||society?8000:6000))throw invalid();
   if(expanded){
     if(!society&&(p.maxGenerations!==maximumCalls||p.maxEstimatedUsd!==maximumUsd))throw invalid();
@@ -106,8 +107,9 @@ export class NeighbourhoodServerSession {
     if (options.plan) {
       if (session.data.plan && session.data.plan.id !== options.plan.id) throw new Error('Different live plan requires reviewed session migration');
       if(session.data.plan&&(session.data.plan.profile==='7g-d-society')!==(options.plan.phase==='7g-d-society'))throw new Error('Different live profile requires a new isolated session');
+      if(session.data.plan?.profile==='7g-d-society'&&(session.data.plan.inferenceTimeoutMs ?? 20000)!==(options.plan.inferenceTimeoutMs ?? 20000))throw new Error('Different inference deadline requires a new isolated session');
       if(session.data.plan?.profile==='7g-d-society'&&session.data.plan.inputTokenLimit!==8000)throw new Error('Mismatched persisted token reservation profile');
-      session.data.plan ??= { id: options.plan.id, used: 0, reservedUsd: 0,...(options.plan.phase==='7g-d-society'?{profile:'7g-d-society' as const,inputTokenLimit:8000 as const}:{}) };
+      session.data.plan ??= { id: options.plan.id, used: 0, reservedUsd: 0,...(options.plan.phase==='7g-d-society'?{profile:'7g-d-society' as const,inputTokenLimit:8000 as const,inferenceTimeoutMs:options.plan.inferenceTimeoutMs ?? 20000}:{}) };
       if(options.plan.phase==='7g-d-society'&&(!session.world.snapshot.socialVisits||JSON.stringify(session.world.residentIds)!==JSON.stringify(options.plan.residents)))throw new Error('Muse society requires the normal sixteen-resident social town');
     }
     if(session.world.hasTownEconomy && options.townMap!=='legacy-v1' && session.world.mapId!=='town-v1') {

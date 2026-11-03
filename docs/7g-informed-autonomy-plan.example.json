@@ -1,0 +1,13 @@
+{
+  "id": "REPLACE-with-new-reviewed-informed-autonomy-run-id",
+  "approved": false,
+  "phase": "7g-d-society",
+  "residents": ["musa", "amina", "zainab", "chris", "fatima", "tunde", "halima", "ibrahim", "yusuf", "ngozi", "emeka", "grace", "ladi", "sadiq", "maryam", "bisi"],
+  "notBefore": "REPLACE-after-explicit-review",
+  "expiresAt": "REPLACE-after-explicit-review",
+  "maxGenerations": 200,
+  "maxEstimatedUsd": 5,
+  "inputTokenLimit": 8000,
+  "inferenceTimeoutMs": 30000,
+  "allowAutonomy": true
+}

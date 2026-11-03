@@ -121,4 +121,20 @@ describe('scoped, consented social invitations and visits',()=>{
     expect(()=>assertSnapshot(restored.snapshot)).not.toThrow();
     const corrupt=structuredClone(before);corrupt.socialVisits!.invitations[id]!.updates[0]!.destination=corrupt.npcs.amina!.home!;expect(()=>assertSnapshot(corrupt)).toThrow();
   });
+  it('retains experienced social exchanges after the same residents complete a paid delivery',()=>{
+    const w=town(),id=accepted(w);
+    for(const person of ['amina','musa'])expect(apply(w,person,{type:'join-social',invitationId:id}).accepted).toBe(true);
+    w.advance(60);
+    expect(apply(w,'amina',{type:'socialise',invitationId:id,seconds:10,message:'It is good to catch up.'}).accepted).toBe(true);
+    expect(apply(w,'musa',{type:'socialise',invitationId:id,seconds:10,message:'I am glad we met.'}).accepted).toBe(true);
+    const socialAt=w.snapshot.npcs.amina.relationships.musa!.lastSocialAt;
+    expect(apply(w,'amina',{type:'leave-social',invitationId:id,message:'I will return to the stall.'}).accepted).toBe(true);
+    for(const person of ['amina','musa'])expect(apply(w,person,{type:'travel',destination:'market'}).accepted).toBe(true);
+    w.advance(60);
+    expect(apply(w,'amina',{type:'propose-transport',recipient:'musa',quantity:2}).accepted).toBe(true);
+    expect(apply(w,'musa',{type:'respond-transport',taskId:'task-1',accept:true}).accepted).toBe(true);
+    expect(apply(w,'musa',{type:'fulfil-transport',taskId:'task-1'}).accepted).toBe(true);w.advance(60);
+    for(const [actor,other] of [['amina','musa'],['musa','amina']])expect(w.snapshot.npcs[actor!]!.relationships[other!]).toMatchObject({socialExchanges:2,lastSocialAt:socialAt,successfulJobs:1});
+    expect(Neighbourhood.restore(w.serialize()).snapshot.npcs.amina.relationships.musa).toMatchObject({socialExchanges:2,successfulJobs:1});
+  });
 });

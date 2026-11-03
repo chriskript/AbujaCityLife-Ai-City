@@ -1,0 +1,5537 @@
+{
+  "sourceRun": "7g-d-economy-20261102T143947Z",
+  "cases": [
+    {
+      "number": 72,
+      "request": {
+        "id": "society-7g-initial:decision-72",
+        "worldId": "society-7g-initial",
+        "actorId": "amina",
+        "actorRevision": 63,
+        "worldRevision": 1851,
+        "observation": {
+          "wholesale": {
+            "rules": {
+              "unitPrice": 1,
+              "deliverySeconds": 60,
+              "cooldownSeconds": 120,
+              "maximumQuantity": 6,
+              "sourceLimit": 240
+            },
+            "offers": [
+              {
+                "businessId": "market",
+                "product": "food-portion",
+                "node": "market",
+                "sourceAvailable": 232,
+                "canOrder": true,
+                "ineligibleReason": null,
+                "payer": "personal-coins",
+                "balance": 23,
+                "businessCoins": 5,
+                "localInputs": null,
+                "pending": []
+              }
+            ]
+          },
+          "actor": {
+            "id": "amina",
+            "revision": 63,
+            "intention": {
+              "goalId": "restock",
+              "reason": "At market with stall open and stock available, buying one keeps personal supply ready to serve and restock."
+            },
+            "activity": {
+              "kind": "idle"
+            },
+            "inventory": {
+              "goods": 2,
+              "rewards": 0,
+              "coins": 23,
+              "food": 2
+            },
+            "relationships": {},
+            "memories": [
+              {
+                "id": "event-404:amina",
+                "eventId": "event-404",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:grace",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 182.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-415:amina",
+                "eventId": "event-415",
+                "kind": "observed",
+                "source": "world",
+                "subject": "wait",
+                "detail": "Selected activity finished",
+                "time": 186.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-448:amina",
+                "eventId": "event-448",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 201,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-449:amina",
+                "eventId": "event-449",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 201,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-450:amina",
+                "eventId": "event-450",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 5 goods at the stall",
+                "time": 201,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-455:amina",
+                "eventId": "event-455",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed a funded work opening",
+                "time": 204.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-500:amina",
+                "eventId": "event-500",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 222.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-501:amina",
+                "eventId": "event-501",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 222.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-502:amina",
+                "eventId": "event-502",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 4 goods at the stall",
+                "time": 222.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-543:amina",
+                "eventId": "event-543",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed no current work opening",
+                "time": 242.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-556:amina",
+                "eventId": "event-556",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "grace",
+                "detail": "Consumed personal food; goods leave inventory",
+                "time": 244.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-573:amina",
+                "eventId": "event-573",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 258.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-576:amina",
+                "eventId": "event-576",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:maryam",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 258.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-579:amina",
+                "eventId": "event-579",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 259.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-581:amina",
+                "eventId": "event-581",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:zainab",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 259.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-593:amina",
+                "eventId": "event-593",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 263.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-594:amina",
+                "eventId": "event-594",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 263.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-595:amina",
+                "eventId": "event-595",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 3 goods at the stall",
+                "time": 263.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-603:amina",
+                "eventId": "event-603",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 264,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-604:amina",
+                "eventId": "event-604",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 264,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-605:amina",
+                "eventId": "event-605",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 2 goods at the stall",
+                "time": 264,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-652:amina",
+                "eventId": "event-652",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 293.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-653:amina",
+                "eventId": "event-653",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 293.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-654:amina",
+                "eventId": "event-654",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 0 goods at the stall",
+                "time": 293.25,
+                "certainty": "certain"
+              }
+            ],
+            "name": "Amina",
+            "occupation": "Market trader",
+            "node": "market",
+            "personality": [
+              "careful with stock",
+              "resourceful",
+              "values dependable assistance"
+            ],
+            "goals": [
+              {
+                "id": "restock",
+                "description": "Maintain enough stock to serve customers"
+              },
+              {
+                "id": "serve",
+                "description": "Serve customers at the stall"
+              }
+            ],
+            "needs": {
+              "food": 0.32,
+              "stock": 0.8,
+              "income": 0,
+              "rest": 0.26
+            },
+            "priorities": [
+              "avoid empty stock",
+              "serve customers",
+              "use available help"
+            ],
+            "capabilities": [
+              "travel",
+              "wait",
+              "work",
+              "propose-transport",
+              "collect-self",
+              "stock-stall",
+              "set-sales",
+              "share",
+              "encounter",
+              "respond-encounter",
+              "buy",
+              "take-work",
+              "eat",
+              "rest",
+              "offer-contact",
+              "communicate",
+              "respond-communication",
+              "end-call",
+              "fund-business",
+              "order-external",
+              "invite-social",
+              "respond-social",
+              "join-social",
+              "socialise",
+              "leave-social"
+            ],
+            "knowledge": {
+              "places": [
+                "stand",
+                "market",
+                "centre",
+                "hill",
+                "amina-house-home",
+                "town-green",
+                "community-office-work",
+                "amina-house-entrance"
+              ],
+              "placeFacts": {
+                "stand": {
+                  "services": [
+                    "taxi-pickup"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "market": {
+                  "services": [
+                    "food-retail"
+                  ],
+                  "products": [
+                    "food-portion"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "centre": {
+                  "services": [
+                    "stock-collection"
+                  ],
+                  "products": [
+                    "stall-supplies"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "hill": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "amina-house-home": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "town-green": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "community-office-work": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "amina-house-entrance": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                }
+              },
+              "people": [
+                "musa",
+                "zainab"
+              ],
+              "blockedEdges": [],
+              "tasks": {},
+              "resources": {
+                "supplierGoods": null,
+                "marketGoods": 0,
+                "salesOpen": true
+              },
+              "transporters": [
+                "musa"
+              ],
+              "businesses": {
+                "community-errands": {
+                  "available": null,
+                  "observedAt": null,
+                  "siteNode": "centre"
+                },
+                "market": {
+                  "available": false,
+                  "funded": true,
+                  "observedAt": 242.75,
+                  "siteNode": "market"
+                }
+              },
+              "contacts": [
+                "musa",
+                "zainab"
+              ],
+              "sharedContacts": [
+                "musa",
+                "zainab"
+              ]
+            },
+            "mobility": "walk",
+            "home": "amina-house-home",
+            "skills": [
+              "general",
+              "retail"
+            ],
+            "routine": {
+              "workplace": "market",
+              "leisure": "hill",
+              "sociability": 0.65
+            }
+          },
+          "time": 297.5,
+          "mapId": "town-v1",
+          "socialContext": {
+            "neighbourhood": "Unity Gardens",
+            "historySource": "authored-pre-simulation",
+            "historyAsOf": "simulation-start",
+            "publicFacts": [
+              {
+                "id": "history:unity-v1:origins",
+                "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+              },
+              {
+                "id": "history:unity-v1:concerns",
+                "detail": "Ordinary unresolved questions at the start include how to care for shared spaces, keep access roads maintained and make everyday services dependable and affordable. These are background concerns, not reports of failures or urgent tasks."
+              },
+              {
+                "id": "history:unity-v1:character",
+                "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+              }
+            ],
+            "background": {
+              "id": "history:unity-v1:self:amina",
+              "public": "Developed a market livelihood serving everyday customers as local commerce took shape.",
+              "private": "Experience managing stall stock taught her to compare collecting supplies herself with seeking help. Past acquaintance does not settle whom she should ask today."
+            },
+            "connections": [
+              {
+                "id": "zainab",
+                "identityKnown": true,
+                "seenInSimulation": true,
+                "metInSimulation": false,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": false,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              },
+              {
+                "id": "musa",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": false,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": false,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              }
+            ]
+          },
+          "places": [
+            {
+              "id": "stand",
+              "node": "stand",
+              "name": "Taxi Stand"
+            },
+            {
+              "id": "market",
+              "node": "market",
+              "name": "Market Square"
+            },
+            {
+              "id": "centre",
+              "node": "centre",
+              "name": "Community Centre supply desk"
+            },
+            {
+              "id": "hill",
+              "node": "hill",
+              "name": "Hill Garden"
+            },
+            {
+              "id": "amina-house-entrance",
+              "node": "amina-house-entrance",
+              "name": "Market Compound entrance"
+            },
+            {
+              "id": "amina-house-home",
+              "node": "amina-house-home",
+              "name": "5 Market Street"
+            },
+            {
+              "id": "community-office-work",
+              "node": "community-office-work",
+              "name": "Community Offices"
+            },
+            {
+              "id": "town-green",
+              "node": "town-green",
+              "name": "Town Green"
+            }
+          ],
+          "placeKnowledge": [
+            {
+              "placeId": "stand",
+              "facts": {
+                "services": [
+                  "taxi-pickup"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:stand",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "market",
+              "facts": {
+                "services": [
+                  "food-retail"
+                ],
+                "products": [
+                  "food-portion"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:market",
+              "stock": {
+                "value": 0,
+                "source": "observed",
+                "observedAt": 297.5,
+                "evidenceId": "visible-stock:amina:market:1851",
+                "freshness": "current"
+              },
+              "salesOpen": {
+                "value": true,
+                "source": "observed",
+                "observedAt": 297.5,
+                "evidenceId": "visible-sales:amina:1851",
+                "freshness": "current"
+              }
+            },
+            {
+              "placeId": "centre",
+              "facts": {
+                "services": [
+                  "stock-collection"
+                ],
+                "products": [
+                  "stall-supplies"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:centre",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "hill",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:hill",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "amina-house-home",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:amina-house-home",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "town-green",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:town-green",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "community-office-work",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:community-office-work",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "amina-house-entrance",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:amina-house-entrance",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            }
+          ],
+          "memoryEvidence": [
+            {
+              "id": "event-404:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-415:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-448:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-449:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-450:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-455:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-500:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-501:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-502:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-543:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-556:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-573:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-576:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-579:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-581:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-593:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-594:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-595:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-603:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-604:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-605:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-652:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-653:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-654:amina",
+              "interpretation": "observed-world-event"
+            }
+          ],
+          "nearbyPeople": [
+            {
+              "id": "zainab",
+              "name": "Zainab",
+              "occupation": "Local resident",
+              "activity": "idle",
+              "known": true,
+              "canTransport": false
+            },
+            {
+              "id": "ngozi",
+              "name": null,
+              "occupation": null,
+              "activity": "work",
+              "known": false,
+              "canTransport": false
+            },
+            {
+              "id": "maryam",
+              "name": null,
+              "occupation": null,
+              "activity": "idle",
+              "known": false,
+              "canTransport": false
+            }
+          ],
+          "encounters": [],
+          "encounterOpportunities": [
+            "zainab",
+            "maryam"
+          ],
+          "communication": {
+            "contacts": [
+              {
+                "id": "musa",
+                "name": "Musa",
+                "canTransport": true
+              },
+              {
+                "id": "zainab",
+                "name": "Zainab",
+                "canTransport": false
+              }
+            ],
+            "threads": [],
+            "canContact": [
+              "musa",
+              "zainab"
+            ],
+            "canCall": [
+              "musa",
+              "zainab"
+            ],
+            "contactOffers": [
+              "musa",
+              "zainab"
+            ],
+            "rules": {
+              "textDelay": 5,
+              "callLifetime": 60,
+              "textLifetime": 300,
+              "cooldown": 180,
+              "maximumThreads": 128,
+              "maximumPending": 4
+            }
+          },
+          "socialVisits": {
+            "version": 1,
+            "venues": [
+              {
+                "id": "stand",
+                "kind": "public"
+              },
+              {
+                "id": "market",
+                "kind": "public"
+              },
+              {
+                "id": "centre",
+                "kind": "public"
+              },
+              {
+                "id": "hill",
+                "kind": "public"
+              },
+              {
+                "id": "amina-house-entrance",
+                "kind": "home-doorstep"
+              },
+              {
+                "id": "community-office-work",
+                "kind": "workplace"
+              },
+              {
+                "id": "town-green",
+                "kind": "public"
+              }
+            ],
+            "invitations": [],
+            "rules": {
+              "maximumInvitations": 128,
+              "maximumActive": 4,
+              "expirySeconds": 600,
+              "maximumUpdates": 8,
+              "privateAccess": false
+            }
+          },
+          "town": {
+            "marketPrice": 2,
+            "ownsMarket": true,
+            "transportPayment": 2,
+            "marketServing": true,
+            "work": [
+              {
+                "id": "community-errands",
+                "name": "Community errands board",
+                "node": "community-office-work",
+                "skill": "general",
+                "wage": 1,
+                "seconds": 45,
+                "matchesSkill": true,
+                "atWorkplace": false,
+                "available": null,
+                "funded": null,
+                "observedAt": null,
+                "freshness": "unknown",
+                "canTakeNow": false,
+                "ineligibleReason": "not-at-workplace"
+              },
+              {
+                "id": "market",
+                "name": "Market stall",
+                "node": "market",
+                "skill": "food",
+                "wage": 1,
+                "seconds": 60,
+                "matchesSkill": false,
+                "atWorkplace": true,
+                "available": false,
+                "funded": true,
+                "observedAt": 297.5,
+                "freshness": "current",
+                "canTakeNow": false,
+                "ineligibleReason": "missing-skill"
+              }
+            ],
+            "purchase": {
+              "canBuyOneNow": false,
+              "ineligibleReason": "insufficient-stock",
+              "quantityKnown": 0
+            },
+            "eligibleWorkIds": []
+          },
+          "resources": {
+            "supplierGoods": null,
+            "marketGoods": 0,
+            "salesOpen": true
+          },
+          "tasks": [],
+          "knownBlockedEdges": [],
+          "permittedActions": [
+            "travel",
+            "wait",
+            "work",
+            "propose-transport",
+            "collect-self",
+            "stock-stall",
+            "set-sales",
+            "share",
+            "encounter",
+            "respond-encounter",
+            "buy",
+            "take-work",
+            "eat",
+            "rest",
+            "offer-contact",
+            "communicate",
+            "respond-communication",
+            "end-call",
+            "fund-business",
+            "order-external",
+            "invite-social",
+            "respond-social",
+            "join-social",
+            "socialise",
+            "leave-social"
+          ],
+          "actionConstraints": {
+            "propose-transport": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "collect-self": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              },
+              "carryingCapacity": 2,
+              "remainingCarryingCapacity": 0
+            },
+            "stock-stall": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "buy": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "eat": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            }
+          }
+        },
+        "triggers": [
+          "action-completed",
+          "stock-low"
+        ]
+      },
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall shows zero stock while open, so stocking my 2 goods keeps it serving."
+      }
+    },
+    {
+      "number": 92,
+      "request": {
+        "id": "society-7g-initial:decision-92",
+        "worldId": "society-7g-initial",
+        "actorId": "amina",
+        "actorRevision": 78,
+        "worldRevision": 2359,
+        "observation": {
+          "wholesale": {
+            "rules": {
+              "unitPrice": 1,
+              "deliverySeconds": 60,
+              "cooldownSeconds": 120,
+              "maximumQuantity": 6,
+              "sourceLimit": 240
+            },
+            "offers": [
+              {
+                "businessId": "market",
+                "product": "food-portion",
+                "node": "market",
+                "sourceAvailable": 230,
+                "canOrder": false,
+                "ineligibleReason": "order-pending",
+                "payer": "personal-coins",
+                "balance": 21,
+                "businessCoins": 4,
+                "localInputs": null,
+                "pending": [
+                  {
+                    "id": "wholesale-3",
+                    "actor": "amina",
+                    "businessId": "market",
+                    "quantity": 2,
+                    "cost": 2,
+                    "createdAt": 356.25,
+                    "dueAt": 416.25,
+                    "status": "pending"
+                  }
+                ]
+              }
+            ]
+          },
+          "actor": {
+            "id": "amina",
+            "revision": 78,
+            "intention": {
+              "goalId": "restock",
+              "reason": "At market stall with zero current stock and sales open, ordering external supply restocks to serve customers."
+            },
+            "activity": {
+              "kind": "idle"
+            },
+            "inventory": {
+              "goods": 2,
+              "rewards": 0,
+              "coins": 21,
+              "food": 2
+            },
+            "relationships": {},
+            "memories": [
+              {
+                "id": "event-576:amina",
+                "eventId": "event-576",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:maryam",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 258.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-579:amina",
+                "eventId": "event-579",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 259.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-581:amina",
+                "eventId": "event-581",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:zainab",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 259.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-593:amina",
+                "eventId": "event-593",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 263.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-594:amina",
+                "eventId": "event-594",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 263.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-595:amina",
+                "eventId": "event-595",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 3 goods at the stall",
+                "time": 263.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-603:amina",
+                "eventId": "event-603",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 264,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-604:amina",
+                "eventId": "event-604",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 264,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-605:amina",
+                "eventId": "event-605",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 2 goods at the stall",
+                "time": 264,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-652:amina",
+                "eventId": "event-652",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 293.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-653:amina",
+                "eventId": "event-653",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 293.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-654:amina",
+                "eventId": "event-654",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 0 goods at the stall",
+                "time": 293.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-664:amina",
+                "eventId": "event-664",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "society-7g-initial:decision-72",
+                "detail": "Attempt failed: missing-stall-supplies. No transaction or commitment was applied.",
+                "time": 297.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-672:amina",
+                "eventId": "event-672",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed a funded work opening",
+                "time": 302.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-683:amina",
+                "eventId": "event-683",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "zainab",
+                "detail": "Consumed personal food; goods leave inventory",
+                "time": 311,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-716:amina",
+                "eventId": "event-716",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed no current work opening",
+                "time": 319.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-733:amina",
+                "eventId": "event-733",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 327.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-736:amina",
+                "eventId": "event-736",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:halima",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 327.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-740:amina",
+                "eventId": "event-740",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 328.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-743:amina",
+                "eventId": "event-743",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:ibrahim",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 328.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-783:amina",
+                "eventId": "event-783",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "maryam",
+                "detail": "Consumed personal food; goods leave inventory",
+                "time": 342.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-804:amina",
+                "eventId": "event-804",
+                "kind": "commitment",
+                "source": "world",
+                "subject": "wholesale-3",
+                "detail": "Paid external wholesaler; finite goods reserved outside town until delivery",
+                "time": 356.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-808:amina",
+                "eventId": "event-808",
+                "kind": "reported",
+                "source": "zainab",
+                "subject": "encounter-1",
+                "detail": "Hello Amina, do you know when more food might arrive at the market?",
+                "time": 356.5,
+                "certainty": "uncertain"
+              },
+              {
+                "id": "event-843:amina",
+                "eventId": "event-843",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 377,
+                "certainty": "certain"
+              }
+            ],
+            "name": "Amina",
+            "occupation": "Market trader",
+            "node": "market",
+            "personality": [
+              "careful with stock",
+              "resourceful",
+              "values dependable assistance"
+            ],
+            "goals": [
+              {
+                "id": "restock",
+                "description": "Maintain enough stock to serve customers"
+              },
+              {
+                "id": "serve",
+                "description": "Serve customers at the stall"
+              }
+            ],
+            "needs": {
+              "food": 0.48,
+              "stock": 0.8,
+              "income": 0.06,
+              "rest": 0.34
+            },
+            "priorities": [
+              "avoid empty stock",
+              "serve customers",
+              "use available help"
+            ],
+            "capabilities": [
+              "travel",
+              "wait",
+              "work",
+              "propose-transport",
+              "collect-self",
+              "stock-stall",
+              "set-sales",
+              "share",
+              "encounter",
+              "respond-encounter",
+              "buy",
+              "take-work",
+              "eat",
+              "rest",
+              "offer-contact",
+              "communicate",
+              "respond-communication",
+              "end-call",
+              "fund-business",
+              "order-external",
+              "invite-social",
+              "respond-social",
+              "join-social",
+              "socialise",
+              "leave-social"
+            ],
+            "knowledge": {
+              "places": [
+                "stand",
+                "market",
+                "centre",
+                "hill",
+                "amina-house-home",
+                "town-green",
+                "community-office-work",
+                "amina-house-entrance"
+              ],
+              "placeFacts": {
+                "stand": {
+                  "services": [
+                    "taxi-pickup"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "market": {
+                  "services": [
+                    "food-retail"
+                  ],
+                  "products": [
+                    "food-portion"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "centre": {
+                  "services": [
+                    "stock-collection"
+                  ],
+                  "products": [
+                    "stall-supplies"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "hill": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "amina-house-home": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "town-green": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "community-office-work": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "amina-house-entrance": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                }
+              },
+              "people": [
+                "musa",
+                "zainab"
+              ],
+              "blockedEdges": [],
+              "tasks": {},
+              "resources": {
+                "supplierGoods": null,
+                "marketGoods": 0,
+                "salesOpen": true
+              },
+              "transporters": [
+                "musa"
+              ],
+              "businesses": {
+                "community-errands": {
+                  "available": null,
+                  "observedAt": null,
+                  "siteNode": "centre"
+                },
+                "market": {
+                  "available": false,
+                  "funded": true,
+                  "observedAt": 319.75,
+                  "siteNode": "market"
+                }
+              },
+              "contacts": [
+                "musa",
+                "zainab"
+              ],
+              "sharedContacts": [
+                "musa",
+                "zainab"
+              ]
+            },
+            "mobility": "walk",
+            "home": "amina-house-home",
+            "skills": [
+              "general",
+              "retail"
+            ],
+            "routine": {
+              "workplace": "market",
+              "leisure": "hill",
+              "sociability": 0.65
+            }
+          },
+          "time": 378,
+          "mapId": "town-v1",
+          "socialContext": {
+            "neighbourhood": "Unity Gardens",
+            "historySource": "authored-pre-simulation",
+            "historyAsOf": "simulation-start",
+            "publicFacts": [
+              {
+                "id": "history:unity-v1:origins",
+                "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+              },
+              {
+                "id": "history:unity-v1:concerns",
+                "detail": "Ordinary unresolved questions at the start include how to care for shared spaces, keep access roads maintained and make everyday services dependable and affordable. These are background concerns, not reports of failures or urgent tasks."
+              },
+              {
+                "id": "history:unity-v1:character",
+                "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+              }
+            ],
+            "background": {
+              "id": "history:unity-v1:self:amina",
+              "public": "Developed a market livelihood serving everyday customers as local commerce took shape.",
+              "private": "Experience managing stall stock taught her to compare collecting supplies herself with seeking help. Past acquaintance does not settle whom she should ask today."
+            },
+            "connections": [
+              {
+                "id": "zainab",
+                "identityKnown": true,
+                "seenInSimulation": true,
+                "metInSimulation": true,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": false,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              },
+              {
+                "id": "musa",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": false,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": false,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              }
+            ]
+          },
+          "places": [
+            {
+              "id": "stand",
+              "node": "stand",
+              "name": "Taxi Stand"
+            },
+            {
+              "id": "market",
+              "node": "market",
+              "name": "Market Square"
+            },
+            {
+              "id": "centre",
+              "node": "centre",
+              "name": "Community Centre supply desk"
+            },
+            {
+              "id": "hill",
+              "node": "hill",
+              "name": "Hill Garden"
+            },
+            {
+              "id": "amina-house-entrance",
+              "node": "amina-house-entrance",
+              "name": "Market Compound entrance"
+            },
+            {
+              "id": "amina-house-home",
+              "node": "amina-house-home",
+              "name": "5 Market Street"
+            },
+            {
+              "id": "community-office-work",
+              "node": "community-office-work",
+              "name": "Community Offices"
+            },
+            {
+              "id": "town-green",
+              "node": "town-green",
+              "name": "Town Green"
+            }
+          ],
+          "placeKnowledge": [
+            {
+              "placeId": "stand",
+              "facts": {
+                "services": [
+                  "taxi-pickup"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:stand",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "market",
+              "facts": {
+                "services": [
+                  "food-retail"
+                ],
+                "products": [
+                  "food-portion"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:market",
+              "stock": {
+                "value": 0,
+                "source": "observed",
+                "observedAt": 378,
+                "evidenceId": "visible-stock:amina:market:2359",
+                "freshness": "current"
+              },
+              "salesOpen": {
+                "value": true,
+                "source": "observed",
+                "observedAt": 378,
+                "evidenceId": "visible-sales:amina:2359",
+                "freshness": "current"
+              }
+            },
+            {
+              "placeId": "centre",
+              "facts": {
+                "services": [
+                  "stock-collection"
+                ],
+                "products": [
+                  "stall-supplies"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:centre",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "hill",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:hill",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "amina-house-home",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:amina-house-home",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "town-green",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:town-green",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "community-office-work",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:community-office-work",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "amina-house-entrance",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:amina-house-entrance",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            }
+          ],
+          "memoryEvidence": [
+            {
+              "id": "event-576:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-579:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-581:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-593:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-594:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-595:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-603:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-604:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-605:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-652:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-653:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-654:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-664:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-672:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-683:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-716:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-733:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-736:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-740:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-743:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-783:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-804:amina",
+              "interpretation": "commitment"
+            },
+            {
+              "id": "event-808:amina",
+              "interpretation": "unverified-report"
+            },
+            {
+              "id": "event-843:amina",
+              "interpretation": "observed-world-event"
+            }
+          ],
+          "nearbyPeople": [
+            {
+              "id": "zainab",
+              "name": "Zainab",
+              "occupation": "Local resident",
+              "activity": "idle",
+              "known": true,
+              "canTransport": false
+            },
+            {
+              "id": "halima",
+              "name": null,
+              "occupation": null,
+              "activity": "wait",
+              "known": false,
+              "canTransport": false
+            },
+            {
+              "id": "ngozi",
+              "name": null,
+              "occupation": null,
+              "activity": "work",
+              "known": false,
+              "canTransport": false
+            },
+            {
+              "id": "sadiq",
+              "name": null,
+              "occupation": null,
+              "activity": "idle",
+              "known": false,
+              "canTransport": false
+            },
+            {
+              "id": "maryam",
+              "name": null,
+              "occupation": null,
+              "activity": "idle",
+              "known": false,
+              "canTransport": false
+            }
+          ],
+          "encounters": [
+            {
+              "id": "encounter-1",
+              "initiator": "zainab",
+              "recipient": "amina",
+              "purpose": "ask",
+              "message": "Hello Amina, do you know when more food might arrive at the market?",
+              "response": null,
+              "status": "pending",
+              "createdAt": 356.5,
+              "expiresAt": 446.5
+            }
+          ],
+          "encounterOpportunities": [],
+          "communication": {
+            "contacts": [
+              {
+                "id": "musa",
+                "name": "Musa",
+                "canTransport": true
+              },
+              {
+                "id": "zainab",
+                "name": "Zainab",
+                "canTransport": false
+              }
+            ],
+            "threads": [],
+            "canContact": [
+              "musa",
+              "zainab"
+            ],
+            "canCall": [
+              "musa",
+              "zainab"
+            ],
+            "contactOffers": [
+              "musa",
+              "zainab"
+            ],
+            "rules": {
+              "textDelay": 5,
+              "callLifetime": 60,
+              "textLifetime": 300,
+              "cooldown": 180,
+              "maximumThreads": 128,
+              "maximumPending": 4
+            }
+          },
+          "socialVisits": {
+            "version": 1,
+            "venues": [
+              {
+                "id": "stand",
+                "kind": "public"
+              },
+              {
+                "id": "market",
+                "kind": "public"
+              },
+              {
+                "id": "centre",
+                "kind": "public"
+              },
+              {
+                "id": "hill",
+                "kind": "public"
+              },
+              {
+                "id": "amina-house-entrance",
+                "kind": "home-doorstep"
+              },
+              {
+                "id": "community-office-work",
+                "kind": "workplace"
+              },
+              {
+                "id": "town-green",
+                "kind": "public"
+              }
+            ],
+            "invitations": [],
+            "rules": {
+              "maximumInvitations": 128,
+              "maximumActive": 4,
+              "expirySeconds": 600,
+              "maximumUpdates": 8,
+              "privateAccess": false
+            }
+          },
+          "town": {
+            "marketPrice": 2,
+            "ownsMarket": true,
+            "transportPayment": 2,
+            "marketServing": true,
+            "work": [
+              {
+                "id": "community-errands",
+                "name": "Community errands board",
+                "node": "community-office-work",
+                "skill": "general",
+                "wage": 1,
+                "seconds": 45,
+                "matchesSkill": true,
+                "atWorkplace": false,
+                "available": null,
+                "funded": null,
+                "observedAt": null,
+                "freshness": "unknown",
+                "canTakeNow": false,
+                "ineligibleReason": "not-at-workplace"
+              },
+              {
+                "id": "market",
+                "name": "Market stall",
+                "node": "market",
+                "skill": "food",
+                "wage": 1,
+                "seconds": 60,
+                "matchesSkill": false,
+                "atWorkplace": true,
+                "available": false,
+                "funded": true,
+                "observedAt": 378,
+                "freshness": "current",
+                "canTakeNow": false,
+                "ineligibleReason": "missing-skill"
+              }
+            ],
+            "purchase": {
+              "canBuyOneNow": false,
+              "ineligibleReason": "insufficient-stock",
+              "quantityKnown": 0
+            },
+            "eligibleWorkIds": []
+          },
+          "resources": {
+            "supplierGoods": null,
+            "marketGoods": 0,
+            "salesOpen": true
+          },
+          "tasks": [],
+          "knownBlockedEdges": [],
+          "permittedActions": [
+            "travel",
+            "wait",
+            "work",
+            "propose-transport",
+            "collect-self",
+            "stock-stall",
+            "set-sales",
+            "share",
+            "encounter",
+            "respond-encounter",
+            "buy",
+            "take-work",
+            "eat",
+            "rest",
+            "offer-contact",
+            "communicate",
+            "respond-communication",
+            "end-call",
+            "fund-business",
+            "order-external",
+            "invite-social",
+            "respond-social",
+            "join-social",
+            "socialise",
+            "leave-social"
+          ],
+          "actionConstraints": {
+            "propose-transport": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "collect-self": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              },
+              "carryingCapacity": 2,
+              "remainingCarryingCapacity": 0
+            },
+            "stock-stall": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "buy": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "eat": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            }
+          }
+        },
+        "triggers": [
+          "economic-decision-completed",
+          "encounter-invitation",
+          "personal-needs-changed",
+          "person-arrived"
+        ]
+      },
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall is open but empty with high stock need, so stocking carried goods restores service while wholesale order is pending."
+      }
+    },
+    {
+      "number": 119,
+      "request": {
+        "id": "society-7g-initial:decision-119",
+        "worldId": "society-7g-initial",
+        "actorId": "amina",
+        "actorRevision": 96,
+        "worldRevision": 2965,
+        "observation": {
+          "wholesale": {
+            "rules": {
+              "unitPrice": 1,
+              "deliverySeconds": 60,
+              "cooldownSeconds": 120,
+              "maximumQuantity": 6,
+              "sourceLimit": 240
+            },
+            "offers": [
+              {
+                "businessId": "market",
+                "product": "food-portion",
+                "node": "market",
+                "sourceAvailable": 230,
+                "canOrder": false,
+                "ineligibleReason": "wholesale-cooldown",
+                "payer": "personal-coins",
+                "balance": 23,
+                "businessCoins": 5,
+                "localInputs": null,
+                "pending": []
+              }
+            ]
+          },
+          "actor": {
+            "id": "amina",
+            "revision": 96,
+            "intention": {
+              "goalId": "serve",
+              "reason": "Wholesale delivery arrived and stall shows 2 goods, so updating waiting Zainab nearby."
+            },
+            "activity": {
+              "kind": "idle"
+            },
+            "inventory": {
+              "goods": 2,
+              "rewards": 0,
+              "coins": 23,
+              "food": 2
+            },
+            "relationships": {},
+            "memories": [
+              {
+                "id": "event-716:amina",
+                "eventId": "event-716",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed no current work opening",
+                "time": 319.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-733:amina",
+                "eventId": "event-733",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 327.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-736:amina",
+                "eventId": "event-736",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:halima",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 327.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-740:amina",
+                "eventId": "event-740",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 328.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-743:amina",
+                "eventId": "event-743",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:ibrahim",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 328.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-783:amina",
+                "eventId": "event-783",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "maryam",
+                "detail": "Consumed personal food; goods leave inventory",
+                "time": 342.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-804:amina",
+                "eventId": "event-804",
+                "kind": "commitment",
+                "source": "world",
+                "subject": "wholesale-3",
+                "detail": "Paid external wholesaler; finite goods reserved outside town until delivery",
+                "time": 356.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-808:amina",
+                "eventId": "event-808",
+                "kind": "reported",
+                "source": "zainab",
+                "subject": "encounter-1",
+                "detail": "Hello Amina, do you know when more food might arrive at the market?",
+                "time": 356.5,
+                "certainty": "uncertain"
+              },
+              {
+                "id": "event-843:amina",
+                "eventId": "event-843",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 377,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-850:amina",
+                "eventId": "event-850",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "society-7g-initial:decision-92",
+                "detail": "Attempt failed: missing-stall-supplies. No transaction or commitment was applied.",
+                "time": 378,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-861:amina",
+                "eventId": "event-861",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed a funded work opening",
+                "time": 379.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-880:amina",
+                "eventId": "event-880",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 381.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-893:amina",
+                "eventId": "event-893",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed no current work opening",
+                "time": 390.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-908:amina",
+                "eventId": "event-908",
+                "kind": "reported",
+                "source": "amina",
+                "subject": "encounter-1",
+                "detail": "Hello Zainab, I have 2 portions ordered and due to arrive soon. Please wait a little. Thank you.",
+                "time": 398.25,
+                "certainty": "uncertain"
+              },
+              {
+                "id": "event-909:amina",
+                "eventId": "event-909",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:fatima",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 398.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-942:amina",
+                "eventId": "event-942",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "wholesale-3",
+                "detail": "Wholesaler delivered the previously paid order",
+                "time": 416.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-943:amina",
+                "eventId": "event-943",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 2 goods at the stall",
+                "time": 416.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-996:amina",
+                "eventId": "event-996",
+                "kind": "observed",
+                "source": "world",
+                "subject": "communication-1",
+                "detail": "Hello Zainab, the 2 portions have now arrived at my stall. Please come to buy. Thank you.",
+                "time": 438.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1011:amina",
+                "eventId": "event-1011",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "market",
+                "detail": "Paid for food; proceeds split between the owner and funded stall work",
+                "time": 443,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1012:amina",
+                "eventId": "event-1012",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "buy",
+                "detail": "Goods transferred after validation",
+                "time": 443,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1013:amina",
+                "eventId": "event-1013",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed 0 goods at the stall",
+                "time": 443,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1037:amina",
+                "eventId": "event-1037",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Observed a funded work opening",
+                "time": 450.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1045:amina",
+                "eventId": "event-1045",
+                "kind": "observed",
+                "source": "world",
+                "subject": "market",
+                "detail": "Reached a waypoint destination",
+                "time": 457.25,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1046:amina",
+                "eventId": "event-1046",
+                "kind": "observed",
+                "source": "world",
+                "subject": "amina:ladi",
+                "detail": "Noticed another available resident nearby; engagement remains optional",
+                "time": 457.25,
+                "certainty": "certain"
+              }
+            ],
+            "name": "Amina",
+            "occupation": "Market trader",
+            "node": "market",
+            "personality": [
+              "careful with stock",
+              "resourceful",
+              "values dependable assistance"
+            ],
+            "goals": [
+              {
+                "id": "restock",
+                "description": "Maintain enough stock to serve customers"
+              },
+              {
+                "id": "serve",
+                "description": "Serve customers at the stall"
+              }
+            ],
+            "needs": {
+              "food": 0.56,
+              "stock": 0.8,
+              "income": 0,
+              "rest": 0.38
+            },
+            "priorities": [
+              "avoid empty stock",
+              "serve customers",
+              "use available help"
+            ],
+            "capabilities": [
+              "travel",
+              "wait",
+              "work",
+              "propose-transport",
+              "collect-self",
+              "stock-stall",
+              "set-sales",
+              "share",
+              "encounter",
+              "respond-encounter",
+              "buy",
+              "take-work",
+              "eat",
+              "rest",
+              "offer-contact",
+              "communicate",
+              "respond-communication",
+              "end-call",
+              "fund-business",
+              "order-external",
+              "invite-social",
+              "respond-social",
+              "join-social",
+              "socialise",
+              "leave-social"
+            ],
+            "knowledge": {
+              "places": [
+                "stand",
+                "market",
+                "centre",
+                "hill",
+                "amina-house-home",
+                "town-green",
+                "community-office-work",
+                "amina-house-entrance"
+              ],
+              "placeFacts": {
+                "stand": {
+                  "services": [
+                    "taxi-pickup"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "market": {
+                  "services": [
+                    "food-retail"
+                  ],
+                  "products": [
+                    "food-portion"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "centre": {
+                  "services": [
+                    "stock-collection"
+                  ],
+                  "products": [
+                    "stall-supplies"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "hill": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "amina-house-home": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "town-green": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "community-office-work": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "amina-house-entrance": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                }
+              },
+              "people": [
+                "musa",
+                "zainab"
+              ],
+              "blockedEdges": [],
+              "tasks": {},
+              "resources": {
+                "supplierGoods": null,
+                "marketGoods": 0,
+                "salesOpen": true
+              },
+              "transporters": [
+                "musa"
+              ],
+              "businesses": {
+                "community-errands": {
+                  "available": null,
+                  "observedAt": null,
+                  "siteNode": "centre"
+                },
+                "market": {
+                  "available": true,
+                  "funded": true,
+                  "observedAt": 450.75,
+                  "siteNode": "market"
+                }
+              },
+              "contacts": [
+                "musa",
+                "zainab"
+              ],
+              "sharedContacts": [
+                "musa",
+                "zainab"
+              ]
+            },
+            "mobility": "walk",
+            "home": "amina-house-home",
+            "skills": [
+              "general",
+              "retail"
+            ],
+            "routine": {
+              "workplace": "market",
+              "leisure": "hill",
+              "sociability": 0.65
+            }
+          },
+          "time": 471,
+          "mapId": "town-v1",
+          "socialContext": {
+            "neighbourhood": "Unity Gardens",
+            "historySource": "authored-pre-simulation",
+            "historyAsOf": "simulation-start",
+            "publicFacts": [
+              {
+                "id": "history:unity-v1:origins",
+                "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+              },
+              {
+                "id": "history:unity-v1:concerns",
+                "detail": "Ordinary unresolved questions at the start include how to care for shared spaces, keep access roads maintained and make everyday services dependable and affordable. These are background concerns, not reports of failures or urgent tasks."
+              },
+              {
+                "id": "history:unity-v1:character",
+                "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+              }
+            ],
+            "background": {
+              "id": "history:unity-v1:self:amina",
+              "public": "Developed a market livelihood serving everyday customers as local commerce took shape.",
+              "private": "Experience managing stall stock taught her to compare collecting supplies herself with seeking help. Past acquaintance does not settle whom she should ask today."
+            },
+            "connections": [
+              {
+                "id": "musa",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": false,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": false,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              },
+              {
+                "id": "zainab",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": true,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": false,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              }
+            ]
+          },
+          "places": [
+            {
+              "id": "stand",
+              "node": "stand",
+              "name": "Taxi Stand"
+            },
+            {
+              "id": "market",
+              "node": "market",
+              "name": "Market Square"
+            },
+            {
+              "id": "centre",
+              "node": "centre",
+              "name": "Community Centre supply desk"
+            },
+            {
+              "id": "hill",
+              "node": "hill",
+              "name": "Hill Garden"
+            },
+            {
+              "id": "amina-house-entrance",
+              "node": "amina-house-entrance",
+              "name": "Market Compound entrance"
+            },
+            {
+              "id": "amina-house-home",
+              "node": "amina-house-home",
+              "name": "5 Market Street"
+            },
+            {
+              "id": "community-office-work",
+              "node": "community-office-work",
+              "name": "Community Offices"
+            },
+            {
+              "id": "town-green",
+              "node": "town-green",
+              "name": "Town Green"
+            }
+          ],
+          "placeKnowledge": [
+            {
+              "placeId": "stand",
+              "facts": {
+                "services": [
+                  "taxi-pickup"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:stand",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "market",
+              "facts": {
+                "services": [
+                  "food-retail"
+                ],
+                "products": [
+                  "food-portion"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:market",
+              "stock": {
+                "value": 0,
+                "source": "observed",
+                "observedAt": 471,
+                "evidenceId": "visible-stock:amina:market:2965",
+                "freshness": "current"
+              },
+              "salesOpen": {
+                "value": true,
+                "source": "observed",
+                "observedAt": 471,
+                "evidenceId": "visible-sales:amina:2965",
+                "freshness": "current"
+              }
+            },
+            {
+              "placeId": "centre",
+              "facts": {
+                "services": [
+                  "stock-collection"
+                ],
+                "products": [
+                  "stall-supplies"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:centre",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "hill",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:hill",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "amina-house-home",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:amina-house-home",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "town-green",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:town-green",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "community-office-work",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:community-office-work",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "amina-house-entrance",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:amina-house-entrance",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            }
+          ],
+          "memoryEvidence": [
+            {
+              "id": "event-716:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-733:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-736:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-740:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-743:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-783:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-804:amina",
+              "interpretation": "commitment"
+            },
+            {
+              "id": "event-808:amina",
+              "interpretation": "unverified-report"
+            },
+            {
+              "id": "event-843:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-850:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-861:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-880:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-893:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-908:amina",
+              "interpretation": "unverified-report"
+            },
+            {
+              "id": "event-909:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-942:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-943:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-996:amina",
+              "interpretation": "speech-only"
+            },
+            {
+              "id": "event-1011:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-1012:amina",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-1013:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1037:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1045:amina",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1046:amina",
+              "interpretation": "observed-world-event"
+            }
+          ],
+          "nearbyPeople": [
+            {
+              "id": "fatima",
+              "name": null,
+              "occupation": null,
+              "activity": "idle",
+              "known": false,
+              "canTransport": false
+            },
+            {
+              "id": "halima",
+              "name": null,
+              "occupation": null,
+              "activity": "wait",
+              "known": false,
+              "canTransport": false
+            },
+            {
+              "id": "ngozi",
+              "name": null,
+              "occupation": null,
+              "activity": "idle",
+              "known": false,
+              "canTransport": false
+            }
+          ],
+          "encounters": [
+            {
+              "id": "encounter-1",
+              "initiator": "zainab",
+              "recipient": "amina",
+              "purpose": "ask",
+              "message": "Hello Amina, do you know when more food might arrive at the market?",
+              "response": "Hello Zainab, I have 2 portions ordered and due to arrive soon. Please wait a little. Thank you.",
+              "status": "accepted",
+              "createdAt": 356.5,
+              "expiresAt": 446.5
+            }
+          ],
+          "encounterOpportunities": [
+            "fatima",
+            "halima",
+            "ngozi"
+          ],
+          "communication": {
+            "contacts": [
+              {
+                "id": "musa",
+                "name": "Musa",
+                "canTransport": true
+              },
+              {
+                "id": "zainab",
+                "name": "Zainab",
+                "canTransport": false
+              }
+            ],
+            "threads": [
+              {
+                "id": "communication-1",
+                "initiator": "amina",
+                "recipient": "zainab",
+                "channel": "text",
+                "purpose": "chat",
+                "message": "Hello Zainab, the 2 portions have now arrived at my stall. Please come to buy. Thank you.",
+                "report": null,
+                "response": null,
+                "reply": null,
+                "replyReport": null,
+                "status": "pending",
+                "createdAt": 438.75,
+                "availableAt": 443.75,
+                "expiresAt": 738.75,
+                "delivered": true,
+                "responseAt": null,
+                "responseNotified": false,
+                "taskId": null
+              }
+            ],
+            "canContact": [
+              "musa"
+            ],
+            "canCall": [
+              "musa"
+            ],
+            "contactOffers": [
+              "musa",
+              "zainab"
+            ],
+            "rules": {
+              "textDelay": 5,
+              "callLifetime": 60,
+              "textLifetime": 300,
+              "cooldown": 180,
+              "maximumThreads": 128,
+              "maximumPending": 4
+            }
+          },
+          "socialVisits": {
+            "version": 1,
+            "venues": [
+              {
+                "id": "stand",
+                "kind": "public"
+              },
+              {
+                "id": "market",
+                "kind": "public"
+              },
+              {
+                "id": "centre",
+                "kind": "public"
+              },
+              {
+                "id": "hill",
+                "kind": "public"
+              },
+              {
+                "id": "amina-house-entrance",
+                "kind": "home-doorstep"
+              },
+              {
+                "id": "community-office-work",
+                "kind": "workplace"
+              },
+              {
+                "id": "town-green",
+                "kind": "public"
+              }
+            ],
+            "invitations": [],
+            "rules": {
+              "maximumInvitations": 128,
+              "maximumActive": 4,
+              "expirySeconds": 600,
+              "maximumUpdates": 8,
+              "privateAccess": false
+            }
+          },
+          "town": {
+            "marketPrice": 2,
+            "ownsMarket": true,
+            "transportPayment": 2,
+            "marketServing": true,
+            "work": [
+              {
+                "id": "community-errands",
+                "name": "Community errands board",
+                "node": "community-office-work",
+                "skill": "general",
+                "wage": 1,
+                "seconds": 45,
+                "matchesSkill": true,
+                "atWorkplace": false,
+                "available": null,
+                "funded": null,
+                "observedAt": null,
+                "freshness": "unknown",
+                "canTakeNow": false,
+                "ineligibleReason": "not-at-workplace"
+              },
+              {
+                "id": "market",
+                "name": "Market stall",
+                "node": "market",
+                "skill": "food",
+                "wage": 1,
+                "seconds": 60,
+                "matchesSkill": false,
+                "atWorkplace": true,
+                "available": true,
+                "funded": true,
+                "observedAt": 471,
+                "freshness": "current",
+                "canTakeNow": false,
+                "ineligibleReason": "missing-skill"
+              }
+            ],
+            "purchase": {
+              "canBuyOneNow": false,
+              "ineligibleReason": "insufficient-stock",
+              "quantityKnown": 0
+            },
+            "eligibleWorkIds": []
+          },
+          "resources": {
+            "supplierGoods": null,
+            "marketGoods": 0,
+            "salesOpen": true
+          },
+          "tasks": [],
+          "knownBlockedEdges": [],
+          "permittedActions": [
+            "travel",
+            "wait",
+            "work",
+            "propose-transport",
+            "collect-self",
+            "stock-stall",
+            "set-sales",
+            "share",
+            "encounter",
+            "respond-encounter",
+            "buy",
+            "take-work",
+            "eat",
+            "rest",
+            "offer-contact",
+            "communicate",
+            "respond-communication",
+            "end-call",
+            "fund-business",
+            "order-external",
+            "invite-social",
+            "respond-social",
+            "join-social",
+            "socialise",
+            "leave-social"
+          ],
+          "actionConstraints": {
+            "propose-transport": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "collect-self": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              },
+              "carryingCapacity": 2,
+              "remainingCarryingCapacity": 0
+            },
+            "stock-stall": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "buy": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "eat": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            }
+          }
+        },
+        "triggers": [
+          "communication-sent",
+          "stock-low",
+          "work-availability-changed",
+          "person-arrived",
+          "encounter-noticed"
+        ]
+      },
+      "decision": {
+        "action": {
+          "quantity": 2,
+          "type": "stock-stall"
+        },
+        "goalId": "restock",
+        "reason": "Stall shows 0 stock and I hold 2 goods, so restocking now to serve customers."
+      }
+    },
+    {
+      "number": 140,
+      "request": {
+        "id": "society-7g-initial:decision-140",
+        "worldId": "society-7g-initial",
+        "actorId": "emeka",
+        "actorRevision": 54,
+        "worldRevision": 3535,
+        "observation": {
+          "wholesale": {
+            "rules": {
+              "unitPrice": 1,
+              "deliverySeconds": 60,
+              "cooldownSeconds": 120,
+              "maximumQuantity": 6,
+              "sourceLimit": 240
+            },
+            "offers": [
+              {
+                "businessId": "utility-work",
+                "product": null,
+                "node": "electrical-shop-work",
+                "sourceAvailable": null,
+                "canOrder": false,
+                "ineligibleReason": "unsupported-wholesale-product",
+                "payer": "personal-coins",
+                "balance": 25,
+                "businessCoins": 28,
+                "localInputs": null,
+                "pending": []
+              }
+            ]
+          },
+          "actor": {
+            "id": "emeka",
+            "name": "Emeka",
+            "occupation": "Electrical repair worker",
+            "node": "electrical-shop-work",
+            "home": "west-flats-flat-2",
+            "mobility": "walk",
+            "circumstances": "Shares the stand-side work area with Tunde; has a modest reserve and values finishing accepted work.",
+            "personality": [
+              "selective about interruptions",
+              "adapts plans to needs and available work"
+            ],
+            "revision": 54,
+            "intention": {
+              "goalId": "livelihood",
+              "reason": "Funded electrical work is open at my workshop and I am on site, so taking it keeps service dependable."
+            },
+            "activity": {
+              "kind": "idle"
+            },
+            "inventory": {
+              "goods": 0,
+              "rewards": 0,
+              "coins": 25,
+              "food": 0
+            },
+            "goals": [
+              {
+                "id": "livelihood",
+                "description": "Keep a dependable repair service and avoid overcommitting"
+              },
+              {
+                "id": "personal",
+                "description": "Meet personal needs and choose time for rest and neighbours"
+              }
+            ],
+            "needs": {
+              "food": 1,
+              "stock": 0,
+              "income": 0.03,
+              "rest": 0.99
+            },
+            "priorities": [
+              "honour accepted commitments",
+              "Keep a dependable repair service and avoid overcommitting",
+              "keep food and rest manageable"
+            ],
+            "capabilities": [
+              "travel",
+              "wait",
+              "work",
+              "buy",
+              "share",
+              "encounter",
+              "respond-encounter",
+              "take-work",
+              "eat",
+              "rest",
+              "offer-contact",
+              "communicate",
+              "respond-communication",
+              "end-call",
+              "fund-business",
+              "invite-social",
+              "respond-social",
+              "join-social",
+              "socialise",
+              "leave-social"
+            ],
+            "knowledge": {
+              "places": [
+                "stand",
+                "overlook",
+                "market",
+                "centre",
+                "west-flats-flat-2",
+                "town-green",
+                "electrical-shop-work",
+                "community-office-work",
+                "west-flats-entrance"
+              ],
+              "placeFacts": {
+                "stand": {
+                  "services": [
+                    "taxi-pickup"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "overlook": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "market": {
+                  "services": [
+                    "food-retail"
+                  ],
+                  "products": [
+                    "food-portion"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "centre": {
+                  "services": [
+                    "stock-collection"
+                  ],
+                  "products": [
+                    "stall-supplies"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "west-flats-flat-2": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "town-green": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "electrical-shop-work": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "community-office-work": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "west-flats-entrance": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                }
+              },
+              "people": [
+                "tunde",
+                "musa"
+              ],
+              "transporters": [],
+              "blockedEdges": [],
+              "tasks": {},
+              "resources": {
+                "supplierGoods": null,
+                "marketGoods": null,
+                "salesOpen": null
+              },
+              "businesses": {
+                "community-errands": {
+                  "available": null,
+                  "observedAt": null,
+                  "siteNode": "centre"
+                },
+                "utility-work": {
+                  "available": true,
+                  "funded": true,
+                  "observedAt": 522.5,
+                  "siteNode": "electrical-shop-work"
+                }
+              },
+              "contacts": [
+                "tunde"
+              ],
+              "sharedContacts": []
+            },
+            "relationships": {
+              "tunde": {
+                "successfulJobs": 0
+              },
+              "musa": {
+                "successfulJobs": 0
+              }
+            },
+            "memories": [
+              {
+                "id": "event-147:emeka",
+                "eventId": "event-147",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 31.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-259:emeka",
+                "eventId": "event-259",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 106.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-260:emeka",
+                "eventId": "event-260",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 106.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-261:emeka",
+                "eventId": "event-261",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 106.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-267:emeka",
+                "eventId": "event-267",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 114.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-416:emeka",
+                "eventId": "event-416",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 189.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-417:emeka",
+                "eventId": "event-417",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 189.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-418:emeka",
+                "eventId": "event-418",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 189.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-444:emeka",
+                "eventId": "event-444",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 199.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-626:emeka",
+                "eventId": "event-626",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-627:emeka",
+                "eventId": "event-627",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-628:emeka",
+                "eventId": "event-628",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-633:emeka",
+                "eventId": "event-633",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-796:emeka",
+                "eventId": "event-796",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 349.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-797:emeka",
+                "eventId": "event-797",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 349.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-798:emeka",
+                "eventId": "event-798",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 349.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-823:emeka",
+                "eventId": "event-823",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 360.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-990:emeka",
+                "eventId": "event-990",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 435.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-991:emeka",
+                "eventId": "event-991",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 435.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-992:emeka",
+                "eventId": "event-992",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 435.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1032:emeka",
+                "eventId": "event-1032",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 447.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1169:emeka",
+                "eventId": "event-1169",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 522.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1170:emeka",
+                "eventId": "event-1170",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 522.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1171:emeka",
+                "eventId": "event-1171",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 522.5,
+                "certainty": "certain"
+              }
+            ],
+            "skills": [
+              "general",
+              "utility"
+            ],
+            "routine": {
+              "workplace": "electrical-shop-work",
+              "leisure": "overlook",
+              "sociability": 0.4
+            }
+          },
+          "time": 569.75,
+          "mapId": "town-v1",
+          "socialContext": {
+            "neighbourhood": "Unity Gardens",
+            "historySource": "authored-pre-simulation",
+            "historyAsOf": "simulation-start",
+            "publicFacts": [
+              {
+                "id": "history:unity-v1:origins",
+                "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+              },
+              {
+                "id": "history:unity-v1:character",
+                "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+              }
+            ],
+            "background": {
+              "id": "history:unity-v1:self:emeka",
+              "public": "Established electrical repair work alongside the stand-side workshop trade.",
+              "private": "Repair experience taught him that finishing accepted work matters. He prefers to consider capacity before taking on another request."
+            },
+            "connections": [
+              {
+                "id": "musa",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": false,
+                "hasPhoneNumber": false,
+                "relationshipRecorded": true,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              },
+              {
+                "id": "tunde",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": false,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": true,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              }
+            ]
+          },
+          "places": [
+            {
+              "id": "stand",
+              "node": "stand",
+              "name": "Taxi Stand"
+            },
+            {
+              "id": "market",
+              "node": "market",
+              "name": "Market Square"
+            },
+            {
+              "id": "centre",
+              "node": "centre",
+              "name": "Community Centre supply desk"
+            },
+            {
+              "id": "overlook",
+              "node": "overlook",
+              "name": "Lake Overlook"
+            },
+            {
+              "id": "west-flats-entrance",
+              "node": "west-flats-entrance",
+              "name": "Acacia Court entrance"
+            },
+            {
+              "id": "west-flats-flat-2",
+              "node": "west-flats-flat-2",
+              "name": "Flat 2, 12 Acacia Lane"
+            },
+            {
+              "id": "electrical-shop-work",
+              "node": "electrical-shop-work",
+              "name": "Electrical Workshop"
+            },
+            {
+              "id": "community-office-work",
+              "node": "community-office-work",
+              "name": "Community Offices"
+            },
+            {
+              "id": "town-green",
+              "node": "town-green",
+              "name": "Town Green"
+            }
+          ],
+          "placeKnowledge": [
+            {
+              "placeId": "stand",
+              "facts": {
+                "services": [
+                  "taxi-pickup"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:stand",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "overlook",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:overlook",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "market",
+              "facts": {
+                "services": [
+                  "food-retail"
+                ],
+                "products": [
+                  "food-portion"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:market",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "centre",
+              "facts": {
+                "services": [
+                  "stock-collection"
+                ],
+                "products": [
+                  "stall-supplies"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:centre",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "west-flats-flat-2",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:west-flats-flat-2",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "town-green",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:town-green",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "electrical-shop-work",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:electrical-shop-work",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "community-office-work",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:community-office-work",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "west-flats-entrance",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:west-flats-entrance",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            }
+          ],
+          "memoryEvidence": [
+            {
+              "id": "event-147:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-259:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-260:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-261:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-267:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-416:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-417:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-418:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-444:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-626:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-627:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-628:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-633:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-796:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-797:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-798:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-823:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-990:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-991:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-992:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1032:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1169:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-1170:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1171:emeka",
+              "interpretation": "observed-world-event"
+            }
+          ],
+          "nearbyPeople": [],
+          "encounters": [],
+          "encounterOpportunities": [],
+          "communication": {
+            "contacts": [
+              {
+                "id": "tunde",
+                "name": "Tunde",
+                "canTransport": false
+              }
+            ],
+            "threads": [],
+            "canContact": [
+              "tunde"
+            ],
+            "canCall": [
+              "tunde"
+            ],
+            "contactOffers": [],
+            "rules": {
+              "textDelay": 5,
+              "callLifetime": 60,
+              "textLifetime": 300,
+              "cooldown": 180,
+              "maximumThreads": 128,
+              "maximumPending": 4
+            }
+          },
+          "socialVisits": {
+            "version": 1,
+            "venues": [
+              {
+                "id": "stand",
+                "kind": "public"
+              },
+              {
+                "id": "market",
+                "kind": "public"
+              },
+              {
+                "id": "centre",
+                "kind": "public"
+              },
+              {
+                "id": "overlook",
+                "kind": "public"
+              },
+              {
+                "id": "west-flats-entrance",
+                "kind": "home-doorstep"
+              },
+              {
+                "id": "electrical-shop-work",
+                "kind": "workplace"
+              },
+              {
+                "id": "community-office-work",
+                "kind": "workplace"
+              },
+              {
+                "id": "town-green",
+                "kind": "public"
+              }
+            ],
+            "invitations": [],
+            "rules": {
+              "maximumInvitations": 128,
+              "maximumActive": 4,
+              "expirySeconds": 600,
+              "maximumUpdates": 8,
+              "privateAccess": false
+            }
+          },
+          "town": {
+            "marketPrice": 2,
+            "ownsMarket": false,
+            "transportPayment": 2,
+            "marketServing": null,
+            "work": [
+              {
+                "id": "community-errands",
+                "name": "Community errands board",
+                "node": "community-office-work",
+                "skill": "general",
+                "wage": 1,
+                "seconds": 45,
+                "matchesSkill": true,
+                "atWorkplace": false,
+                "available": null,
+                "funded": null,
+                "observedAt": null,
+                "freshness": "unknown",
+                "canTakeNow": false,
+                "ineligibleReason": "not-at-workplace"
+              },
+              {
+                "id": "utility-work",
+                "name": "Electrical repair desk",
+                "node": "electrical-shop-work",
+                "skill": "utility",
+                "wage": 2,
+                "seconds": 75,
+                "matchesSkill": true,
+                "atWorkplace": true,
+                "available": true,
+                "funded": true,
+                "observedAt": 569.75,
+                "freshness": "current",
+                "canTakeNow": true,
+                "ineligibleReason": null
+              }
+            ],
+            "purchase": {
+              "canBuyOneNow": null,
+              "ineligibleReason": null,
+              "quantityKnown": null
+            },
+            "eligibleWorkIds": [
+              "utility-work"
+            ]
+          },
+          "resources": {
+            "supplierGoods": null,
+            "marketGoods": null,
+            "salesOpen": null
+          },
+          "tasks": [],
+          "knownBlockedEdges": [],
+          "permittedActions": [
+            "travel",
+            "wait",
+            "work",
+            "buy",
+            "share",
+            "encounter",
+            "respond-encounter",
+            "take-work",
+            "eat",
+            "rest",
+            "offer-contact",
+            "communicate",
+            "respond-communication",
+            "end-call",
+            "fund-business",
+            "invite-social",
+            "respond-social",
+            "join-social",
+            "socialise",
+            "leave-social"
+          ],
+          "actionConstraints": {
+            "buy": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "eat": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            }
+          }
+        },
+        "triggers": [
+          "work-availability-changed",
+          "personal-needs-changed",
+          "activity-completed"
+        ]
+      },
+      "decision": {
+        "action": {
+          "businessId": "utility-work",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Funded electrical work is open at my workshop and I am on site, so taking it keeps service dependable."
+      }
+    },
+    {
+      "number": 161,
+      "request": {
+        "id": "society-7g-initial:decision-161",
+        "worldId": "society-7g-initial",
+        "actorId": "emeka",
+        "actorRevision": 62,
+        "worldRevision": 4035,
+        "observation": {
+          "wholesale": {
+            "rules": {
+              "unitPrice": 1,
+              "deliverySeconds": 60,
+              "cooldownSeconds": 120,
+              "maximumQuantity": 6,
+              "sourceLimit": 240
+            },
+            "offers": [
+              {
+                "businessId": "utility-work",
+                "product": null,
+                "node": "electrical-shop-work",
+                "sourceAvailable": null,
+                "canOrder": false,
+                "ineligibleReason": "unsupported-wholesale-product",
+                "payer": "personal-coins",
+                "balance": 27,
+                "businessCoins": 26,
+                "localInputs": null,
+                "pending": []
+              }
+            ]
+          },
+          "actor": {
+            "id": "emeka",
+            "name": "Emeka",
+            "occupation": "Electrical repair worker",
+            "node": "electrical-shop-work",
+            "home": "west-flats-flat-2",
+            "mobility": "walk",
+            "circumstances": "Shares the stand-side work area with Tunde; has a modest reserve and values finishing accepted work.",
+            "personality": [
+              "selective about interruptions",
+              "adapts plans to needs and available work"
+            ],
+            "revision": 62,
+            "intention": {
+              "goalId": "livelihood",
+              "reason": "Funded electrical work is open at my workshop and I am on site, so taking it keeps service dependable."
+            },
+            "activity": {
+              "kind": "idle"
+            },
+            "inventory": {
+              "goods": 0,
+              "rewards": 0,
+              "coins": 27,
+              "food": 0
+            },
+            "goals": [
+              {
+                "id": "livelihood",
+                "description": "Keep a dependable repair service and avoid overcommitting"
+              },
+              {
+                "id": "personal",
+                "description": "Meet personal needs and choose time for rest and neighbours"
+              }
+            ],
+            "needs": {
+              "food": 1,
+              "stock": 0,
+              "income": 0,
+              "rest": 1
+            },
+            "priorities": [
+              "honour accepted commitments",
+              "Keep a dependable repair service and avoid overcommitting",
+              "keep food and rest manageable"
+            ],
+            "capabilities": [
+              "travel",
+              "wait",
+              "work",
+              "buy",
+              "share",
+              "encounter",
+              "respond-encounter",
+              "take-work",
+              "eat",
+              "rest",
+              "offer-contact",
+              "communicate",
+              "respond-communication",
+              "end-call",
+              "fund-business",
+              "invite-social",
+              "respond-social",
+              "join-social",
+              "socialise",
+              "leave-social"
+            ],
+            "knowledge": {
+              "places": [
+                "stand",
+                "overlook",
+                "market",
+                "centre",
+                "west-flats-flat-2",
+                "town-green",
+                "electrical-shop-work",
+                "community-office-work",
+                "west-flats-entrance"
+              ],
+              "placeFacts": {
+                "stand": {
+                  "services": [
+                    "taxi-pickup"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "overlook": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "market": {
+                  "services": [
+                    "food-retail"
+                  ],
+                  "products": [
+                    "food-portion"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "centre": {
+                  "services": [
+                    "stock-collection"
+                  ],
+                  "products": [
+                    "stall-supplies"
+                  ],
+                  "source": "established",
+                  "complete": true
+                },
+                "west-flats-flat-2": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "town-green": {
+                  "services": [
+                    "scenic-view"
+                  ],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "electrical-shop-work": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "community-office-work": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                },
+                "west-flats-entrance": {
+                  "services": [],
+                  "products": [],
+                  "source": "established",
+                  "complete": true
+                }
+              },
+              "people": [
+                "tunde",
+                "musa"
+              ],
+              "transporters": [],
+              "blockedEdges": [],
+              "tasks": {},
+              "resources": {
+                "supplierGoods": null,
+                "marketGoods": null,
+                "salesOpen": null
+              },
+              "businesses": {
+                "community-errands": {
+                  "available": null,
+                  "observedAt": null,
+                  "siteNode": "centre"
+                },
+                "utility-work": {
+                  "available": true,
+                  "funded": true,
+                  "observedAt": 644.75,
+                  "siteNode": "electrical-shop-work"
+                }
+              },
+              "contacts": [
+                "tunde"
+              ],
+              "sharedContacts": []
+            },
+            "relationships": {
+              "tunde": {
+                "successfulJobs": 0
+              },
+              "musa": {
+                "successfulJobs": 0
+              }
+            },
+            "memories": [
+              {
+                "id": "event-267:emeka",
+                "eventId": "event-267",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 114.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-416:emeka",
+                "eventId": "event-416",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 189.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-417:emeka",
+                "eventId": "event-417",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 189.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-418:emeka",
+                "eventId": "event-418",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 189.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-444:emeka",
+                "eventId": "event-444",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 199.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-626:emeka",
+                "eventId": "event-626",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-627:emeka",
+                "eventId": "event-627",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-628:emeka",
+                "eventId": "event-628",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-633:emeka",
+                "eventId": "event-633",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 274.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-796:emeka",
+                "eventId": "event-796",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 349.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-797:emeka",
+                "eventId": "event-797",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 349.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-798:emeka",
+                "eventId": "event-798",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 349.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-823:emeka",
+                "eventId": "event-823",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 360.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-990:emeka",
+                "eventId": "event-990",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 435.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-991:emeka",
+                "eventId": "event-991",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 435.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-992:emeka",
+                "eventId": "event-992",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 435.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1032:emeka",
+                "eventId": "event-1032",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 447.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1169:emeka",
+                "eventId": "event-1169",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 522.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1170:emeka",
+                "eventId": "event-1170",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 522.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1171:emeka",
+                "eventId": "event-1171",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 522.5,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1261:emeka",
+                "eventId": "event-1261",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed no current work opening",
+                "time": 569.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1396:emeka",
+                "eventId": "event-1396",
+                "kind": "outcome",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Completed physical work; received held wage and deposited any produced supplies",
+                "time": 644.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1397:emeka",
+                "eventId": "event-1397",
+                "kind": "observed",
+                "source": "world",
+                "subject": "work",
+                "detail": "Selected activity finished",
+                "time": 644.75,
+                "certainty": "certain"
+              },
+              {
+                "id": "event-1398:emeka",
+                "eventId": "event-1398",
+                "kind": "observed",
+                "source": "world",
+                "subject": "utility-work",
+                "detail": "Observed a funded work opening",
+                "time": 644.75,
+                "certainty": "certain"
+              }
+            ],
+            "skills": [
+              "general",
+              "utility"
+            ],
+            "routine": {
+              "workplace": "electrical-shop-work",
+              "leisure": "overlook",
+              "sociability": 0.4
+            }
+          },
+          "time": 655,
+          "mapId": "town-v1",
+          "socialContext": {
+            "neighbourhood": "Unity Gardens",
+            "historySource": "authored-pre-simulation",
+            "historyAsOf": "simulation-start",
+            "publicFacts": [
+              {
+                "id": "history:unity-v1:origins",
+                "detail": "Unity Gardens is a fictional residential community in Abuja, Nigeria. It began as a modest development on the outskirts; homes were occupied gradually and small businesses grew around everyday needs."
+              },
+              {
+                "id": "history:unity-v1:character",
+                "detail": "At the start of the simulation, apartment blocks and standalone homes share a neighbourhood with market trading, transport, repairs, supply work, care, teaching and tailoring. Residents have different means and priorities; ordinary trade and services are functioning."
+              }
+            ],
+            "background": {
+              "id": "history:unity-v1:self:emeka",
+              "public": "Established electrical repair work alongside the stand-side workshop trade.",
+              "private": "Repair experience taught him that finishing accepted work matters. He prefers to consider capacity before taking on another request."
+            },
+            "connections": [
+              {
+                "id": "musa",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": false,
+                "hasPhoneNumber": false,
+                "relationshipRecorded": true,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              },
+              {
+                "id": "tunde",
+                "identityKnown": true,
+                "seenInSimulation": false,
+                "metInSimulation": false,
+                "hasPhoneNumber": true,
+                "relationshipRecorded": true,
+                "successfulJobs": 0,
+                "trust": "not-established-by-history"
+              }
+            ]
+          },
+          "places": [
+            {
+              "id": "stand",
+              "node": "stand",
+              "name": "Taxi Stand"
+            },
+            {
+              "id": "market",
+              "node": "market",
+              "name": "Market Square"
+            },
+            {
+              "id": "centre",
+              "node": "centre",
+              "name": "Community Centre supply desk"
+            },
+            {
+              "id": "overlook",
+              "node": "overlook",
+              "name": "Lake Overlook"
+            },
+            {
+              "id": "west-flats-entrance",
+              "node": "west-flats-entrance",
+              "name": "Acacia Court entrance"
+            },
+            {
+              "id": "west-flats-flat-2",
+              "node": "west-flats-flat-2",
+              "name": "Flat 2, 12 Acacia Lane"
+            },
+            {
+              "id": "electrical-shop-work",
+              "node": "electrical-shop-work",
+              "name": "Electrical Workshop"
+            },
+            {
+              "id": "community-office-work",
+              "node": "community-office-work",
+              "name": "Community Offices"
+            },
+            {
+              "id": "town-green",
+              "node": "town-green",
+              "name": "Town Green"
+            }
+          ],
+          "placeKnowledge": [
+            {
+              "placeId": "stand",
+              "facts": {
+                "services": [
+                  "taxi-pickup"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:stand",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "overlook",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:overlook",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "market",
+              "facts": {
+                "services": [
+                  "food-retail"
+                ],
+                "products": [
+                  "food-portion"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:market",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "centre",
+              "facts": {
+                "services": [
+                  "stock-collection"
+                ],
+                "products": [
+                  "stall-supplies"
+                ],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:centre",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "west-flats-flat-2",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:west-flats-flat-2",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "town-green",
+              "facts": {
+                "services": [
+                  "scenic-view"
+                ],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:town-green",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "electrical-shop-work",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:electrical-shop-work",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "community-office-work",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:community-office-work",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            },
+            {
+              "placeId": "west-flats-entrance",
+              "facts": {
+                "services": [],
+                "products": [],
+                "source": "established",
+                "complete": true
+              },
+              "factEvidenceId": "place-facts:west-flats-entrance",
+              "stock": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              },
+              "salesOpen": {
+                "value": null,
+                "source": "unknown",
+                "observedAt": null,
+                "evidenceId": null,
+                "freshness": "unknown"
+              }
+            }
+          ],
+          "memoryEvidence": [
+            {
+              "id": "event-267:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-416:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-417:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-418:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-444:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-626:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-627:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-628:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-633:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-796:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-797:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-798:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-823:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-990:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-991:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-992:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1032:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1169:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-1170:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1171:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1261:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1396:emeka",
+              "interpretation": "verified-outcome"
+            },
+            {
+              "id": "event-1397:emeka",
+              "interpretation": "observed-world-event"
+            },
+            {
+              "id": "event-1398:emeka",
+              "interpretation": "observed-world-event"
+            }
+          ],
+          "nearbyPeople": [],
+          "encounters": [],
+          "encounterOpportunities": [],
+          "communication": {
+            "contacts": [
+              {
+                "id": "tunde",
+                "name": "Tunde",
+                "canTransport": false
+              }
+            ],
+            "threads": [],
+            "canContact": [
+              "tunde"
+            ],
+            "canCall": [
+              "tunde"
+            ],
+            "contactOffers": [],
+            "rules": {
+              "textDelay": 5,
+              "callLifetime": 60,
+              "textLifetime": 300,
+              "cooldown": 180,
+              "maximumThreads": 128,
+              "maximumPending": 4
+            }
+          },
+          "socialVisits": {
+            "version": 1,
+            "venues": [
+              {
+                "id": "stand",
+                "kind": "public"
+              },
+              {
+                "id": "market",
+                "kind": "public"
+              },
+              {
+                "id": "centre",
+                "kind": "public"
+              },
+              {
+                "id": "overlook",
+                "kind": "public"
+              },
+              {
+                "id": "west-flats-entrance",
+                "kind": "home-doorstep"
+              },
+              {
+                "id": "electrical-shop-work",
+                "kind": "workplace"
+              },
+              {
+                "id": "community-office-work",
+                "kind": "workplace"
+              },
+              {
+                "id": "town-green",
+                "kind": "public"
+              }
+            ],
+            "invitations": [],
+            "rules": {
+              "maximumInvitations": 128,
+              "maximumActive": 4,
+              "expirySeconds": 600,
+              "maximumUpdates": 8,
+              "privateAccess": false
+            }
+          },
+          "town": {
+            "marketPrice": 2,
+            "ownsMarket": false,
+            "transportPayment": 2,
+            "marketServing": null,
+            "work": [
+              {
+                "id": "community-errands",
+                "name": "Community errands board",
+                "node": "community-office-work",
+                "skill": "general",
+                "wage": 1,
+                "seconds": 45,
+                "matchesSkill": true,
+                "atWorkplace": false,
+                "available": null,
+                "funded": null,
+                "observedAt": null,
+                "freshness": "unknown",
+                "canTakeNow": false,
+                "ineligibleReason": "not-at-workplace"
+              },
+              {
+                "id": "utility-work",
+                "name": "Electrical repair desk",
+                "node": "electrical-shop-work",
+                "skill": "utility",
+                "wage": 2,
+                "seconds": 75,
+                "matchesSkill": true,
+                "atWorkplace": true,
+                "available": true,
+                "funded": true,
+                "observedAt": 655,
+                "freshness": "current",
+                "canTakeNow": true,
+                "ineligibleReason": null
+              }
+            ],
+            "purchase": {
+              "canBuyOneNow": null,
+              "ineligibleReason": null,
+              "quantityKnown": null
+            },
+            "eligibleWorkIds": [
+              "utility-work"
+            ]
+          },
+          "resources": {
+            "supplierGoods": null,
+            "marketGoods": null,
+            "salesOpen": null
+          },
+          "tasks": [],
+          "knownBlockedEdges": [],
+          "permittedActions": [
+            "travel",
+            "wait",
+            "work",
+            "buy",
+            "share",
+            "encounter",
+            "respond-encounter",
+            "take-work",
+            "eat",
+            "rest",
+            "offer-contact",
+            "communicate",
+            "respond-communication",
+            "end-call",
+            "fund-business",
+            "invite-social",
+            "respond-social",
+            "join-social",
+            "socialise",
+            "leave-social"
+          ],
+          "actionConstraints": {
+            "buy": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            },
+            "eat": {
+              "quantity": {
+                "minimum": 1,
+                "maximum": 6
+              }
+            }
+          }
+        },
+        "triggers": [
+          "work-availability-changed",
+          "personal-needs-changed",
+          "activity-completed"
+        ]
+      },
+      "decision": {
+        "action": {
+          "businessId": "utility-work",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "On site at my workshop with funded electrical work open, taking it keeps service dependable."
+      }
+    }
+  ]
+}

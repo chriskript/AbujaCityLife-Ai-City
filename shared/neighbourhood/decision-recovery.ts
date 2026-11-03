@@ -1,3 +1,4 @@
+import { carriedGoods } from './personal-rules.js';
 import type { Action, WorldState } from './types.js';
 import type { CommunicationHost } from './communication.js';
 
@@ -11,7 +12,9 @@ export function recordRejection(host:CommunicationHost,id:string,requestId:strin
   const blockedUntil=repetitions>=3?state.time+120:state.time;
   state.decisionRecovery ??={};
   state.decisionRecovery[id]={version:1,action:fingerprint,reason,requestId,at:state.time,repetitions:Math.min(3,repetitions),blockedUntil};
-  record('action-rejected',id,[id],requestId,`Attempt failed: ${reason}. No transaction or commitment was applied.`,{reason,action:action.type,blockedUntil},'outcome');
+  const npc=state.npcs[id]!,cargo=Object.values(state.tasks).filter(t=>t.recipient===id&&t.status==='collected').reduce((s,t)=>s+t.quantity,0),goods=carriedGoods(npc.inventory.goods,npc.inventory.food ?? 0,cargo);
+  const explanation=reason==='missing-stall-supplies'?` Total goods ${goods.total} includes personal food ${goods.personalFood} and committed cargo ${goods.committedCargo}; only ${goods.restockable} can stock the stall. These categories cannot be substituted.`:'';
+  record('action-rejected',id,[id],requestId,`Attempt failed: ${reason}. No transaction or commitment was applied.${explanation}`,{reason,action:action.type,blockedUntil},'outcome');
   if(repetitions>=3)record('repeated-rejection-paused',id,[id],requestId,'Three identical failures within 120 seconds; this resident has a 120-second inference cooldown. Other residents and deterministic mechanics continue.',{blockedUntil},'outcome');
   trigger(id,'action-rejected');
 }

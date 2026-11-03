@@ -7,10 +7,11 @@ import { withProbeBudget } from '../controls/probe-budget.js';
 import { socialContextInstructions } from '../../shared/neighbourhood/social-context.js';
 import { employmentInstructions } from './employment-grounding.js';
 import { prepareModelInput, assertVisibleMemoryReference, type ContextAudit } from './model-context.js';
-import { generationReservation, type InputTokenLimit } from './model-limits.js';
+import { generationReservation, reviewedInferenceDeadline, type InferenceDeadlineMs, type InputTokenLimit } from './model-limits.js';
 
 export interface NeighbourhoodProvider {
   mode: 'mock' | 'live-meta';
+  readonly inferenceTimeoutMs?:InferenceDeadlineMs;
   decide(request: NpcDecisionRequest): Promise<NpcInferenceResult>;
   converse(context: ConversationContext): Promise<ConversationDecision>;
   metrics: GenerationMetrics | null;
@@ -74,8 +75,9 @@ export const neighbourhoodModelConfiguration = {model, inputTokenLimit:inputLimi
 export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
   readonly mode = 'live-meta'; metrics: GenerationMetrics | null = null;
   // Evaluation evidence contains only this invocation, never credentials or hidden model reasoning.
-  attempt: { phase: string; preflightTokens?: number; outputText?: string; proposal?: unknown; context?:ContextAudit } | null = null;
-  constructor(private readonly options: { apiKey: string; ledgerPath: string; dailyUsd: number; totalUsd: number; dailyUsdUntil?: string; totalUsdUntil?:string; inputTokenLimit?:InputTokenLimit; fetcher?: typeof fetch }) {}
+  attempt: { phase: string; timeoutMs?:number; preflightLatencyMs?:number; generationStartedAfterMs?:number; preflightTokens?: number; outputText?: string; proposal?: unknown; context?:ContextAudit } | null = null;
+  constructor(private readonly options: { apiKey: string; ledgerPath: string; dailyUsd: number; totalUsd: number; dailyUsdUntil?: string; totalUsdUntil?:string; inputTokenLimit?:InputTokenLimit; inferenceTimeoutMs?:InferenceDeadlineMs; fetcher?: typeof fetch }) {reviewedInferenceDeadline(options.inferenceTimeoutMs);}
+  get inferenceTimeoutMs():InferenceDeadlineMs {return reviewedInferenceDeadline(this.options.inferenceTimeoutMs);}
   async decide(request: NpcDecisionRequest): Promise<NpcInferenceResult> {
     this.metrics=null;this.attempt={phase:'context-preparing'};
     const prepared=prepareModelInput(request,'decision');
@@ -97,8 +99,8 @@ export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
   }
   private async generate(name: string, schema: unknown, input: unknown, instructions:string, context:ContextAudit): Promise<unknown> {
     this.metrics = null;
-    this.attempt = {phase:'prepared',context};
-    const started = performance.now(); const signal = AbortSignal.timeout(20_000);
+    this.attempt = {phase:'prepared',context,timeoutMs:this.inferenceTimeoutMs};
+    const started = performance.now(); const signal = AbortSignal.timeout(this.inferenceTimeoutMs);
     const ceiling=this.options.inputTokenLimit ?? inputLimit;
     const body = { model, instructions, input: JSON.stringify(input), reasoning: { effort: 'low' }, text: { format: { type: 'json_schema', name, strict: true, schema } } };
     if (body.input.length > 24_000) throw new Error('Observation too large');
@@ -111,9 +113,12 @@ export class MetaNeighbourhoodProvider implements NeighbourhoodProvider {
       // Reserve the entire input ceiling before ANY provider HTTP request. Never refund failures.
       await reserve(generationReservation(ceiling));
       this.attempt!.phase='reserved';
+      const countStarted=performance.now();
       const count = await post('responses/input_tokens', body);
+      this.attempt!.preflightLatencyMs=Math.round(performance.now()-countStarted);
       this.attempt!.preflightTokens=count.input_tokens;this.attempt!.phase='preflight';
       if (!Number.isSafeInteger(count.input_tokens) || count.input_tokens < 1 || count.input_tokens > ceiling) throw new Error('Input token limit exceeded');
+      this.attempt!.phase='generation-dispatched';this.attempt!.generationStartedAfterMs=Math.round(performance.now()-started);
       const response = await post('responses', { ...body, max_output_tokens: outputLimit, store: false });
       this.attempt!.phase='response-received';
       if (response.model !== model || response.status !== 'completed' || !Array.isArray(response.output)) throw new Error('Unexpected Meta model or incomplete response');

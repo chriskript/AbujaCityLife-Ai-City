@@ -1,3 +1,4 @@
+import { decisionGrounding } from './decision-grounding.js';
 import type { NpcDecision, NpcDecisionRequest, NpcObservation } from '../../shared/neighbourhood/types.js';
 import type { ConversationContext } from '../../shared/neighbourhood/conversation.js';
 import { contextPolicy, scopedInstructions } from './context-policy.js';
@@ -66,7 +67,7 @@ function encodeObservation(o:NpcObservation,audit:ContextAudit){
   const interpretations=new Map(o.memoryEvidence.map(e=>[e.id,e.interpretation]));
   const facts=new Map(o.placeKnowledge.map(p=>[p.placeId,p]));
   return {
-    mapId:o.mapId,time:o.time,actor,
+    mapId:o.mapId,time:o.time,actor,decisionContext:decisionGrounding(o),
     ...(o.decisionRecovery?{decisionRecovery:o.decisionRecovery}:{}),...(o.wholesale?{wholesale:o.wholesale}:{}),
     knownPeople:knowledge.people,knownTransporters:knowledge.transporters ?? [],capabilities,permittedActions:o.permittedActions,actionConstraints:o.actionConstraints,
     places:o.places.map(p=>{const k=facts.get(p.id);return{id:p.id,name:p.name,...(p.node!==p.id?{node:p.node}:{}),facts:k?.facts ?? null,...(k?.factEvidenceId?{factEvidenceId:k.factEvidenceId}:{}),...(k?.stock.value!==null&&k?.stock.value!==undefined?{stock:k.stock}:{}),...(k?.salesOpen.value!==null&&k?.salesOpen.value!==undefined?{salesOpen:k.salesOpen}:{})};}),

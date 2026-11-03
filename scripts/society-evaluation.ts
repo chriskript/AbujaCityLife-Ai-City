@@ -44,7 +44,7 @@ try{
     if(!env.MODEL_API_KEY?.trim() || (env.META_MODEL ?? 'muse-spark-1.3')!=='muse-spark-1.3')throw new Error('Missing Meta credential or mismatched model');
     const dailyUsd=Number(env.META_PROBE_DAILY_USD??'.25'),totalUsd=Number(env.META_PROBE_TOTAL_USD??'1');
     if(!Number.isFinite(dailyUsd) || dailyUsd<=0 || dailyUsd>50 || !Number.isFinite(totalUsd) || totalUsd<=0 || totalUsd>100)throw new Error('Invalid daily or total application allowance');
-    provider=new MetaNeighbourhoodProvider({apiKey:env.MODEL_API_KEY,ledgerPath:'runtime/meta-probe-budget.json',dailyUsd,totalUsd,inputTokenLimit:plan.inputTokenLimit ?? 6000,...(env.META_PROBE_DAILY_USD_UNTIL?{dailyUsdUntil:env.META_PROBE_DAILY_USD_UNTIL}:{}),...(env.META_PROBE_TOTAL_USD_UNTIL?{totalUsdUntil:env.META_PROBE_TOTAL_USD_UNTIL}:{})});
+    provider=new MetaNeighbourhoodProvider({apiKey:env.MODEL_API_KEY,ledgerPath:'runtime/meta-probe-budget.json',dailyUsd,totalUsd,inputTokenLimit:plan.inputTokenLimit ?? 6000,...(plan.inferenceTimeoutMs?{inferenceTimeoutMs:plan.inferenceTimeoutMs}:{}),...(env.META_PROBE_DAILY_USD_UNTIL?{dailyUsdUntil:env.META_PROBE_DAILY_USD_UNTIL}:{}),...(env.META_PROBE_TOTAL_USD_UNTIL?{totalUsdUntil:env.META_PROBE_TOTAL_USD_UNTIL}:{})});
   }else{
     const offline=new MockNeighbourhoodProvider();
     provider={mode:'live-meta',metrics:null,async decide(request){const result=await offline.decide(request);return {...result,mode:'meta',model:'offline-7g-contract-fixture'};},async converse(){throw new Error('Unsupported in offline contract rehearsal');}};

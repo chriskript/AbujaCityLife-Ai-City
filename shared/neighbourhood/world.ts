@@ -1,3 +1,4 @@
+import { personalRules, carriedGoods } from './personal-rules.js';
 import { enableEconomicContinuity, tradeObservation, validateTrade, executeTrade, advanceTrade } from './economic-continuity.js';
 import { ordinaryRejection, recordRejection } from './decision-recovery.js';
 import { mapFor, initialHomes, initialLocations, workSites, type MapId } from '../world/town-layout.js';
@@ -259,10 +260,10 @@ export class Neighbourhood {
 
   private townNeeds(): void {
     const town = this.state.town; if (!town || this.state.time < town.nextNeedsAt) return;
-    town.nextNeedsAt += 60;
+    town.nextNeedsAt += personalRules.intervalSeconds;
     for (const npc of Object.values(this.state.npcs)) {
-      npc.needs.food = Math.min(1,Number((npc.needs.food + .08).toFixed(6)));
-      npc.needs.rest = Math.min(1,Number(((npc.needs.rest ?? 0) + (['travel','work'].includes(npc.activity.kind) ? .08 : .04)).toFixed(6)));
+      npc.needs.food = Math.min(1,Number((npc.needs.food + personalRules.foodIncrease).toFixed(6)));
+      npc.needs.rest = Math.min(1,Number(((npc.needs.rest ?? 0) + (['travel','work'].includes(npc.activity.kind) ? personalRules.activeFatigueIncrease : personalRules.otherFatigueIncrease)).toFixed(6)));
       npc.needs.income = Math.min(1,Number((npc.needs.income + .03).toFixed(6))); npc.revision++;
       this.trigger(npc.id,'personal-needs-changed'); this.perceive(npc.id);
     }
@@ -332,7 +333,7 @@ export class Neighbourhood {
     for (const task of Object.values(this.state.tasks)) {
       if (task.requester !== id || task.status !== 'delivered' || npc.node !== task.destination || npc.knowledge.tasks[task.id] === 'delivered') continue;
       npc.knowledge.tasks[task.id] = 'delivered';
-      npc.relationships[task.recipient] = { successfulJobs: (npc.relationships[task.recipient]?.successfulJobs ?? 0) + 1 };
+      npc.relationships[task.recipient] = { ...npc.relationships[task.recipient], successfulJobs: (npc.relationships[task.recipient]?.successfulJobs ?? 0) + 1 };
       npc.memories = npc.memories.filter(memory => !(memory.kind === 'commitment' && memory.subject === task.id));
       this.record('delivery-observed', id, [id], task.id, 'Verified delivered goods and the delivery receipt at the stall', { quantity: task.quantity }, 'outcome');
       this.trigger(id, 'delivery-observed');
@@ -564,7 +565,8 @@ export class Neighbourhood {
     } else if (action.type === 'stock-stall') {
       if (npc.node !== 'market') return 'not-at-market';
       if (npc.inventory.goods < action.quantity) return 'missing-goods';
-      if (town && npc.inventory.goods-(npc.inventory.food ?? 0)<action.quantity) return 'missing-stall-supplies';
+      const cargo=Object.values(this.state.tasks).filter(t=>t.recipient===id&&t.status==='collected').reduce((sum,t)=>sum+t.quantity,0);
+      if (town && carriedGoods(npc.inventory.goods,npc.inventory.food ?? 0,cargo).restockable<action.quantity) return 'missing-stall-supplies';
     } else if (action.type === 'buy') {
       const present = town ? this.marketServing(id) : this.residentIds.some(other => this.nearby(id, other) && this.state.npcs[other]!.capabilities.includes('set-sales'));
       if (npc.node !== 'market' || !present) return 'trader-not-nearby';
@@ -602,7 +604,7 @@ export class Neighbourhood {
     }
     if (action.type === 'eat') {
       npc.inventory.goods-=action.quantity; npc.inventory.food!-=action.quantity; this.state.town!.consumed+=action.quantity;
-      npc.needs.food=Math.max(0,npc.needs.food-.8*action.quantity);
+      npc.needs.food=Math.max(0,npc.needs.food-personalRules.mealRelief*action.quantity);
       this.record('food-consumed',id,this.witnesses(id),id,'Consumed personal food; goods leave inventory',{quantity:action.quantity},'outcome'); this.trigger(id,'meal-completed'); return;
     }
     if (action.type === 'travel') this.travel(id, action.destination, null, null);
@@ -721,7 +723,7 @@ export class Neighbourhood {
       npc.needs.income = Math.max(0, npc.needs.income - 0.3); this.state.resources.revision++;
       npc.knowledge.tasks[task.id] = 'delivered';
       npc.memories = npc.memories.filter(memory => !(memory.kind === 'commitment' && memory.subject === task.id));
-      npc.relationships[task.requester] = { successfulJobs: (npc.relationships[task.requester]?.successfulJobs ?? 0) + 1 };
+      npc.relationships[task.requester] = { ...npc.relationships[task.requester], successfulJobs: (npc.relationships[task.requester]?.successfulJobs ?? 0) + 1 };
       this.record('transport-delivered', id, [id], task.id, 'Delivered goods into the stall receiving inventory; reward applied once', { quantity: task.quantity }, 'outcome');
       for (const witness of this.witnesses(id)) this.perceive(witness);
       this.trigger(id, 'job-completed');
@@ -759,13 +761,13 @@ export class Neighbourhood {
           if (activity.job) {
             const job=activity.job;
             npc.memories=npc.memories.filter(memory=>!(memory.kind==='commitment' && memory.subject===job.businessId));
-            npc.inventory.coins!+=job.wage; npc.needs.income=Math.max(0,npc.needs.income-.3);
+            npc.inventory.coins!+=job.wage; npc.needs.income=Math.max(0,npc.needs.income-personalRules.workIncomeRelief);
             this.state.town!.produced+=job.output; this.state.resources.supplierGoods+=job.output;
             if (job.output) this.state.resources.revision++;
             this.record('paid-work-completed',id,[id],job.businessId,'Completed physical work; received held wage and deposited any produced supplies',{wage:job.wage,quantity:job.output},'outcome');
           }
           if (activity.resting) {
-            npc.needs.rest=Math.max(0,(npc.needs.rest ?? 0)-activity.resting*.01);
+            npc.needs.rest=Math.max(0,(npc.needs.rest ?? 0)-activity.resting*personalRules.restReliefPerSecond);
             this.record('rest-completed',id,[id],npc.node,'Rest reduced personal fatigue',{},'outcome');
           }
           npc.activity = { kind: 'idle' }; npc.revision++;

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "mode": "offline-only",
+  "liveMetaCalls": 0,
+  "tests": {
+    "total": 388,
+    "passed": 388,
+    "failed": 0,
+    "files": 28
+  },
+  "typecheck": "passed",
+  "productionBuild": "passed; existing 603.59 kB routes chunk advisory",
+  "historicalRequestReprojections": 165,
+  "maximumProjectedCharacters": 16412,
+  "hardCharacterCap": 24000,
+  "exactNewTokenCounts": "unverified; provider preflight required after approval",
+  "originalEvidenceSha256": "2001a9a02f5e34888e2d757cb2b6aae85b2d99f7983e9df174fd839ad503f72a",
+  "defaultDeadlineMs": 20000,
+  "proposedOptInDeadlineMs": 30000,
+  "fullRunReservationUsd": 3.7408,
+  "source": "output/decision-grounding-tests.json"
+}
