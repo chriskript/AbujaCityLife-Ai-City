@@ -1,0 +1,2196 @@
+{
+  "id": "7g-http-reliability-20261103T123036Z",
+  "kind": "actual-live-meta",
+  "decisions": [
+    {
+      "number": 1,
+      "actor": "musa",
+      "time": 0.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-1",
+      "decision": {
+        "action": {
+          "destination": "community-office-work",
+          "type": "travel"
+        },
+        "goalId": "earn",
+        "reason": "Income need is high and no transport jobs pending; moving to offices to check general work outweighs resting now."
+      },
+      "validation": {
+        "id": "event-80",
+        "time": 0.25,
+        "type": "action-validated",
+        "actor": "musa",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-1",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6566,
+        "inputTokens": 4625,
+        "outputTokens": 358,
+        "estimatedCostUsd": 0.00730275
+      },
+      "latencyMs": 6574,
+      "preflightTokens": 4768
+    },
+    {
+      "number": 2,
+      "actor": "amina",
+      "time": 0.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-2",
+      "decision": {
+        "action": {
+          "businessId": "market",
+          "quantity": 2,
+          "type": "order-external"
+        },
+        "goalId": "restock",
+        "reason": "Stock need is high and I am at my market desk with supply available, so ordering inputs now to restock and serve customers later."
+      },
+      "validation": null,
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 7536,
+        "inputTokens": 5427,
+        "outputTokens": 672,
+        "estimatedCostUsd": 0.00963975
+      },
+      "latencyMs": 7540,
+      "preflightTokens": 5570
+    },
+    {
+      "number": 3,
+      "actor": "zainab",
+      "time": 0.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-3",
+      "decision": {
+        "action": {
+          "destination": "market",
+          "type": "travel"
+        },
+        "goalId": "food",
+        "reason": "Hunger is 0.8 with no food carried; market sells food for 2 coins and I have 6, so go there to check stock and buy."
+      },
+      "validation": {
+        "id": "event-85",
+        "time": 0.75,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-3",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5880,
+        "inputTokens": 4830,
+        "outputTokens": 325,
+        "estimatedCostUsd": 0.00741875
+      },
+      "latencyMs": 5887,
+      "preflightTokens": 4973
+    },
+    {
+      "number": 4,
+      "actor": "chris",
+      "time": 1,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-4",
+      "decision": {
+        "action": {
+          "destination": "repair-shop-work",
+          "type": "travel"
+        },
+        "goalId": "earn",
+        "reason": "Income need is high so heading to workshop for paid repair work before social errands."
+      },
+      "validation": {
+        "id": "event-89",
+        "time": 1,
+        "type": "action-validated",
+        "actor": "chris",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-4",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5621,
+        "inputTokens": 5320,
+        "outputTokens": 508,
+        "estimatedCostUsd": 0.008809
+      },
+      "latencyMs": 5629,
+      "preflightTokens": 5463
+    },
+    {
+      "number": 5,
+      "actor": "fatima",
+      "time": 1.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-5",
+      "decision": {
+        "action": {
+          "seconds": 60,
+          "type": "rest"
+        },
+        "goalId": "personal",
+        "reason": "Tired after shift at home with no food held; resting now restores capacity before seeking a meal or care work."
+      },
+      "validation": {
+        "id": "event-93",
+        "time": 1.25,
+        "type": "action-validated",
+        "actor": "fatima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-5",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5205,
+        "inputTokens": 4899,
+        "outputTokens": 368,
+        "estimatedCostUsd": 0.00768775
+      },
+      "latencyMs": 5210,
+      "preflightTokens": 5042
+    },
+    {
+      "number": 6,
+      "actor": "tunde",
+      "time": 1.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-6",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At workshop with funded repair work available; taking it supports income and customer base while food/rest needs are low."
+      },
+      "validation": {
+        "id": "event-97",
+        "time": 1.5,
+        "type": "action-validated",
+        "actor": "tunde",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-6",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6402,
+        "inputTokens": 4959,
+        "outputTokens": 231,
+        "estimatedCostUsd": 0.0071805
+      },
+      "latencyMs": 6408,
+      "preflightTokens": 5102
+    },
+    {
+      "number": 7,
+      "actor": "halima",
+      "time": 1.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-7",
+      "decision": {
+        "action": {
+          "businessId": "supply-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At the supply desk with a funded opening matching my skill; working protects income and keeps supplies moving before handling food."
+      },
+      "validation": {
+        "id": "event-101",
+        "time": 1.75,
+        "type": "action-validated",
+        "actor": "halima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-7",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6570,
+        "inputTokens": 5259,
+        "outputTokens": 357,
+        "estimatedCostUsd": 0.008091
+      },
+      "latencyMs": 6571,
+      "preflightTokens": 5402
+    },
+    {
+      "number": 8,
+      "actor": "ibrahim",
+      "time": 2,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-8",
+      "decision": {
+        "action": {
+          "destination": "centre",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is high and supply work requires presence at centre desk, so travel there first before food or rest."
+      },
+      "validation": {
+        "id": "event-105",
+        "time": 2,
+        "type": "action-validated",
+        "actor": "ibrahim",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-8",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4136,
+        "inputTokens": 4614,
+        "outputTokens": 255,
+        "estimatedCostUsd": 0.00685125
+      },
+      "latencyMs": 4139,
+      "preflightTokens": 4757
+    },
+    {
+      "number": 9,
+      "actor": "yusuf",
+      "time": 26.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-9",
+      "decision": {
+        "action": {
+          "businessId": "learning-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At learning desk with funded teaching work available; taking it addresses income need."
+      },
+      "validation": {
+        "id": "event-132",
+        "time": 26.5,
+        "type": "action-validated",
+        "actor": "yusuf",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-9",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3833,
+        "inputTokens": 4958,
+        "outputTokens": 265,
+        "estimatedCostUsd": 0.00732375
+      },
+      "latencyMs": 3835,
+      "preflightTokens": 5101
+    },
+    {
+      "number": 10,
+      "actor": "ngozi",
+      "time": 28.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-10",
+      "decision": {
+        "action": {
+          "quantity": 1,
+          "type": "buy"
+        },
+        "goalId": "personal",
+        "reason": "No market work is available and I carry no food with moderate hunger; buying one portion keeps needs manageable while saving coins for work search."
+      },
+      "validation": {
+        "id": "event-138",
+        "time": 28.5,
+        "type": "action-validated",
+        "actor": "ngozi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-10",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 8026,
+        "inputTokens": 5377,
+        "outputTokens": 623,
+        "estimatedCostUsd": 0.009369
+      },
+      "latencyMs": 8027,
+      "preflightTokens": 5520
+    },
+    {
+      "number": 11,
+      "actor": "emeka",
+      "time": 28.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-11",
+      "decision": {
+        "action": {
+          "businessId": "utility-work",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At workshop with funded utility work available; income need is highest so taking dependable repair work before food/rest."
+      },
+      "validation": {
+        "id": "event-151",
+        "time": 28.75,
+        "type": "action-validated",
+        "actor": "emeka",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-11",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3801,
+        "inputTokens": 4926,
+        "outputTokens": 268,
+        "estimatedCostUsd": 0.0072965
+      },
+      "latencyMs": 3803,
+      "preflightTokens": 5069
+    },
+    {
+      "number": 12,
+      "actor": "grace",
+      "time": 29,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-12",
+      "decision": {
+        "action": {
+          "destination": "community-office-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest and errands work is at Community Offices, so going there first to look for paid work."
+      },
+      "validation": {
+        "id": "event-156",
+        "time": 29,
+        "type": "action-validated",
+        "actor": "grace",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-12",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6648,
+        "inputTokens": 4533,
+        "outputTokens": 434,
+        "estimatedCostUsd": 0.00751075
+      },
+      "latencyMs": 6649,
+      "preflightTokens": 4676
+    },
+    {
+      "number": 13,
+      "actor": "ladi",
+      "time": 29.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-13",
+      "decision": {
+        "action": {
+          "destination": "community-office-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest at 0.85, market has zero stock and no eligible job for me here, so I will go to Community Offices to check the errands board."
+      },
+      "validation": {
+        "id": "event-160",
+        "time": 29.25,
+        "type": "action-validated",
+        "actor": "ladi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-13",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4764,
+        "inputTokens": 5352,
+        "outputTokens": 390,
+        "estimatedCostUsd": 0.0083475
+      },
+      "latencyMs": 4766,
+      "preflightTokens": 5495
+    },
+    {
+      "number": 14,
+      "actor": "sadiq",
+      "time": 30.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-14",
+      "decision": {
+        "action": {
+          "destination": "repair-shop-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest and repair work matches my skill, so heading to Tunde's Workshop to seek work despite hunger."
+      },
+      "validation": {
+        "id": "event-164",
+        "time": 30.25,
+        "type": "action-validated",
+        "actor": "sadiq",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-14",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5521,
+        "inputTokens": 5060,
+        "outputTokens": 417,
+        "estimatedCostUsd": 0.00809725
+      },
+      "latencyMs": 5532,
+      "preflightTokens": 5203
+    },
+    {
+      "number": 15,
+      "actor": "maryam",
+      "time": 53.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-15",
+      "decision": {
+        "action": {
+          "seconds": 45,
+          "type": "rest"
+        },
+        "goalId": "personal",
+        "reason": "At home with moderate fatigue and low hunger, resting now best balances personal time before work or social contact."
+      },
+      "validation": {
+        "id": "event-178",
+        "time": 53.5,
+        "type": "action-validated",
+        "actor": "maryam",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-15",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5515,
+        "inputTokens": 4652,
+        "outputTokens": 353,
+        "estimatedCostUsd": 0.00731525
+      },
+      "latencyMs": 5517,
+      "preflightTokens": 4795
+    },
+    {
+      "number": 16,
+      "actor": "bisi",
+      "time": 54,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-16",
+      "decision": {
+        "action": {
+          "businessId": "tailoring-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At my tailoring desk with funded work available; taking it addresses income need before handling food."
+      },
+      "validation": {
+        "id": "event-182",
+        "time": 54,
+        "type": "action-validated",
+        "actor": "bisi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-16",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4496,
+        "inputTokens": 4954,
+        "outputTokens": 244,
+        "estimatedCostUsd": 0.0072295
+      },
+      "latencyMs": 4498,
+      "preflightTokens": 5097
+    },
+    {
+      "number": 17,
+      "actor": "musa",
+      "time": 57.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-17",
+      "decision": {
+        "action": {
+          "businessId": "community-errands",
+          "type": "take-work"
+        },
+        "goalId": "earn",
+        "reason": "Income need is high and funded general work is available here, so taking it beats resting."
+      },
+      "validation": {
+        "id": "event-194",
+        "time": 57.5,
+        "type": "action-validated",
+        "actor": "musa",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-17",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 2539,
+        "inputTokens": 4744,
+        "outputTokens": 217,
+        "estimatedCostUsd": 0.00685225
+      },
+      "latencyMs": 2542,
+      "preflightTokens": 4887
+    },
+    {
+      "number": 18,
+      "actor": "amina",
+      "time": 59,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-18",
+      "decision": {
+        "action": {
+          "businessId": "market",
+          "quantity": 2,
+          "type": "order-external"
+        },
+        "goalId": "restock",
+        "reason": "Stall stock is empty with high restock need, so ordering supply now to serve customers."
+      },
+      "validation": {
+        "id": "event-198",
+        "time": 59,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-18",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 9084,
+        "inputTokens": 5673,
+        "outputTokens": 891,
+        "estimatedCostUsd": 0.010878
+      },
+      "latencyMs": 9086,
+      "preflightTokens": 5816
+    },
+    {
+      "number": 19,
+      "actor": "zainab",
+      "time": 59.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-19",
+      "decision": {
+        "action": {
+          "message": "Hi Amina, I'm looking for food but the stall looks empty - any idea when more may arrive?",
+          "purpose": "ask",
+          "recipient": "amina",
+          "type": "encounter"
+        },
+        "goalId": "food",
+        "reason": "Market stock is currently 0 so I cannot buy; asking nearby trader Amina for food information while I remain at market."
+      },
+      "validation": {
+        "id": "event-202",
+        "time": 59.25,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-19",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5889,
+        "inputTokens": 5210,
+        "outputTokens": 533,
+        "estimatedCostUsd": 0.00877775
+      },
+      "latencyMs": 5891,
+      "preflightTokens": 5353
+    },
+    {
+      "number": 20,
+      "actor": "chris",
+      "time": 59.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-20",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "earn",
+        "reason": "Income need is high and I am at the workshop with funded repair work available, so taking paid work first before social errands."
+      },
+      "validation": {
+        "id": "event-206",
+        "time": 59.5,
+        "type": "action-validated",
+        "actor": "chris",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-20",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4989,
+        "inputTokens": 5520,
+        "outputTokens": 313,
+        "estimatedCostUsd": 0.00823025
+      },
+      "latencyMs": 4992,
+      "preflightTokens": 5663
+    },
+    {
+      "number": 21,
+      "actor": "amina",
+      "time": 80.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-21",
+      "decision": {
+        "action": {
+          "interactionId": "encounter-1",
+          "message": "Thanks for asking - I ordered 2 supplies, due soon. Please check back shortly after delivery.",
+          "response": "clarify",
+          "type": "respond-encounter"
+        },
+        "goalId": "serve",
+        "reason": "Zainab asked about empty stall, so answering with pending order status to serve her."
+      },
+      "validation": {
+        "id": "event-231",
+        "time": 80.5,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-21",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5775,
+        "inputTokens": 5867,
+        "outputTokens": 432,
+        "estimatedCostUsd": 0.00916975
+      },
+      "latencyMs": 5779,
+      "preflightTokens": 6010
+    },
+    {
+      "number": 22,
+      "actor": "halima",
+      "time": 80.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-22",
+      "decision": {
+        "action": {
+          "businessId": "supply-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At the supply desk with a funded matching opening; taking work protects income before handling food needs."
+      },
+      "validation": {
+        "id": "event-235",
+        "time": 80.75,
+        "type": "action-validated",
+        "actor": "halima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-22",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5260,
+        "inputTokens": 5490,
+        "outputTokens": 437,
+        "estimatedCostUsd": 0.00871975
+      },
+      "latencyMs": 5264,
+      "preflightTokens": 5633
+    },
+    {
+      "number": 23,
+      "actor": "ibrahim",
+      "time": 83.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-23",
+      "decision": {
+        "action": {
+          "businessId": "supply-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest at 0.93 and I am already at centre with funded supply work available, so taking work first before food."
+      },
+      "validation": {
+        "id": "event-239",
+        "time": 83.25,
+        "type": "action-validated",
+        "actor": "ibrahim",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-23",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3761,
+        "inputTokens": 4928,
+        "outputTokens": 291,
+        "estimatedCostUsd": 0.00739675
+      },
+      "latencyMs": 3765,
+      "preflightTokens": 5071
+    },
+    {
+      "number": 24,
+      "actor": "ngozi",
+      "time": 83.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-24",
+      "decision": {
+        "action": {
+          "businessId": "market",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest at 0.88 and matching market work is currently available, so I will take the shift before eating my carried food."
+      },
+      "validation": {
+        "id": "event-245",
+        "time": 83.5,
+        "type": "action-validated",
+        "actor": "ngozi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-24",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5410,
+        "inputTokens": 5547,
+        "outputTokens": 437,
+        "estimatedCostUsd": 0.008791
+      },
+      "latencyMs": 5414,
+      "preflightTokens": 5690
+    },
+    {
+      "number": 25,
+      "actor": "ladi",
+      "time": 87.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-25",
+      "decision": {
+        "action": {
+          "businessId": "community-errands",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need 0.88 is highest; eligible community-errands work is funded and available here, so taking it before food/rest."
+      },
+      "validation": {
+        "id": "event-253",
+        "time": 87.5,
+        "type": "action-validated",
+        "actor": "ladi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-25",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4913,
+        "inputTokens": 5316,
+        "outputTokens": 258,
+        "estimatedCostUsd": 0.0077415
+      },
+      "latencyMs": 4918,
+      "preflightTokens": 5459
+    },
+    {
+      "number": 26,
+      "actor": "sadiq",
+      "time": 88.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-26",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest and funded repair work is available here matching my skill, so taking it to earn despite hunger."
+      },
+      "validation": {
+        "id": "event-259",
+        "time": 88.75,
+        "type": "action-validated",
+        "actor": "sadiq",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-26",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4171,
+        "inputTokens": 5374,
+        "outputTokens": 217,
+        "estimatedCostUsd": 0.00763975
+      },
+      "latencyMs": 4175,
+      "preflightTokens": 5517
+    },
+    {
+      "number": 27,
+      "actor": "maryam",
+      "time": 110.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-27",
+      "decision": {
+        "action": {
+          "destination": "community-office-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Fatigue is low and income need is highest, so heading to the offices to look for eligible work before handling food."
+      },
+      "validation": {
+        "id": "event-276",
+        "time": 110.25,
+        "type": "action-validated",
+        "actor": "maryam",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-27",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 8696,
+        "inputTokens": 4780,
+        "outputTokens": 697,
+        "estimatedCostUsd": 0.00893725
+      },
+      "latencyMs": 8701,
+      "preflightTokens": 4923
+    },
+    {
+      "number": 28,
+      "actor": "musa",
+      "time": 110.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-28",
+      "decision": {
+        "action": {
+          "businessId": "community-errands",
+          "type": "take-work"
+        },
+        "goalId": "earn",
+        "reason": "Income need is highest and funded matching work is available here, so taking it now is best."
+      },
+      "validation": {
+        "id": "event-280",
+        "time": 110.5,
+        "type": "action-validated",
+        "actor": "musa",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-28",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3088,
+        "inputTokens": 5026,
+        "outputTokens": 179,
+        "estimatedCostUsd": 0.00704325
+      },
+      "latencyMs": 3093,
+      "preflightTokens": 5169
+    },
+    {
+      "number": 29,
+      "actor": "amina",
+      "time": 112.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-29",
+      "decision": {
+        "action": {
+          "seconds": 10,
+          "type": "wait"
+        },
+        "goalId": "restock",
+        "reason": "Pending 2-unit order due shortly; waiting at market to receive it and serve customers."
+      },
+      "validation": {
+        "id": "event-287",
+        "time": 112.5,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-29",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5210,
+        "inputTokens": 5878,
+        "outputTokens": 360,
+        "estimatedCostUsd": 0.0088775
+      },
+      "latencyMs": 5217,
+      "preflightTokens": 6021
+    },
+    {
+      "number": 30,
+      "actor": "zainab",
+      "time": 112.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-30",
+      "decision": {
+        "action": {
+          "seconds": 30,
+          "type": "wait"
+        },
+        "goalId": "food",
+        "reason": "Market stock is 0 so I cannot buy yet; waiting briefly at market for Amina's expected delivery before asking again."
+      },
+      "validation": {
+        "id": "event-291",
+        "time": 112.75,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-30",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 7501,
+        "inputTokens": 5295,
+        "outputTokens": 569,
+        "estimatedCostUsd": 0.009037
+      },
+      "latencyMs": 7508,
+      "preflightTokens": 5438
+    },
+    {
+      "number": 31,
+      "actor": "fatima",
+      "time": 113.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-31",
+      "decision": {
+        "action": {
+          "destination": "market",
+          "type": "travel"
+        },
+        "goalId": "personal",
+        "reason": "Hunger is rising with no food held and fatigue is low after rest, so heading to market to buy a meal."
+      },
+      "validation": {
+        "id": "event-296",
+        "time": 113.5,
+        "type": "action-validated",
+        "actor": "fatima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-31",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5649,
+        "inputTokens": 5026,
+        "outputTokens": 424,
+        "estimatedCostUsd": 0.0080845
+      },
+      "latencyMs": 5658,
+      "preflightTokens": 5169
+    },
+    {
+      "number": 32,
+      "actor": "tunde",
+      "time": 114,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-32",
+      "decision": {
+        "action": {
+          "destination": "market",
+          "type": "travel"
+        },
+        "goalId": "personal",
+        "reason": "No food carried and workshop work unavailable; going to market to keep hunger manageable."
+      },
+      "validation": {
+        "id": "event-300",
+        "time": 114,
+        "type": "action-validated",
+        "actor": "tunde",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-32",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 7978,
+        "inputTokens": 5367,
+        "outputTokens": 593,
+        "estimatedCostUsd": 0.009229
+      },
+      "latencyMs": 7984,
+      "preflightTokens": 5510
+    },
+    {
+      "number": 33,
+      "actor": "halima",
+      "time": 131.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-33",
+      "decision": {
+        "action": {
+          "destination": "market",
+          "type": "travel"
+        },
+        "goalId": "personal",
+        "reason": "Hunger is my highest need at 0.56 with no food carried, while income need is low and desk stock is healthy at 14, so I will go to the market to buy food next."
+      },
+      "validation": {
+        "id": "event-342",
+        "time": 131.5,
+        "type": "action-validated",
+        "actor": "halima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-33",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 7089,
+        "inputTokens": 5474,
+        "outputTokens": 638,
+        "estimatedCostUsd": 0.009554
+      },
+      "latencyMs": 7095,
+      "preflightTokens": 5617
+    },
+    {
+      "number": 34,
+      "actor": "ladi",
+      "time": 133,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-34",
+      "decision": {
+        "action": {
+          "businessId": "community-errands",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need 0.61 is highest and funded matching errands work is available here, so taking it before food/rest."
+      },
+      "validation": {
+        "id": "event-358",
+        "time": 133,
+        "type": "action-validated",
+        "actor": "ladi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-34",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4894,
+        "inputTokens": 5593,
+        "outputTokens": 256,
+        "estimatedCostUsd": 0.00807925
+      },
+      "latencyMs": 4902,
+      "preflightTokens": 5736
+    },
+    {
+      "number": 35,
+      "actor": "maryam",
+      "time": 133.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-35",
+      "decision": {
+        "action": {
+          "destination": "market",
+          "type": "travel"
+        },
+        "goalId": "personal",
+        "reason": "No eligible work is open at the offices now, so I will handle rising hunger at the market before checking work again."
+      },
+      "validation": {
+        "id": "event-366",
+        "time": 133.25,
+        "type": "action-validated",
+        "actor": "maryam",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-35",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6452,
+        "inputTokens": 5183,
+        "outputTokens": 490,
+        "estimatedCostUsd": 0.00856125
+      },
+      "latencyMs": 6459,
+      "preflightTokens": 5326
+    },
+    {
+      "number": 36,
+      "actor": "bisi",
+      "time": 133.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-36",
+      "decision": {
+        "action": {
+          "businessId": "tailoring-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At my desk with funded tailoring work available now; taking it secures income first, then I will handle food at market."
+      },
+      "validation": {
+        "id": "event-370",
+        "time": 133.5,
+        "type": "action-validated",
+        "actor": "bisi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-36",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4959,
+        "inputTokens": 5117,
+        "outputTokens": 324,
+        "estimatedCostUsd": 0.00777325
+      },
+      "latencyMs": 4965,
+      "preflightTokens": 5260
+    },
+    {
+      "number": 37,
+      "actor": "amina",
+      "time": 135,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-37",
+      "decision": {
+        "action": {
+          "channel": "text",
+          "memoryId": null,
+          "message": "Hi Zainab, stall is restocked now with 2 portions and open. Come by when ready!",
+          "purpose": "chat",
+          "recipient": "zainab",
+          "type": "communicate"
+        },
+        "goalId": "serve",
+        "reason": "Stall shows 2 in stock and open; informing waiting customer to serve while staying at market."
+      },
+      "validation": {
+        "id": "event-375",
+        "time": 135,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-37",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 8246,
+        "inputTokens": 5932,
+        "outputTokens": 762,
+        "estimatedCostUsd": 0.0106535
+      },
+      "latencyMs": 8253,
+      "preflightTokens": 6075
+    },
+    {
+      "number": 38,
+      "actor": "zainab",
+      "time": 135.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-38",
+      "decision": {
+        "action": {
+          "quantity": 1,
+          "type": "buy"
+        },
+        "goalId": "food",
+        "reason": "Market now shows 2 in stock and sales open, I am very hungry so buying food now."
+      },
+      "validation": {
+        "id": "event-379",
+        "time": 135.25,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-38",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6822,
+        "inputTokens": 5324,
+        "outputTokens": 428,
+        "estimatedCostUsd": 0.008474
+      },
+      "latencyMs": 6828,
+      "preflightTokens": 5467
+    },
+    {
+      "number": 39,
+      "actor": "chris",
+      "time": 151.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-39",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "earn",
+        "reason": "Income need is highest at 0.46 and funded repair work is available here now, so taking paid work before errands or socializing."
+      },
+      "validation": {
+        "id": "event-420",
+        "time": 151.75,
+        "type": "action-validated",
+        "actor": "chris",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-39",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4199,
+        "inputTokens": 5536,
+        "outputTokens": 207,
+        "estimatedCostUsd": 0.00779975
+      },
+      "latencyMs": 4205,
+      "preflightTokens": 5679
+    },
+    {
+      "number": 40,
+      "actor": "zainab",
+      "time": 156.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-40",
+      "decision": {
+        "action": {
+          "quantity": 1,
+          "type": "eat"
+        },
+        "goalId": "food",
+        "reason": "Very hungry with food in hand, eating now to relieve hunger before further errands."
+      },
+      "validation": {
+        "id": "event-431",
+        "time": 156.25,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-40",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6882,
+        "inputTokens": 5712,
+        "outputTokens": 335,
+        "estimatedCostUsd": 0.00856375
+      },
+      "latencyMs": 6890,
+      "preflightTokens": 5855
+    },
+    {
+      "number": 41,
+      "actor": "halima",
+      "time": 156.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-41",
+      "decision": {
+        "action": {
+          "quantity": 1,
+          "type": "buy"
+        },
+        "goalId": "personal",
+        "reason": "Hunger 0.56 is highest need with no food carried. At market with 1 portion in stock and sales open, so buying food now to eat next."
+      },
+      "validation": {
+        "id": "event-435",
+        "time": 156.5,
+        "type": "action-validated",
+        "actor": "halima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-41",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6102,
+        "inputTokens": 5792,
+        "outputTokens": 349,
+        "estimatedCostUsd": 0.00872325
+      },
+      "latencyMs": 6108,
+      "preflightTokens": 5935
+    },
+    {
+      "number": 42,
+      "actor": "yusuf",
+      "time": 156.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-42",
+      "decision": {
+        "action": {
+          "businessId": "learning-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At Learning Centre with funded teaching work available; taking it supports income and livelihood goal."
+      },
+      "validation": {
+        "id": "event-445",
+        "time": 156.75,
+        "type": "action-validated",
+        "actor": "yusuf",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-42",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4261,
+        "inputTokens": 5123,
+        "outputTokens": 265,
+        "estimatedCostUsd": 0.00753
+      },
+      "latencyMs": 4265,
+      "preflightTokens": 5266
+    },
+    {
+      "number": 43,
+      "actor": "emeka",
+      "time": 157.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-43",
+      "decision": {
+        "action": {
+          "businessId": "utility-work",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At workshop with funded repair work available; taking it to keep income steady before handling food and rest."
+      },
+      "validation": {
+        "id": "event-450",
+        "time": 157.25,
+        "type": "action-validated",
+        "actor": "emeka",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-43",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4107,
+        "inputTokens": 5094,
+        "outputTokens": 225,
+        "estimatedCostUsd": 0.00732375
+      },
+      "latencyMs": 4112,
+      "preflightTokens": 5237
+    },
+    {
+      "number": 44,
+      "actor": "sadiq",
+      "time": 161.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-44",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest and funded repair work is available here matching my skill, so take it to earn before handling hunger."
+      },
+      "validation": {
+        "id": "event-456",
+        "time": 161.5,
+        "type": "action-validated",
+        "actor": "sadiq",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-44",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4682,
+        "inputTokens": 5294,
+        "outputTokens": 266,
+        "estimatedCostUsd": 0.007748
+      },
+      "latencyMs": 4690,
+      "preflightTokens": 5437
+    },
+    {
+      "number": 45,
+      "actor": "zainab",
+      "time": 180.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-45",
+      "decision": {
+        "action": {
+          "communicationId": "communication-1",
+          "memoryId": null,
+          "message": "Thanks Amina! Stall looks empty now - any more coming soon?",
+          "response": "clarify",
+          "type": "respond-communication"
+        },
+        "goalId": "food",
+        "reason": "Market shows zero stock so I cannot buy; following up with Amina about restock before errands."
+      },
+      "validation": {
+        "id": "event-485",
+        "time": 180.25,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-45",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 7220,
+        "inputTokens": 5834,
+        "outputTokens": 540,
+        "estimatedCostUsd": 0.0095875
+      },
+      "latencyMs": 7225,
+      "preflightTokens": 5977
+    },
+    {
+      "number": 46,
+      "actor": "musa",
+      "time": 181.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-46",
+      "decision": {
+        "action": {
+          "businessId": "community-errands",
+          "type": "take-work"
+        },
+        "goalId": "earn",
+        "reason": "Income need is high and funded matching work is available here now, so taking it beats travelling to rest."
+      },
+      "validation": {
+        "id": "event-489",
+        "time": 181.75,
+        "type": "action-validated",
+        "actor": "musa",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-46",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4931,
+        "inputTokens": 5384,
+        "outputTokens": 306,
+        "estimatedCostUsd": 0.0080305
+      },
+      "latencyMs": 4934,
+      "preflightTokens": 5527
+    },
+    {
+      "number": 47,
+      "actor": "amina",
+      "time": 184,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-47",
+      "decision": {
+        "action": {
+          "businessId": "market",
+          "quantity": 2,
+          "type": "order-external"
+        },
+        "goalId": "restock",
+        "reason": "Stall shows 0 stock but open with Zainab waiting; ordering 2 portions now to restock while staying at market."
+      },
+      "validation": {
+        "id": "event-493",
+        "time": 184,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-47",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 8550,
+        "inputTokens": 6326,
+        "outputTokens": 747,
+        "estimatedCostUsd": 0.01108225
+      },
+      "latencyMs": 8553,
+      "preflightTokens": 6469
+    },
+    {
+      "number": 48,
+      "actor": "fatima",
+      "time": 184.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-48",
+      "decision": {
+        "action": {
+          "message": "Hi Halima, market stall is empty and I need a meal later — any idea when food returns?",
+          "purpose": "ask",
+          "recipient": "halima",
+          "type": "encounter"
+        },
+        "goalId": "personal",
+        "reason": "Hungry with no food held and market stock empty, so asking nearby Halima for advice while staying at market."
+      },
+      "validation": {
+        "id": "event-497",
+        "time": 184.25,
+        "type": "action-validated",
+        "actor": "fatima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-48",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 10796,
+        "inputTokens": 5740,
+        "outputTokens": 992,
+        "estimatedCostUsd": 0.011391
+      },
+      "latencyMs": 10800,
+      "preflightTokens": 5883
+    },
+    {
+      "number": 49,
+      "actor": "halima",
+      "time": 184.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-49",
+      "decision": {
+        "action": {
+          "quantity": 1,
+          "type": "eat"
+        },
+        "goalId": "personal",
+        "reason": "Hunger is my highest need and I have food carried, so eating now at the market."
+      },
+      "validation": {
+        "id": "event-501",
+        "time": 184.5,
+        "type": "action-validated",
+        "actor": "halima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-49",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4750,
+        "inputTokens": 6027,
+        "outputTokens": 385,
+        "estimatedCostUsd": 0.00917
+      },
+      "latencyMs": 4753,
+      "preflightTokens": 6170
+    },
+    {
+      "number": 50,
+      "actor": "ibrahim",
+      "time": 184.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-50",
+      "decision": {
+        "action": {
+          "businessId": "supply-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At centre with funded supply work available and matching skill; taking paid work first to earn coins for food before eating/resting."
+      },
+      "validation": {
+        "id": "event-505",
+        "time": 184.75,
+        "type": "action-validated",
+        "actor": "ibrahim",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-50",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 3561,
+        "inputTokens": 5189,
+        "outputTokens": 276,
+        "estimatedCostUsd": 0.00765925
+      },
+      "latencyMs": 3563,
+      "preflightTokens": 5332
+    },
+    {
+      "number": 51,
+      "actor": "ngozi",
+      "time": 200.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-51",
+      "decision": {
+        "action": {
+          "businessId": "market",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Funded market work matching my food skill is available now, so I'll take the shift first then eat my carried food for high hunger."
+      },
+      "validation": {
+        "id": "event-510",
+        "time": 200.25,
+        "type": "action-validated",
+        "actor": "ngozi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-51",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 9806,
+        "inputTokens": 6015,
+        "outputTokens": 818,
+        "estimatedCostUsd": 0.01099525
+      },
+      "latencyMs": 9810,
+      "preflightTokens": 6158
+    },
+    {
+      "number": 52,
+      "actor": "grace",
+      "time": 200.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-52",
+      "decision": {
+        "action": {
+          "businessId": "community-errands",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "Income need is highest and funded errands work is available here, so taking paid work first before food or rest."
+      },
+      "validation": {
+        "id": "event-521",
+        "time": 200.5,
+        "type": "action-validated",
+        "actor": "grace",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-52",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4734,
+        "inputTokens": 5088,
+        "outputTokens": 253,
+        "estimatedCostUsd": 0.00743525
+      },
+      "latencyMs": 4736,
+      "preflightTokens": 5231
+    },
+    {
+      "number": 53,
+      "actor": "maryam",
+      "time": 201.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-53",
+      "decision": {
+        "action": {
+          "destination": "community-office-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Market has no food stock to buy now, so I will check the offices for eligible work."
+      },
+      "validation": {
+        "id": "event-528",
+        "time": 201.5,
+        "type": "action-validated",
+        "actor": "maryam",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-53",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5793,
+        "inputTokens": 5603,
+        "outputTokens": 439,
+        "estimatedCostUsd": 0.0088695
+      },
+      "latencyMs": 5796,
+      "preflightTokens": 5746
+    },
+    {
+      "number": 54,
+      "actor": "halima",
+      "time": 204.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-54",
+      "decision": {
+        "action": {
+          "interactionId": "encounter-2",
+          "message": "Still empty at market now. I don't know when food returns, but I'll let you know if I see stock arrive.",
+          "response": "clarify",
+          "type": "respond-encounter"
+        },
+        "goalId": "livelihood",
+        "reason": "Fatima asked about empty stall and I am at the market seeing zero stock, so answer now."
+      },
+      "validation": {
+        "id": "event-532",
+        "time": 204.5,
+        "type": "action-validated",
+        "actor": "halima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-54",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 7786,
+        "inputTokens": 5957,
+        "outputTokens": 726,
+        "estimatedCostUsd": 0.01053175
+      },
+      "latencyMs": 7789,
+      "preflightTokens": 6100
+    },
+    {
+      "number": 55,
+      "actor": "tunde",
+      "time": 207.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-55",
+      "decision": {
+        "action": {
+          "destination": "repair-shop-work",
+          "type": "travel"
+        },
+        "goalId": "livelihood",
+        "reason": "Market stock is currently zero so buying is impossible; returning to workshop to check for repair work and protect income."
+      },
+      "validation": {
+        "id": "event-536",
+        "time": 207.5,
+        "type": "action-validated",
+        "actor": "tunde",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-55",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 9095,
+        "inputTokens": 5821,
+        "outputTokens": 841,
+        "estimatedCostUsd": 0.0108505
+      },
+      "latencyMs": 9099,
+      "preflightTokens": 5964
+    },
+    {
+      "number": 56,
+      "actor": "ladi",
+      "time": 207.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-56",
+      "decision": {
+        "action": {
+          "destination": "market",
+          "type": "travel"
+        },
+        "goalId": "personal",
+        "reason": "No errands work is currently available here and hunger/fatigue are rising, so I will go to the market to check food before resting."
+      },
+      "validation": {
+        "id": "event-540",
+        "time": 207.75,
+        "type": "action-validated",
+        "actor": "ladi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-56",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 8493,
+        "inputTokens": 5478,
+        "outputTokens": 848,
+        "estimatedCostUsd": 0.0104515
+      },
+      "latencyMs": 8498,
+      "preflightTokens": 5621
+    },
+    {
+      "number": 57,
+      "actor": "bisi",
+      "time": 214.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-57",
+      "decision": {
+        "action": {
+          "businessId": "tailoring-desk",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At my desk with funded tailoring work available now; taking it secures income first, then I will handle food at market."
+      },
+      "validation": {
+        "id": "event-554",
+        "time": 214.75,
+        "type": "action-validated",
+        "actor": "bisi",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-57",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4873,
+        "inputTokens": 5323,
+        "outputTokens": 258,
+        "estimatedCostUsd": 0.00775025
+      },
+      "latencyMs": 4875,
+      "preflightTokens": 5466
+    },
+    {
+      "number": 58,
+      "actor": "amina",
+      "time": 219.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-58",
+      "decision": {
+        "action": {
+          "seconds": 30,
+          "type": "wait"
+        },
+        "goalId": "restock",
+        "reason": "Wholesale order of 2 portions due shortly and stall is empty with Zainab waiting; waiting at market to receive delivery then restock."
+      },
+      "validation": {
+        "id": "event-561",
+        "time": 219.75,
+        "type": "action-validated",
+        "actor": "amina",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-58",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6399,
+        "inputTokens": 6407,
+        "outputTokens": 508,
+        "estimatedCostUsd": 0.01016775
+      },
+      "latencyMs": 6401,
+      "preflightTokens": 6550
+    },
+    {
+      "number": 59,
+      "actor": "zainab",
+      "time": 220,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-59",
+      "decision": {
+        "action": {
+          "message": "Hi, I'm Zainab, local resident. Nice to meet you here at the market!",
+          "purpose": "introduce",
+          "recipient": "fatima",
+          "type": "encounter"
+        },
+        "goalId": "food",
+        "reason": "Market is empty and Amina is unavailable, so meeting neighbours here while watching for restock."
+      },
+      "validation": {
+        "id": "event-565",
+        "time": 220,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-59",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 8397,
+        "inputTokens": 5784,
+        "outputTokens": 876,
+        "estimatedCostUsd": 0.010953
+      },
+      "latencyMs": 8399,
+      "preflightTokens": 5927
+    },
+    {
+      "number": 60,
+      "actor": "fatima",
+      "time": 220.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-60",
+      "decision": {
+        "action": {
+          "interactionId": "encounter-3",
+          "message": "Hi Zainab, nice to meet you! I'm Fatima, community nurse here. Hope to chat again soon.",
+          "response": "accept",
+          "type": "respond-encounter"
+        },
+        "goalId": "personal",
+        "reason": "Acknowledge new neighbour's introduction at market to stay sociable while hungry with no stock."
+      },
+      "validation": {
+        "id": "event-569",
+        "time": 220.25,
+        "type": "action-validated",
+        "actor": "fatima",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-60",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5883,
+        "inputTokens": 5870,
+        "outputTokens": 407,
+        "estimatedCostUsd": 0.00906725
+      },
+      "latencyMs": 5885,
+      "preflightTokens": 6013
+    },
+    {
+      "number": 61,
+      "actor": "sadiq",
+      "time": 224,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-61",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "livelihood",
+        "reason": "At workshop with funded repair work matching my skill; earning first then handling food."
+      },
+      "validation": {
+        "id": "event-576",
+        "time": 224,
+        "type": "action-validated",
+        "actor": "sadiq",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-61",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4359,
+        "inputTokens": 5413,
+        "outputTokens": 243,
+        "estimatedCostUsd": 0.007799
+      },
+      "latencyMs": 4362,
+      "preflightTokens": 5556
+    },
+    {
+      "number": 62,
+      "actor": "musa",
+      "time": 228.75,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-62",
+      "decision": {
+        "action": {
+          "businessId": "community-errands",
+          "type": "take-work"
+        },
+        "goalId": "earn",
+        "reason": "Funded matching work is available here now and needs are low, so taking it beats resting or travelling."
+      },
+      "validation": {
+        "id": "event-586",
+        "time": 228.75,
+        "type": "action-validated",
+        "actor": "musa",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-62",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 4663,
+        "inputTokens": 5470,
+        "outputTokens": 266,
+        "estimatedCostUsd": 0.007968
+      },
+      "latencyMs": 4665,
+      "preflightTokens": 5613
+    },
+    {
+      "number": 63,
+      "actor": "chris",
+      "time": 239.5,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-63",
+      "decision": {
+        "action": {
+          "businessId": "repair-workshop",
+          "type": "take-work"
+        },
+        "goalId": "earn",
+        "reason": "Funded repair work is available here now and matches my skill, so taking it before rest or food errands."
+      },
+      "validation": {
+        "id": "event-604",
+        "time": 239.5,
+        "type": "action-validated",
+        "actor": "chris",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-63",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 5932,
+        "inputTokens": 5678,
+        "outputTokens": 372,
+        "estimatedCostUsd": 0.0086785
+      },
+      "latencyMs": 5933,
+      "preflightTokens": 5821
+    },
+    {
+      "number": 64,
+      "actor": "zainab",
+      "time": 243.25,
+      "requestId": "7g-http-reliability-20261103T123036Z-world:decision-64",
+      "decision": {
+        "action": {
+          "message": "Hi, I'm Zainab, local resident. Nice to meet you here at the market!",
+          "purpose": "introduce",
+          "recipient": "halima",
+          "type": "encounter"
+        },
+        "goalId": "food",
+        "reason": "Market stock is empty so I will stay here and meet a new neighbour while watching for restock."
+      },
+      "validation": {
+        "id": "event-613",
+        "time": 243.25,
+        "type": "action-validated",
+        "actor": "zainab",
+        "subject": "7g-http-reliability-20261103T123036Z-world:decision-64",
+        "detail": "accepted",
+        "data": {
+          "accepted": true
+        }
+      },
+      "metrics": {
+        "model": "muse-spark-1.3",
+        "latencyMs": 6769,
+        "inputTokens": 6010,
+        "outputTokens": 589,
+        "estimatedCostUsd": 0.01001575
+      },
+      "latencyMs": 6770,
+      "preflightTokens": 6153
+    }
+  ]
+}

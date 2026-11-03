@@ -1,25 +1,36 @@
-﻿# Submission walkthrough — three-minute narration draft
+﻿# Final demonstration walkthrough — November 3
 
-Use the real [HTTP/browser acceptance](nov3-live-http-browser-acceptance.md) and separately labelled earlier evidence. The local application still defaults to offline policies. Never start inference merely to reproduce a scene, resume the interrupted HTTP run, or conceal its persistence failure.
+The clean recording is **`output/playwright/unity-gardens-final-demo.mp4`**, **2:59**, 1280×720 H.264 / 25fps, approximately 5.35MB. It is silent with burned-in explanatory captions. It uses actual browser footage from the [accepted 64-generation reliability evaluation](nov3-http-browser-reliability.md), at normal speed. It is a recording, not a replay that resumes the world.
 
-The actual capture is `output/playwright/unity-gardens-http-review-128s.webm`: approximately 2:08, silent, 1280×720. It is review footage, not a finished submission video. Its genuine live portion shows the town, resident selection, Amina's market and phone; its ending shows backend unavailability. A clean final recording remains gated on persistence reliability. The script below is prepared for the final edit; its timings are editorial targets, not claims that a three-minute video has already been rendered.
+## What the final video shows
 
-## Narration and evidence route
+| Time | Image and explanatory text |
+| --- | --- |
+| 0:00–0:12 | Unity Gardens with the visible Live Meta badge; project title and recorded-live label. |
+| 0:12–0:33 | Town and resident panel: sixteen residents, shared resources and independent choices. |
+| 0:33–0:55 | Amina's actual activity and event feed; Muse receives each deciding resident's scoped knowledge, needs and commitments. |
+| 0:55–1:17 | Live activities and economic events; the world validates proposals and executes movement/payment deterministically. |
+| 1:17–1:33 | Knowing someone, having their number, trust and consent are distinct. |
+| 1:33–2:00 | Amina's real phone opens in read-only inspection; her autonomy continues. |
+| 2:00–2:20 | Legitimately existing Contacts view; no player message is sent or resident control acquired. |
+| 2:20–2:38 | Return to the town. Text explicitly labels observer-free reasoning, refresh and reconnection as additional checks from this run, not footage of the disconnection itself. |
+| 2:38–2:51 | Recorded run result: 64 Muse responses, estimated $0.550113; actual Windows contention recovered safely. |
+| 2:51–2:59 | Whole-neighbourhood view and the guiding principle: we create the possibilities; residents create their own stories. |
 
-**0:00–0:25 — The society.** Show the real town and its visible Live Meta label. “Welcome to Unity Gardens, a fictional neighbourhood in Abuja. Sixteen residents share homes, businesses and a central green. We create the world, its rules and its possibilities. The residents create their own stories.” Select residents and show a home or workplace without taking control.
+The final clip contains no spoken narration. Its text is editorial explanation, not a transcript or fabricated NPC speech. Calls in the game have no voice audio. The VTT sidecar duplicates the burned-in captions and should not be displayed twice.
 
-**0:25–0:55 — Independent choices.** “Muse reasons about meaningful choices using each resident's own knowledge, background, needs and commitments. Here, some residents chose work, while Fatima and Maryam chose rest. The world validates proposals; movement, timers, stock and payments execute deterministically.” Show current actual activities and completed wage events. Do not call work acceptance a completed job.
+## Evidence behind the explanation
 
-**0:55–1:25 — A connected economy.** Cut to clearly labelled recorded decisions and events from the same HTTP run. “Amina independently ordered six food portions from a finite external wholesaler and paid six credits. Zainab asked about the shortage. After delivery, Amina replied that food was available; Zainab later bought a portion. These are separately generated choices linked by real world events.” Reference decisions 2, 20, 21 and 37; do not claim the reply alone caused the purchase.
+The session completed 64 responses, 63 accepted actions and one safely discarded pause-boundary response, with no action rejection or offline substitution. All sixteen residents reasoned. It recorded an independent Amina–Zainab exchange and subsequent food purchases, further introductions/responses, paid replenishment and completed work. No new contact, relationship-counter change or structured social meeting occurred in this run. Earlier 200-generation and Grace–Maryam evidence remain separate; they are not spliced into this recording.
 
-**1:25–1:55 — Relationships have boundaries.** Show genuine phone/Contacts footage. “Knowing someone is different from having their number, trusting them or agreeing to meet. In a separate 200-response run, Musa voluntarily shared his number. In another earlier run, Grace and Maryam independently introduced themselves, invited, accepted and both attended. Extended hangout conversation and lasting friendship remain unproven.” Clearly identify each separate run in the final edit; do not splice them into this run's timeline.
+The reliability report documents 1,107 successful authoritative checkpoint replacements, a 10m 18.6s continuously unpaused interval and 177 writes beyond 8½ minutes. One session-file EPERM recovered in 38.3ms. This supports the bounded local demonstration without claiming Windows contention is eliminated or that the longer retry tail caused recovery.
 
-**1:55–2:25 — A society beyond the observer.** Show the actual pause/refresh and disconnection measurements as recorded evidence, not fabricated gameplay. “The browser connected to the actual Muse session. All sixteen residents were selectable. Pausing and refreshing kept the same world. With no browser observer for over a minute, real model decisions continued; reconnecting showed the resulting stock, purchases and completed work.” Do not imply time advances while deliberately paused.
+## Verified recording checks
 
-**2:25–3:00 — Authority and the open future.** Show the interruption honestly and return to the project title/evidence summary. “Mistakes can become new information without automatic correction. Serious failures stop. This acceptance test returned 43 Muse decisions and cost about 35 cents before Windows denied a checkpoint replacement. The browser froze without switching to offline reasoning. The focused repair passes offline tests; live confirmation is still pending. Our strongest sustained run has 200 responses across sixteen residents. This is an evolving society with consequences, not a predetermined success story.”
+- All 4,475 frames decoded without error; exact duration 179 seconds and continuous 25fps timing.
+- Eight encoded samples visually reviewed for legibility, caption placement, mode visibility and phone controls. No credentials or raw model inputs appear.
+- Chrome playback, seeking to the phone scene and subsequent frame advancement passed.
+- Original raw capture and working remux retained; source-in 50s / source-out 229s, no retiming or repeated footage.
+- Python render/verification project and manifests: `output/playwright/final-demo-project/`. Editing uses isolated local PyAV/Pillow libraries, not the model provider.
 
-## Final edit checks
-
-Keep the total at or below three minutes through clear editing, never accelerated speech, repeated footage or artificial padding. Preserve the original capture. No credentials, token form contents, raw private model inputs or local filesystem secrets should appear. Calls are simulated and have no voice audio. Do not add fictional conversations, promises or successful outcomes to the narration.
-
-The [submission materials](submission-materials.md) contain draft fields, recording assets, public-access requirements and outstanding publication gates. The latest report is the source of truth for test/build results and remaining blockers. Upload, public hosting, commit and push remain unapproved.
+The [submission materials](submission-materials.md) contain final public-facing copy, repository/access checks and release gates. Publication, commit, push, deployment and final submission require owner approval. Do not expose the loopback operator service as a public demo.

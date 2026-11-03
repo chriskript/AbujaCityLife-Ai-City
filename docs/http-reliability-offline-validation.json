@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-03",
+  "tests": {
+    "passed": 409,
+    "failed": 0,
+    "files": 32,
+    "durationSeconds": 384.47
+  },
+  "focusedTests": 23,
+  "typecheck": "passed both projects",
+  "productionBuild": "passed; existing large routes-chunk advisory",
+  "newPaidCallsAfterRun": 0,
+  "recording": {
+    "video": "unity-gardens-final-demo.mp4",
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "fps": "25/1",
+    "frames": 4475,
+    "durationSeconds": 179,
+    "audioStreams": 0,
+    "decodeErrors": 0,
+    "continuousFrameTiming": true,
+    "qaSampleSeconds": [
+      0,
+      34,
+      63,
+      100,
+      130,
+      155,
+      165,
+      175
+    ],
+    "noApiCalls": true,
+    "browserPlayback": {
+      "duration": 179,
+      "width": 1280,
+      "height": 720,
+      "error": null,
+      "playing": true,
+      "advanced": true
+    },
+    "visualReview": "Eight representative encoded samples inspected; captions and phone controls readable, live badge retained."
+  }
+}

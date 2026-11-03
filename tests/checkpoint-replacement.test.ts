@@ -1,12 +1,22 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { rename } from 'node:fs/promises';
 import { replaceCheckpoint } from '../server/persistence/replace-checkpoint.js';
+import {channel} from 'node:diagnostics_channel';
 
 vi.mock('node:fs/promises', async importOriginal => ({ ...await importOriginal<typeof import('node:fs/promises')>(), rename: vi.fn() }));
 const replacement = vi.mocked(rename);
 afterEach(() => { vi.resetAllMocks(); });
 const failure = (code: string) => Object.assign(new Error(code), { code });
 describe('atomic checkpoint replacement', () => {
+  it('reports contention and a successful replacement without changing retry semantics or exposing contents',async()=>{
+    const records:any[]=[],c=channel('citylab.checkpoint.replace'),listener=(r:unknown)=>{records.push(r);};c.subscribe(listener);
+    try{
+      replacement.mockRejectedValueOnce(failure('EPERM')).mockResolvedValueOnce();
+      await replaceCheckpoint('flushed.pending','saved.json','win32');
+      expect(records).toEqual([expect.objectContaining({source:'flushed.pending',target:'saved.json',outcome:'contention',code:'EPERM',attempt:1}),expect.objectContaining({outcome:'replaced',attempt:2})]);
+      expect(records.every(r=>Object.keys(r).every(k=>['source','target','outcome','code','attempt','elapsedMs'].includes(k)))).toBe(true);
+    }finally{c.unsubscribe(listener);}
+  });
   it('retries a transient Windows denial using the same source and destination', async () => {
     replacement.mockRejectedValueOnce(failure('EPERM')).mockRejectedValueOnce(failure('EBUSY')).mockResolvedValueOnce();
     await replaceCheckpoint('already-flushed.pending', 'last-good.json', 'win32');

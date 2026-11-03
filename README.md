@@ -61,7 +61,7 @@ AI Town is a separate hackathon entry that builds on the broader Abuja City Life
 - [Local operation and controls](docs/backend.md)
 - [Simulation architecture](docs/architecture.md)
 - [Muse: live validation and limitations](docs/nov3-autonomous-society-validation.md)
-- [Real Muse browser acceptance and current demonstration readiness](docs/nov3-live-http-browser-acceptance.md)
+- [Accepted live Muse browser reliability and demonstration](docs/nov3-http-browser-reliability.md)
 - [Submission walkthrough](docs/submission-walkthrough.md)
 - [Project provenance and attribution](docs/provenance.md)
 
