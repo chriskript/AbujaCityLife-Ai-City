@@ -1,12 +1,18 @@
 import * as THREE from 'three';
 import { createWorld, landmarkLabels } from './world.js';
 import { createTownWorld } from './town-world.js';
+import { cityGate } from './town-scenery.js';
 import { MapControls } from 'three/addons/controls/MapControls.js';
 import { mapFor,type MapId } from '../../../shared/world/town-layout.js';
 import { townFurnishings } from '../../../shared/world/town-planning.js';
 import { createInhabitants } from './inhabitants.js';
 import type { ActorPose, NeighbourhoodView } from '../../../shared/neighbourhood/presentation.js';
 import { type NpcId } from '../../../shared/neighbourhood/types.js';
+
+function disposeSceneryMaterial(material:THREE.Material):void {
+  if('map' in material)(material.map as THREE.Texture|null)?.dispose();
+  material.dispose();
+}
 
 export class NeighbourhoodScene {
   readonly renderer: THREE.WebGLRenderer;
@@ -132,7 +138,7 @@ export class NeighbourhoodScene {
   }
   private setMap(id:MapId):void {
     if(id===this.mapId)return;this.mapId=id;this.population?.cargo.removeFromParent();this.scene.remove(this.world.group);
-    const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>();this.world.group.traverse(child=>{if(child instanceof THREE.Mesh){geometries.add(child.geometry);for(const mat of Array.isArray(child.material)?child.material:[child.material])materials.add(mat);}});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());
+    const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>();this.world.group.traverse(child=>{if(child instanceof THREE.Mesh){geometries.add(child.geometry);for(const mat of Array.isArray(child.material)?child.material:[child.material])materials.add(mat);}});geometries.forEach(g=>g.dispose());materials.forEach(disposeSceneryMaterial);
     this.world=id==='town-v1'?createTownWorld():createWorld();this.scene.add(this.world.group);this.world.taxi.scale.setScalar(1.3);this.world.taxi.userData.npcId='musa';if(this.population)this.world.taxi.add(this.population.cargo);
     this.controls?.dispose();this.controls=null;this.buildingLabels.forEach(label=>label.remove());this.buildingLabels.clear();
     if(id==='town-v1'){
@@ -144,6 +150,7 @@ export class NeighbourhoodScene {
       this.controls=new MapControls(this.camera,this.renderer.domElement);this.controls.target.copy(this.target);this.controls.enableRotate=false;this.controls.enableDamping=true;this.controls.screenSpacePanning=false;this.controls.minDistance=65;this.controls.maxDistance=1500;this.controls.zoomSpeed=.8;this.showOverview();
       this.controls.addEventListener('start',()=>{this.follow=false;this.cameraBuilding=null;this.onPan?.();});
       for(const building of mapFor(id).buildings){const button=document.createElement('button');button.className='building-marker';button.dataset.building=building.id;button.addEventListener('click',()=>this.selectBuilding?.(building.id),{signal:this.populationListeners!.signal});document.querySelector('#building-labels')?.append(button);this.buildingLabels.set(building.id,button);}
+      const gateLabel=document.createElement('button');gateLabel.className='building-marker';gateLabel.dataset.building=cityGate.id;gateLabel.addEventListener('click',()=>this.selectBuilding?.(cityGate.id),{signal:this.populationListeners!.signal});document.querySelector('#building-labels')?.append(gateLabel);this.buildingLabels.set(cityGate.id,gateLabel);
     }
     this.populationPlaced=false;
   }
@@ -190,6 +197,11 @@ export class NeighbourhoodScene {
     const focused = view.actors.find(actor => actor.id === selected) ?? musa;
     this.render(musa.pose, seconds, focused.pose);
     const actorLabelRects:{left:number;right:number;top:number;bottom:number}[]=[];
+    const origin=this.container.getBoundingClientRect();
+    for(const element of document.querySelectorAll<HTMLElement>('.places-panel:not([hidden]),.inhabitant-panel:not([hidden]),.activity-feed:not([hidden]),.town-navigation,.scene-caption,.view-controls,.neighbourhood-bar')){
+      const rect=element.getBoundingClientRect();
+      actorLabelRects.push({left:rect.left-origin.left,right:rect.right-origin.left,top:rect.top-origin.top,bottom:rect.bottom-origin.top});
+    }
     const labelOrder=view.actors.map((actor,index)=>({actor,index})).sort((a,b)=>Number(b.actor.id===selected)-Number(a.actor.id===selected));
     for (const {index,actor} of labelOrder) {
       const position = population.models[actor.id]!.group.position;
@@ -204,25 +216,28 @@ export class NeighbourhoodScene {
       const x=(this.projection.x+1)*this.container.clientWidth/2+horizontalOffset,y=(1-this.projection.y)*this.container.clientHeight/2+labelOffset;
       const width=actor.name.length*7+26,rect={left:x-width/2,right:x+width/2,top:y-40,bottom:y};
       if(!marker.hidden){
-        if(actor.id!==selected && actorLabelRects.some(other=>rect.left<other.right+5 && rect.right>other.left-5 && rect.top<other.bottom+5 && rect.bottom>other.top-5))marker.hidden=true;
+        if(actorLabelRects.some(other=>rect.left<other.right+5 && rect.right>other.left-5 && rect.top<other.bottom+5 && rect.bottom>other.top-5))marker.hidden=true;
         else actorLabelRects.push(rect);
       }
     }
     for (const [id,model] of Object.entries(population.models)) if (!view.actors.some(actor => actor.id === id)) { model.group.visible = false; this.actorLabels.get(id)!.hidden = true; }
     this.populationPlaced = true;
-    const labelRects:{left:number;right:number;top:number;bottom:number}[]=[];
+    const labelRects=actorLabelRects;
     const distance=this.controls?this.camera.position.distanceTo(this.controls.target):0;
-    for(const building of [...mapFor(this.mapId).buildings].sort((a,b)=>Number(a.kind==='flats')-Number(b.kind==='flats'))){
+    const candidates=[...mapFor(this.mapId).buildings,...(this.mapId==='town-v1'?[{...cityGate,name:'Abuja City Gate',floors:2,kind:'landmark',units:[]}]:[])];
+    const priority=(id:string)=>id===this.cameraBuilding?0:id==='market-stalls'?1:id===cityGate.id?2:id==='community-office'?3:4;
+    for(const building of candidates.sort((a,b)=>priority(a.id)-priority(b.id))){
       const marker=this.buildingLabels.get(building.id)!;const occupants=view.actors.filter(actor=>actor.insideBuildingId===building.id);
-      marker.textContent=`${building.name}${occupants.length?` · ${occupants.length} indoors`:''}`;marker.setAttribute('aria-label',`Inspect ${building.name}`);
+      const caption=building.name;if(marker.textContent!==caption)marker.textContent=caption;marker.setAttribute('aria-label',`Inspect ${building.name}${occupants.length?`, ${occupants.length} indoors`:''}`);marker.dataset.context=String(building.id===this.cameraBuilding);
       this.projection.set(building.x,building.floors*7+4,building.z).project(this.camera);
       marker.style.transform=`translate(${(this.projection.x+1)*this.container.clientWidth/2}px,${(1-this.projection.y)*this.container.clientHeight/2}px) translate(-50%,-100%)`;
-      marker.hidden=this.projection.z>1 || Math.abs(this.projection.x)>.95 || Math.abs(this.projection.y)>.95 || this.camera.position.distanceTo(this.controls!.target)>420 && !['flats','market','office'].includes(building.kind) && building.id!==this.cameraBuilding && !occupants.some(actor=>actor.id===selected);
-      if(this.container.clientWidth<600 && distance>420 && !['market','office'].includes(building.kind))marker.hidden=true;
+      const contextual=building.id===this.cameraBuilding || this.follow && occupants.some(actor=>actor.id===selected);
+      marker.hidden=this.projection.z>1 || Math.abs(this.projection.x)>.95 || Math.abs(this.projection.y)>.95 || !contextual && distance>(priority(building.id)<4?1500:building.units.length?260:340);
+      if(this.container.clientWidth<600 && distance>420 && priority(building.id)>2 && !contextual)marker.hidden=true;
       const x=(this.projection.x+1)*this.container.clientWidth/2,y=(1-this.projection.y)*this.container.clientHeight/2;
-      const width=(marker.textContent?.length ?? 0)*6+24,rect={left:x-width/2,right:x+width/2,top:y-38,bottom:y+3};
+      const width=(marker.textContent?.length ?? 0)*6.5+24,rect={left:x-width/2,right:x+width/2,top:y-38,bottom:y+3};
       if(!marker.hidden){
-        if(building.id!==this.cameraBuilding && labelRects.some(other=>rect.left<other.right+6 && rect.right>other.left-6 && rect.top<other.bottom+4 && rect.bottom>other.top-4))marker.hidden=true;
+        if(labelRects.some(other=>rect.left<other.right+6 && rect.right>other.left-6 && rect.top<other.bottom+4 && rect.bottom>other.top-4))marker.hidden=true;
         else labelRects.push(rect);
       }
     }
@@ -239,7 +254,7 @@ export class NeighbourhoodScene {
     if (this.disposed || this.contextLost) return;
     this.world.taxi.position.set(pose.x, 0.1, pose.z); this.world.taxi.rotation.y = pose.heading;
     if(this.controls){
-      if(this.follow || this.cameraBuilding){const map=mapFor(this.mapId),place=map.buildings.find(b=>b.id===this.cameraBuilding) ?? map.nodes.find(n=>n.id===this.cameraBuilding);const x=place?.x ?? cameraPose.x,z=place?.z ?? cameraPose.z;this.desiredTarget.set(x,0,z);this.desiredPosition.set(x+85,115,z+105);const ease=1-Math.exp(-Math.min(seconds,.05)*3);this.camera.position.lerp(this.desiredPosition,ease);this.controls.target.lerp(this.desiredTarget,ease);}
+      if(this.follow || this.cameraBuilding){const map=mapFor(this.mapId),place=this.cameraBuilding===cityGate.id?cityGate:map.buildings.find(b=>b.id===this.cameraBuilding) ?? map.nodes.find(n=>n.id===this.cameraBuilding);const x=place?.x ?? cameraPose.x,z=place?.z ?? cameraPose.z;this.desiredTarget.set(x,0,z);this.desiredPosition.set(x+85,115,z+105);const ease=1-Math.exp(-Math.min(seconds,.05)*3);this.camera.position.lerp(this.desiredPosition,ease);this.controls.target.lerp(this.desiredTarget,ease);}
       const previousTarget=this.controls.target.clone();this.controls.target.x=THREE.MathUtils.clamp(this.controls.target.x,-150,260);this.controls.target.z=THREE.MathUtils.clamp(this.controls.target.z,-150,190);this.camera.position.add(this.controls.target.clone().sub(previousTarget));this.controls.update();
     } else {
     if (this.follow) {
@@ -286,7 +301,7 @@ export class NeighbourhoodScene {
       }
     });
     for (const geometry of geometries) geometry.dispose();
-    for (const material of materials) material.dispose();
+    for (const material of materials) disposeSceneryMaterial(material);
     this.scene.traverse(object => { if (object instanceof THREE.DirectionalLight) object.shadow.dispose(); });
     this.renderer.dispose(); this.renderer.domElement.remove(); this.labels.replaceChildren();
   }

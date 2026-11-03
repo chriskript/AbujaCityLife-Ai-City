@@ -7,6 +7,7 @@ import type { NpcId } from '../../shared/neighbourhood/types.js';
 import { ResidentPhone } from './resident-phone.js';
 import { mapFor,buildingFor } from '../../shared/world/town-layout.js';
 import { zoneFor, publicSpaces } from '../../shared/world/town-planning.js';
+import { cityGate } from './rendering/town-scenery.js';
 
 document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = 'Observe life in Unity Gardens, a fictional residential community in Abuja.';
 document.querySelector('#experience')!.innerHTML = `
@@ -160,7 +161,17 @@ function updateUi(force = false): void {
   const buildings=mapFor(view.mapId).buildings;
   if(buildingMap!==view.mapId){buildingMap=view.mapId;el<HTMLSelectElement>('#building-picker').replaceChildren(new Option('Choose a destination',''),...publicSpaces.filter(place=>mapFor(view.mapId).nodes.some(node=>node.id===place.id)).map(place=>new Option(place.name,`place:${place.id}`)),...buildings.map(building=>new Option(`${zoneFor(building)} · ${building.name}`,building.id)));selectedBuilding=null;}
   const publicPlace=publicSpaces.find(place=>`place:${place.id}`===selectedBuilding);
-  const building=buildings.find(item=>item.id===selectedBuilding);el('#building-inspector').hidden=!building && !publicPlace;
+  if(view.mapId==='town-v1'){
+    const picker=el<HTMLSelectElement>('#building-picker');
+    if(!Array.from(picker.options).some(option=>option.value===cityGate.id))picker.add(new Option('Landmark · Abuja City Gate',cityGate.id));
+    if(selectedBuilding===cityGate.id){
+      el('#building-inspector').hidden=false;el('#building-name').textContent='Abuja City Gate';
+      el('#building-address').textContent='Landmark · A miniature tribute beside the western approach to Unity Gardens.';
+      el('#building-residents').textContent='Twin swept pylons, a suspended green-and-white Nigeria silhouette and a welcome beam frame a small roadside garden.';
+      picker.value=cityGate.id;
+    }
+  }
+  const building=buildings.find(item=>item.id===selectedBuilding);el('#building-inspector').hidden=!building && !publicPlace && selectedBuilding!==cityGate.id;
   if(publicPlace){
     el('#building-name').textContent=publicPlace.name;el('#building-address').textContent=publicPlace.description;el<HTMLSelectElement>('#building-picker').value=`place:${publicPlace.id}`;
     const visitors=view.actors.filter(actor=>actor.node===publicPlace.id && !actor.moving);el('#building-residents').replaceChildren(...visitors.map(actor=>{const button=document.createElement('button');button.textContent=`${actor.name} · ${actor.activity}`;button.addEventListener('click',()=>select(actor.id));return button;}));

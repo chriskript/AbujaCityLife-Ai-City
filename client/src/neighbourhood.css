@@ -47,6 +47,9 @@ body[data-experience=neighbourhood] .neighbourhood-bar{position:absolute;left:28
 body[data-experience=neighbourhood] #notice{position:absolute;bottom:8px;left:24px;right:24px;text-align:center;line-height:1.3;font-size:10px;color:#315a49;padding:0;pointer-events:none;z-index:3}
 #building-labels,#inhabitant-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}.building-marker,.npc-marker{position:absolute;left:0;top:0;pointer-events:auto;border:1px solid #fff9;background:#fff9e9ed;color:#254b3d;border-radius:9px;padding:7px 10px;font-size:11px;box-shadow:0 3px 12px #17392b18;white-space:nowrap;min-height:34px}
 .npc-marker{border-radius:22px;min-height:40px}.npc-marker[aria-pressed=true]{background:#f0d080;border-color:#d4ae4e;z-index:2}.building-marker:hover{background:#f7e4ad}
+.building-marker{font-size:10px;font-weight:600;letter-spacing:.15px;min-height:28px;padding:6px 9px;border-radius:6px;background:#faf8efd9;box-shadow:0 2px 8px #17392b0d}
+.building-marker::after{content:'';position:absolute;bottom:-6px;left:50%;height:5px;border-left:1px solid #456a4e80}
+.building-marker[data-context=true],.building-marker:focus-visible{background:#f5dfaa;border-color:#c3a464}
 body[data-experience=neighbourhood] input:focus-visible,body[data-experience=neighbourhood] select:focus-visible,body[data-experience=neighbourhood] textarea:focus-visible{outline:3px solid #b68734;outline-offset:3px}
 @media(max-width:900px){body[data-experience=neighbourhood] .topbar{height:66px;padding:0 18px}.brand{font-size:16px}.brand-mark{width:37px;height:37px}.mode-pill{font-size:10px;padding:9px}.inhabitant-panel,.places-panel,.activity-feed{width:320px;right:18px}.town-navigation{right:18px}.scene-caption{left:18px!important}.neighbourhood-bar .cooperation-status .eyebrow{display:none}body[data-experience=neighbourhood] .neighbourhood-bar{gap:16px;left:18px;right:18px}}
 @media(max-width:600px){

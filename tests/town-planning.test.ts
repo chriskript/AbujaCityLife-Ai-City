@@ -6,8 +6,24 @@ import { createTown } from '../shared/neighbourhood/town.js';
 import { Neighbourhood } from '../shared/neighbourhood/world.js';
 import { projectNeighbourhood } from '../shared/neighbourhood/presentation.js';
 import { RemoteNeighbourhoodSession } from '../client/src/simulation/remote-neighbourhood-session.js';
+import { cityGate, createPlanting, sceneryClear, waterfrontBenches, plantingReserves } from '../client/src/rendering/town-scenery.js';
 
 describe('Unity Gardens integrated planning', () => {
+  it('keeps the complete gate footprint and mature planting crowns clear of every access corridor, building and lake', () => {
+    expect(sceneryClear(cityGate, 1)).toBe(true);
+    expect(cityGate.height).toBeLessThanOrEqual(14);
+    for(const bench of waterfrontBenches)expect(sceneryClear(bench)).toBe(true);
+    const plants=createPlanting();
+    expect(plants.length).toBeGreaterThan(40);
+    expect(plants.length).toBeLessThan(150);
+    for(const p of plants){
+      const radius=(p.kind==='tree'?4:1.3)*p.size;
+      expect(sceneryClear({...p,width:radius*2,depth:radius*2},.7),JSON.stringify(p)).toBe(true);
+      for(const reserve of plantingReserves)expect(Math.abs(p.x-reserve.x)>=reserve.width/2+radius+1 || Math.abs(p.z-reserve.z)>=reserve.depth/2+radius+1).toBe(true);
+      expect(Math.abs(p.x-cityGate.x)>=cityGate.width/2+radius+2 || Math.abs(p.z-cityGate.z)>=cityGate.depth/2+radius+2).toBe(true);
+    }
+    expect(sceneryClear({...cityGate,x:0,z:0})).toBe(false);
+  });
   it('keeps every footprint and setback clear of roads, sidewalks, paths, other plots and water', () => {
     expect(validateTownPlan()).toEqual([]);
     expect(validateTownFurnishings()).toEqual([]);
