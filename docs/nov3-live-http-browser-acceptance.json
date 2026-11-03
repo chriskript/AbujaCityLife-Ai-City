@@ -1,0 +1,1476 @@
+{
+  "id": "7g-http-20261103T111807Z",
+  "analysisKind": "offline audit of interrupted live evidence; run not resumed",
+  "stopReason": "checkpoint-replacement-EPERM",
+  "sessionId": "fd858388-7357-4d21-a283-40a716ca9ccd",
+  "sequence": 816,
+  "time": 181.25,
+  "paused": false,
+  "providerGenerations": 43,
+  "tokenPreflights": 43,
+  "providerStatuses": [
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "returned": 43,
+  "accepted": 41,
+  "rejected": [
+    {
+      "number": 36,
+      "actor": "amina",
+      "reason": "encounter-unavailable"
+    }
+  ],
+  "unexecutedReturned": [
+    {
+      "number": 14,
+      "actor": "ngozi",
+      "requestId": "7g-http-20261103T111807Z-world:decision-14"
+    }
+  ],
+  "actors": [
+    "musa",
+    "amina",
+    "zainab",
+    "chris",
+    "fatima",
+    "tunde",
+    "halima",
+    "ibrahim",
+    "yusuf",
+    "ngozi",
+    "emeka",
+    "grace",
+    "ladi",
+    "sadiq",
+    "maryam",
+    "bisi"
+  ],
+  "usage": {
+    "inputTokens": 224966,
+    "outputTokens": 16336,
+    "estimatedUsd": 0.3506355
+  },
+  "pipelineLatencyMs": {
+    "min": 3263,
+    "median": 4732,
+    "max": 9020
+  },
+  "integrity": {
+    "protectedChecks": true,
+    "priorLedgerPreserved": true,
+    "newReservations": 43,
+    "newReservedUsd": 0.804272,
+    "evidenceSha256": "1e871da4057cd5d4059fe767a0a582b20b0aa0477bab382f56465a11906add7c",
+    "checkpointSha256": "cf55af9ae1c25323046de63eaa1c15867e9e875ffcbb79b7c70aa4645b0174a0",
+    "pending": [
+      {
+        "file": "session.json.68f22fc6-84c2-4733-b313-c3b217f7e5d0.pending",
+        "sha256": "52133e30571ea903beb70f161ffbcbcbd4e5655cbb6647a8c6500249944ed56e",
+        "sequence": 817,
+        "time": 181.5,
+        "requests": 43,
+        "paused": false,
+        "worldEqualsCommitted": false
+      }
+    ],
+    "uniqueRequests": true,
+    "eventCount": 226,
+    "repeatedIdenticalEvents": 3854
+  },
+  "counts": {
+    "encounter-noticed": 25,
+    "action-proposed": 42,
+    "action-validated": 42,
+    "intention-selected": 41,
+    "external-order-placed": 1,
+    "rest-started": 2,
+    "paid-work-started": 20,
+    "arrived": 10,
+    "purchase-paid": 3,
+    "buy": 3,
+    "inference-unavailable": 1,
+    "activity-started": 1,
+    "encounter-invited": 2,
+    "external-order-delivered": 1,
+    "rest-completed": 2,
+    "activity-completed": 15,
+    "paid-work-completed": 12,
+    "encounter-accepted": 1,
+    "food-consumed": 1,
+    "action-rejected": 1
+  },
+  "observers": [
+    {
+      "stage": "observer-connected",
+      "time": 0,
+      "observers": 1
+    },
+    {
+      "stage": "observer-disconnected",
+      "time": 54.25,
+      "observers": 0
+    },
+    {
+      "stage": "observer-connected",
+      "time": 54.25,
+      "observers": 1
+    },
+    {
+      "stage": "observer-disconnected",
+      "time": 55.5,
+      "observers": 0
+    },
+    {
+      "stage": "observer-connected",
+      "time": 92.25,
+      "observers": 1
+    },
+    {
+      "stage": "observer-disconnected",
+      "time": 181.25,
+      "observers": 0
+    }
+  ],
+  "scopedAudit": [
+    {
+      "number": 1,
+      "actor": "musa",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 2,
+      "actor": "amina",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 3,
+      "actor": "zainab",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 4,
+      "actor": "chris",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 5,
+      "actor": "fatima",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 6,
+      "actor": "tunde",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 7,
+      "actor": "halima",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 8,
+      "actor": "ibrahim",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 9,
+      "actor": "yusuf",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 10,
+      "actor": "ngozi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 11,
+      "actor": "emeka",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 12,
+      "actor": "grace",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 13,
+      "actor": "ladi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 14,
+      "actor": "ngozi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 15,
+      "actor": "sadiq",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 16,
+      "actor": "maryam",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 17,
+      "actor": "bisi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 18,
+      "actor": "musa",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 19,
+      "actor": "amina",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 20,
+      "actor": "zainab",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 21,
+      "actor": "amina",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 22,
+      "actor": "fatima",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 23,
+      "actor": "tunde",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 24,
+      "actor": "halima",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 25,
+      "actor": "ngozi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 26,
+      "actor": "sadiq",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 27,
+      "actor": "maryam",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 28,
+      "actor": "musa",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 29,
+      "actor": "amina",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 30,
+      "actor": "ngozi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 31,
+      "actor": "chris",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 32,
+      "actor": "ibrahim",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 33,
+      "actor": "yusuf",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 34,
+      "actor": "emeka",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 35,
+      "actor": "grace",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 36,
+      "actor": "amina",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 37,
+      "actor": "zainab",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 38,
+      "actor": "fatima",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 39,
+      "actor": "tunde",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 40,
+      "actor": "halima",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 41,
+      "actor": "ibrahim",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 42,
+      "actor": "ladi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    },
+    {
+      "number": 43,
+      "actor": "ngozi",
+      "ownBiography": true,
+      "onlyOwnInvitations": true,
+      "noUndeliveredRecipientThreads": true,
+      "noUnnotifiedReplies": true,
+      "allPlacesLegitimatelyKnown": true,
+      "privateUnitsOnlyOwn": true,
+      "constraintsPreserved": true,
+      "jobsPreserved": true,
+      "onlyOwnedOffers": true,
+      "onlyOwnOrders": true,
+      "noRemoteSupplyQuote": true,
+      "recoveryOnlyOwn": true
+    }
+  ],
+  "residents": [
+    {
+      "id": "musa",
+      "decisions": 3,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 10,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 12,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 16
+    },
+    {
+      "id": "amina",
+      "decisions": 5,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 24,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 21,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 24
+    },
+    {
+      "id": "zainab",
+      "decisions": 3,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 6,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 1,
+        "rewards": 0,
+        "coins": 4,
+        "food": 1
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 24
+    },
+    {
+      "id": "chris",
+      "decisions": 2,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 4,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 4,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 15
+    },
+    {
+      "id": "fatima",
+      "decisions": 3,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 14,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 1,
+        "rewards": 0,
+        "coins": 12,
+        "food": 1
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 15
+    },
+    {
+      "id": "tunde",
+      "decisions": 3,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 22,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 26,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 11
+    },
+    {
+      "id": "halima",
+      "decisions": 3,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 12,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 16,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 16
+    },
+    {
+      "id": "ibrahim",
+      "decisions": 3,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 3,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 5,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 12
+    },
+    {
+      "id": "yusuf",
+      "decisions": 2,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 9,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 11,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 6
+    },
+    {
+      "id": "ngozi",
+      "decisions": 5,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 5,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 4,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 23
+    },
+    {
+      "id": "emeka",
+      "decisions": 2,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 13,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 15,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 6
+    },
+    {
+      "id": "grace",
+      "decisions": 2,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 2,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 2,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 10
+    },
+    {
+      "id": "ladi",
+      "decisions": 2,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 4,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 4,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 20
+    },
+    {
+      "id": "sadiq",
+      "decisions": 2,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 1,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 3,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 11
+    },
+    {
+      "id": "maryam",
+      "decisions": 2,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 18,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 18,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 13
+    },
+    {
+      "id": "bisi",
+      "decisions": 1,
+      "initialInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 8,
+        "food": 0
+      },
+      "finalInventory": {
+        "goods": 0,
+        "rewards": 0,
+        "coins": 10,
+        "food": 0
+      },
+      "contactsChanged": false,
+      "relationshipsChanged": false,
+      "newMemories": 4
+    }
+  ],
+  "economy": {
+    "trade": {
+      "version": 1,
+      "nextId": 2,
+      "sourceRemaining": 234,
+      "spent": 6,
+      "importedFood": 6,
+      "importedInputs": 0,
+      "orders": [
+        {
+          "id": "wholesale-1",
+          "actor": "amina",
+          "businessId": "market",
+          "quantity": 6,
+          "cost": 6,
+          "createdAt": 0.5,
+          "dueAt": 60.5,
+          "status": "delivered"
+        }
+      ]
+    },
+    "resources": {
+      "supplierGoods": 14,
+      "marketGoods": 4,
+      "salesOpen": true,
+      "revision": 7
+    },
+    "completedWork": 12,
+    "wagesPaid": 21,
+    "activeWork": [
+      {
+        "actor": "tunde",
+        "activity": {
+          "kind": "work",
+          "until": 229.25,
+          "job": {
+            "businessId": "repair-workshop",
+            "wage": 2,
+            "inputs": 0,
+            "output": 0
+          }
+        }
+      },
+      {
+        "actor": "halima",
+        "activity": {
+          "kind": "work",
+          "until": 217.5,
+          "job": {
+            "businessId": "supply-desk",
+            "wage": 2,
+            "inputs": 2,
+            "output": 2
+          }
+        }
+      },
+      {
+        "actor": "ibrahim",
+        "activity": {
+          "kind": "work",
+          "until": 217.75,
+          "job": {
+            "businessId": "supply-desk",
+            "wage": 2,
+            "inputs": 2,
+            "output": 2
+          }
+        }
+      },
+      {
+        "actor": "yusuf",
+        "activity": {
+          "kind": "work",
+          "until": 234.5,
+          "job": {
+            "businessId": "learning-desk",
+            "wage": 2,
+            "inputs": 0,
+            "output": 0
+          }
+        }
+      },
+      {
+        "actor": "ngozi",
+        "activity": {
+          "kind": "work",
+          "until": 241,
+          "job": {
+            "businessId": "market",
+            "wage": 1,
+            "inputs": 0,
+            "output": 0
+          }
+        }
+      },
+      {
+        "actor": "emeka",
+        "activity": {
+          "kind": "work",
+          "until": 223.25,
+          "job": {
+            "businessId": "utility-work",
+            "wage": 2,
+            "inputs": 0,
+            "output": 0
+          }
+        }
+      },
+      {
+        "actor": "grace",
+        "activity": {
+          "kind": "work",
+          "until": 193.5,
+          "job": {
+            "businessId": "community-errands",
+            "wage": 1,
+            "inputs": 0,
+            "output": 0
+          }
+        }
+      },
+      {
+        "actor": "ladi",
+        "activity": {
+          "kind": "work",
+          "until": 220.5,
+          "job": {
+            "businessId": "community-errands",
+            "wage": 1,
+            "inputs": 0,
+            "output": 0
+          }
+        }
+      }
+    ],
+    "produced": 6,
+    "consumed": 1,
+    "rawInputs": 86
+  },
+  "social": {
+    "encounters": [
+      {
+        "id": "encounter-1",
+        "initiator": "zainab",
+        "recipient": "amina",
+        "purpose": "ask",
+        "message": "Hi Amina! Market looks out of food right now - do you know when more may arrive or where else to check?",
+        "response": "Hi Zainab! Market has food now - 6 portions in stock and sales are open. Happy to serve you here!",
+        "status": "accepted",
+        "createdAt": 55.75,
+        "expiresAt": 145.75
+      },
+      {
+        "id": "encounter-2",
+        "initiator": "amina",
+        "recipient": "ngozi",
+        "purpose": "introduce",
+        "message": "Hi! I'm Amina, market trader here. Welcome to Market Square!",
+        "response": null,
+        "status": "pending",
+        "createdAt": 119.5,
+        "expiresAt": 209.5
+      }
+    ],
+    "phoneThreads": 0,
+    "structuredSocialInvitations": 0,
+    "contactChanges": [],
+    "relationshipChanges": []
+  },
+  "browser": {
+    "pauseBefore": {
+      "id": "7g-http-20261103T111807Z",
+      "kind": "live-meta",
+      "mode": "live-meta",
+      "sessionId": "fd858388-7357-4d21-a283-40a716ca9ccd",
+      "worldId": "7g-http-20261103T111807Z-world",
+      "sequence": 249,
+      "time": 54.25,
+      "paused": true,
+      "requests": 14,
+      "returned": 14,
+      "inFlight": 0,
+      "observers": 1,
+      "providerFailed": false,
+      "stopping": false,
+      "wallMs": 194997
+    },
+    "pauseAfter": {
+      "id": "7g-http-20261103T111807Z",
+      "kind": "live-meta",
+      "mode": "live-meta",
+      "sessionId": "fd858388-7357-4d21-a283-40a716ca9ccd",
+      "worldId": "7g-http-20261103T111807Z-world",
+      "sequence": 249,
+      "time": 54.25,
+      "paused": true,
+      "requests": 14,
+      "returned": 14,
+      "inFlight": 0,
+      "observers": 1,
+      "providerFailed": false,
+      "stopping": false,
+      "wallMs": 220455
+    },
+    "disconnectBefore": {
+      "id": "7g-http-20261103T111807Z",
+      "kind": "live-meta",
+      "mode": "live-meta",
+      "sessionId": "fd858388-7357-4d21-a283-40a716ca9ccd",
+      "worldId": "7g-http-20261103T111807Z-world",
+      "sequence": 264,
+      "time": 55.5,
+      "paused": false,
+      "requests": 19,
+      "returned": 18,
+      "inFlight": 1,
+      "observers": 1,
+      "providerFailed": false,
+      "stopping": false,
+      "wallMs": 253423
+    },
+    "disconnectAfter": {
+      "id": "7g-http-20261103T111807Z",
+      "kind": "live-meta",
+      "mode": "live-meta",
+      "sessionId": "fd858388-7357-4d21-a283-40a716ca9ccd",
+      "worldId": "7g-http-20261103T111807Z-world",
+      "sequence": 423,
+      "time": 91.5,
+      "paused": false,
+      "requests": 26,
+      "returned": 26,
+      "inFlight": 0,
+      "observers": 0,
+      "providerFailed": false,
+      "stopping": false,
+      "wallMs": 328321
+    },
+    "security": [
+      {
+        "path": "/api/session",
+        "status": 401
+      },
+      {
+        "path": "/api/phone?actorId=amina",
+        "status": 401
+      },
+      {
+        "path": "/.env",
+        "status": 404
+      },
+      {
+        "path": "/runtime/demo-access.json",
+        "status": 404
+      },
+      {
+        "path": "/output/http-muse-acceptance/7g-http-20261103T111807Z/access.json",
+        "status": 404
+      }
+    ]
+  }
+}

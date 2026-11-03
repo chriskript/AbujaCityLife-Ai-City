@@ -15,7 +15,12 @@ describe('atomic checkpoint replacement', () => {
   it('bounds persistent Windows denial and preserves its error for fail-closed handling', async () => {
     const error = failure('EACCES'); replacement.mockRejectedValue(error);
     await expect(replaceCheckpoint('pending', 'saved', 'win32')).rejects.toBe(error);
-    expect(replacement).toHaveBeenCalledTimes(5);
+    expect(replacement).toHaveBeenCalledTimes(8);
+  });
+  it('tolerates contention longer than the old 185ms window without rewriting or replaying an action',async()=>{
+    replacement.mockRejectedValueOnce(failure('EPERM')).mockRejectedValueOnce(failure('EPERM')).mockRejectedValueOnce(failure('EBUSY')).mockRejectedValueOnce(failure('EPERM')).mockRejectedValueOnce(failure('EPERM')).mockResolvedValueOnce();
+    await replaceCheckpoint('same-flushed.pending','same-last-good.json','win32');
+    expect(replacement.mock.calls).toEqual(Array.from({length:6},()=>['same-flushed.pending','same-last-good.json']));
   });
   it('does not retry disk/permission failures outside the transient Windows cases', async () => {
     for (const [platform, code] of [['linux', 'EPERM'], ['win32', 'ENOSPC'], ['win32', 'EIO']] as const) {

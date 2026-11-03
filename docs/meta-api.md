@@ -1,6 +1,8 @@
 # Meta API setup and verification
 
-The original **standalone server-side contract probe** has one approved live Spark 1.3 destination-selection result accepted by both validators. The [controlled neighbourhood backend](backend.md) now prepares decisions and conversations for live integration, with mocked HTTP contract coverage; its new schemas have not yet been evaluated live. Browser gameplay and routine tests default to mock mode. No public inference endpoint is enabled.
+The server-side integration has been exercised through bounded, separately approved Muse society evaluations, including the [200-generation November 3 run](nov3-sustained-muse-live-evaluation.md). The [real HTTP/browser acceptance](nov3-live-http-browser-acceptance.md) verified actual provider decisions in the integrated town, pause/refresh and observer-free reasoning before a Windows checkpoint replacement failure. Its focused repair is offline-verified; clean live confirmation remains outstanding. Browser gameplay and routine tests default to offline mode. No public inference endpoint is enabled.
+
+The current approved hackathon allowances are **$50 daily / $100 cumulative through November 4, 2026**, reverting to the conservative $0.25/day and $1 cumulative defaults on November 5, Lagos time. Reservations and history are retained. These supersede the earlier dated allowance changes documented below; they do not authorise any particular run. Reviewed society runs use **8,000 input / 2,048 output tokens**, a **30-second shared deadline**, six generations/minute and one pending inference, with their own stricter generation/cost/time envelope. The original standalone probe and legacy defaults described below remain separate.
 
 ## Offline foundation check
 
@@ -56,7 +58,7 @@ Reservations are retained in full after success, timeout, or generation failure.
 
 Persist `runtime/meta-probe-budget.json` across runs and deployments. Deleting or replacing it defeats spending history. A crash can leave a `.lock` or `.pending` file; investigate manually rather than clearing accounting automatically. The initial ledger must be created explicitly, so an unexpectedly missing ledger is never silently replaced by a live run.
 
-The [backend](backend.md) reuses this same ledger, adding session limits, request deduplication and approved evaluation allowances. These controls do not cover other applications or keys using the same Meta account and depend on configured prices and reservation assumptions. The probe and local demo service are not suitable for public exposure. Full live scenario evaluation and public hosting remain outstanding.
+The [backend](backend.md) reuses this same ledger, adding session limits, request deduplication and approved evaluation allowances. These controls do not cover other applications or keys using the same Meta account and depend on configured prices and reservation assumptions. The probe and local operator service are not suitable for public exposure. Live scenario evaluation has occurred; reliable public hosting remains separate, unapproved work. See [submission access requirements](submission-materials.md).
 
 ## Verification boundaries
 

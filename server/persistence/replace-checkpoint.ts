@@ -5,7 +5,9 @@ import { setTimeout } from 'node:timers/promises';
 // of an already closed, flushed file, never writing again or removing the old target.
 // Permanent failures still reach the caller's fail-closed persistence boundary.
 export async function replaceCheckpoint(source: string, target: string, platform = process.platform): Promise<void> {
-  const delays = [10, 25, 50, 100];
+  // A scanner can hold the closed target longer than one 250ms world step.
+  // Bound replacement-only contention to 1.585s; permanent errors still stop.
+  const delays = [10, 25, 50, 100, 200, 400, 800];
   for (let attempt = 0;; attempt++) {
     try { await rename(source, target); return; }
     catch (error) {
