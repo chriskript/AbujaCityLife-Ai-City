@@ -24,9 +24,11 @@ The local experience runs with **deterministic offline policies by default**, wi
 
 **Muse Spark 1.3**, through Meta Model API, adds language-model reasoning at selected decision opportunities. Live evaluations have demonstrated residents choosing work, food and replenishment, exchanging information, sharing contacts and following a workplace invitation. Residents have also independently introduced themselves, proposed a meeting, accepted and attended together. Sustained conversation during an agreed hangout and lasting friendship changes remain **unproven**. Muse receives the deciding resident's limited knowledge and personal context; proposed actions must pass the simulation's rules before changing the world.
 
-Live use requires separate configuration and explicit approval. See [Meta setup and evaluation documentation](docs/meta-api.md).
+Persistent local live use runs with `npm run dev:live` after you configure and authorize a reusable local operating policy. See the [persistent Muse operation guide](docs/local-live.md). Bounded experiments retain their separate approvals; see [Meta setup and evaluation documentation](docs/meta-api.md).
 
 ## Run locally
+
+For the persistent Muse society, follow the one-time setup in the [local live guide](docs/local-live.md), then run **`npm run dev:live`**. It builds the interface, restores the authoritative society and prints its URL. Inference stays disabled until you explicitly authorize your local policy. The commands below run explicit offline Mock development with its own checkpoint.
 
 You need **Node.js 22.12+**, npm and a WebGL 2-capable browser.
 

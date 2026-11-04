@@ -1,3 +1,10 @@
+export interface MuseStatus {
+  upstreamRemainingDailyUsd?:number; upstreamRemainingTotalUsd?:number;
+  enabled:boolean; available:boolean; status:string; inFlight:boolean; requests:number; reservedUsd:number;
+  remainingDailyUsd:number; remainingTotalUsd:number; remainingRequests:number; remainingTokens:number;
+  estimatedUsd:number; inputTokenLimit:number; outputTokenLimit:number;
+}
+
 import { mapFor, buildingFor, addressFor, type MapId } from '../world/town-layout.js';
 import { type NpcId, type WorldState, type WorldEvent, type TaskStatus, type Encounter, type Communication } from './types.js';
 import type { PhoneView,PhoneControlInput,PhoneLease,PhoneActionInput } from './phone.js';
@@ -32,11 +39,15 @@ export interface NeighbourhoodFrame {
   version: 2; sessionId: string; sequence: number; mode: 'mock' | 'live-meta';
   paused: boolean; speed: 1 | 2 | 4; conversationAvailable: boolean;
   decisionBudget: { used: number; limit: number };
+  muse?: MuseStatus;
+  stoppedDecisions?: {actorId:string;requestId:string;reason:string;recordedAt:number}[];
   progression?: { used: number; limit: number; stopped: boolean };
   snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null;
 }
 export type Experiment = 'cooperate' | 'decline' | 'wait' | 'self-collect' | 'reduce-sales';
 export type SessionCommand = { id: string; worldId: string } & (
+  | { type: 'inference-stop' }
+  | { type: 'review-inference' }
   | { type: 'pause'; paused: boolean }
   | { type: 'speed'; speed: 1 | 2 | 4 }
   | { type: 'reset'; experiment: Experiment }
@@ -59,7 +70,7 @@ const observableTypes = new Set([
   'contact-offered','communication-sent','text-delivered','phone-ringing','communication-response-chosen','communication-replied','communication-report','call-ended','communication-closed','remote-task-received','remote-task-response',
   'activity-started', 'activity-completed', 'arrived', 'transport-proposed', 'transport-accepted',
   'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy', 'transport-clarification-requested',
-  'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'road-observed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable',
+  'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'road-observed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable', 'inference-interrupted',
   'encounter-noticed', 'encounter-invited', 'encounter-accepted', 'encounter-declined', 'encounter-deferred', 'encounter-clarified', 'encounter-expired', 'resident-introduced', 'information-shared',
   'paid-work-started','paid-work-completed','purchase-paid','food-consumed','rest-started','rest-completed','transport-paid',
   // Operator presentation of actual validated outcomes, never NPC knowledge.

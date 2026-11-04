@@ -1,3 +1,7 @@
+# Persistent Muse startup
+
+Use `npm run dev:live` for ordinary persistent Muse operation. The [local live guide](local-live.md) documents setup, reusable owner authorization, controls, spending limits and recovery. `npm run backend` uses a separate `runtime/mock-neighbourhood-session.json` for explicit offline development. The legacy per-plan instructions below remain applicable to bounded evaluations.
+
 # Controlled neighbourhood backend
 
 [Milestone 7D](milestone-7d.md) integrates contact-based calls, delayed texts and remote transport discussions. Old town sessions receive `.pre-7d-backup` before adding communication state and capabilities; existing world assets, memories and spending/progression counters remain. All remote actions use the same authoritative validator and existing inference safeguards. This milestone was evaluated offline only.

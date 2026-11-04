@@ -30,7 +30,7 @@ document.querySelector('#experience')!.innerHTML = `
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
     <details id="resident-communications" class="conversation"><summary>Calls &amp; messages <span id="communication-count"></span></summary><p id="resident-contacts" class="intention"></p><p class="intention">Observer history. Residents receive only their own delivered messages. Discussion is separate from a job commitment.</p><ol id="communication-history" class="person-recent"></ol></details>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
-    <section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
+    <details id="muse-controls" class="conversation" hidden><summary>Muse operation</summary><p id="muse-status" role="status"></p><button id="stop-muse">Stop additional Muse inference</button><button id="review-muse">Acknowledge stopped decisions</button><p>Inspect recorded events in Activity before acknowledging. Pause and wait for pending inference first. Reauthorize with the local policy command to enable inference.</p></details><section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
     <details class="experiments"><summary>Neighbourhood experiments</summary><button id="town-road">Close supply–market road</button><p id="road-status">Residents learn about closures locally. Occupied roads cannot close.</p><p id="progression-status"></p><label for="experiment">Mock decision policy</label><select id="experiment"><option value="cooperate">Cooperation</option><option value="decline">Driver declines</option><option value="wait">Trader waits</option><option value="self-collect">Trader collects supplies herself</option><option value="reduce-sales">Trader pauses sales</option></select><p>Choose an alternative, then reset. These are labelled mock policies, not guaranteed live AI outcomes.</p></details>
   </section>
   <div class="view-controls" role="group" aria-label="Neighbourhood controls"><button id="overview">Town overview</button><button id="focus" aria-pressed="false">◎ Focus Amina</button><button id="pause" aria-pressed="false">Ⅱ Pause</button></div>
@@ -140,7 +140,7 @@ function updateUi(force = false): void {
   if (!frame) return;
   const view = frame.snapshot;
   el('#world-clock').textContent = `${timeLabel(view.time)}${frame.paused ? ' · paused' : ''}`;
-  const key = `${view.worldId}:${frame.eventCursor}:${selected}:${frame.paused}:${frame.speed}:${focused}`;
+  const key = `${view.worldId}:${frame.eventCursor}:${selected}:${frame.paused}:${frame.speed}:${focused}:${JSON.stringify(frame.muse)}`;
   if (!force && key === uiKey) return; uiKey = key;
   if (!view.actors.some(actor => actor.id === selected)) selected = view.actors[0]!.id;
   for (const person of view.actors) names[person.id] = person.name;
@@ -229,23 +229,29 @@ function updateUi(force = false): void {
   el('#communication-history').replaceChildren(...conversations.map(item=>{
     const line=document.createElement('li');line.textContent=`${timeLabel(item.createdAt)} · ${item.channel==='call'?'Call':'Text'} · ${names[item.initiator]} → ${names[item.recipient]} · ${item.status}: ${item.message}${item.reply ? ` Reply (${item.response}): ${item.reply}` : ''}${item.taskId ? ` Separate task: ${item.taskId} (${view.tasks.find(task=>task.id===item.taskId)?.status ?? 'recorded'}).` : ''}`;return line;
   }));
-  el('#event-details').textContent = JSON.stringify({ mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, communications:view.communications,events: frame.events }, null, 2);
+  el('#muse-controls').hidden = !frame.muse;
+  el('#event-inspection').hidden = !frame.muse && !debug;
+  el<HTMLSelectElement>('#speed').disabled = frame.mode==='live-meta';
+  el('#muse-status').textContent = frame.muse ? `${frame.muse.status} ? ${frame.muse.inFlight ? 'pending' : 'idle'} ? ${view.actors.length} residents ? ${view.actors.filter(a=>a.activity!=='idle').length} active ? ${frame.decisionBudget.used} session requests ? ${frame.muse.requests} policy requests ? ${frame.muse.reservedUsd.toFixed(4)} reserved ? remaining ${frame.muse.remainingDailyUsd.toFixed(4)} today / ${frame.muse.remainingTotalUsd.toFixed(4)} total ? ${frame.muse.remainingRequests} requests / ${frame.muse.remainingTokens} tokens ? upstream remaining ${frame.muse.upstreamRemainingDailyUsd?.toFixed(4) ?? "?"} today / ${frame.muse.upstreamRemainingTotalUsd?.toFixed(4) ?? "?"} total ? known estimate this run ${frame.muse.estimatedUsd.toFixed(4)} ? ${frame.stoppedDecisions?.length ?? 0} stopped decisions` : '';
+  el<HTMLButtonElement>('#reset').disabled = !!frame.muse;
+  el('#event-details').textContent = JSON.stringify({ muse:frame.muse,stoppedDecisions:frame.stoppedDecisions, mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, communications:view.communications,events: frame.events }, null, 2);
   const mode = el('.mode-pill'); mode.replaceChildren(); const dot = document.createElement('i');
   mode.title = frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
-  mode.append(dot, document.createTextNode(frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Meta / backend'));
-  el('#feed-mode').textContent = frame.mode === 'mock' ? 'MOCK' : 'LIVE META';
+  mode.append(dot, document.createTextNode(frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Muse / backend'));
+  el('#feed-mode').textContent = frame.mode === 'mock' ? 'MOCK' : 'LIVE MUSE';
   document.body.dataset.worldId = view.worldId; document.body.dataset.task = task?.status ?? 'none';
   document.body.dataset.selected = selected; document.body.dataset.paused = String(frame.paused);
   document.body.dataset.marketGoods = String(view.resources.marketGoods);
   el('#conversation-mode').textContent = frame.mode === 'live-meta' ? 'LIVE META' : 'MOCK FIXTURE';
-  el<HTMLButtonElement>('#send-message').disabled = !remote || conversationBusy;
+  el<HTMLButtonElement>('#send-message').disabled = !remote || conversationBusy || !!frame.muse && (frame.paused || !frame.muse.available);
   el<HTMLTextAreaElement>('#conversation-input').disabled = !remote;
   if (frame.decisionBudget.used >= frame.decisionBudget.limit) el('#notice').textContent = 'Session decision limit reached. Reset preserves request and spending limits.';
   if (frame.progression?.stopped) el('#notice').textContent = 'Controlled server advancement limit reached. The town is paused; reset and restart preserve this allowance.';
+  else if(frame.muse)el('#notice').textContent = `Live Muse ? ${frame.muse.status}. Actions are validated by the authoritative backend.`;
   else el('#notice').textContent = frame.mode === 'live-meta' ? 'Live Meta decisions. Actions are validated by the authoritative backend.' : local ? 'Local mock test mode. No backend or Meta requests.' : 'Authoritative backend · mock activities and labelled conversation fixtures · no Meta requests.';
 }
 
-async function command(payload: Omit<Extract<SessionCommand, { type: 'pause' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'speed' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'reset' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'road' }>, 'id' | 'worldId'>): Promise<void> {
+async function command(payload: {type:'inference-stop'|'review-inference'} | Omit<Extract<SessionCommand, { type: 'pause' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'speed' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'reset' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'road' }>, 'id' | 'worldId'>): Promise<void> {
   if (!frame) return;
   try {
     const receipt = await session.send({ ...payload, id: `ui-${crypto.randomUUID()}`, worldId: frame.snapshot.worldId });
@@ -291,7 +297,7 @@ try {
   remote?.onConnection(state => {
     el('#backend-access').hidden = state === 'ready';
     el('#demo-token').hidden = state !== 'unauthorized'; el('#sign-in').hidden = state !== 'unauthorized';
-    el('#connection-status').textContent = state === 'incompatible' ? 'A town update is ready. Restart the backend to load the new layout and migrate your saved town, then reload.' : state === 'unauthorized' ? 'Controlled local demonstration. Use the token from runtime/demo-access.json.' : state === 'offline' ? 'Backend unavailable. Start npm run backend, then reload. The visible snapshot is frozen.' : state === 'connecting' ? 'Connecting to authoritative backend…' : '';
+    el('#connection-status').textContent = state === 'incompatible' ? 'A town update is ready. Restart the backend to load the new layout and migrate your saved town, then reload.' : state === 'unauthorized' ? 'Controlled local demonstration. Use the token from runtime/demo-access.json.' : state === 'offline' ? 'Backend unavailable. Start npm run dev:live (Muse) or npm run backend (mock), then reload. The visible snapshot is frozen.' : state === 'connecting' ? 'Connecting to authoritative backend…' : '';
     if (state !== 'ready') el('#notice').textContent = 'Waiting for the secured backend. No local fallback or inference is running.';
   });
   el('#sign-in').addEventListener('click', () => {
@@ -314,6 +320,8 @@ try {
     proposalId = null; el('#confirm-proposal').hidden = true;
   }, options);
 
+  el('#stop-muse').addEventListener('click',()=>{void command({type:'inference-stop'});},options);
+  el('#review-muse').addEventListener('click',()=>{void command({type:'review-inference'});},options);
   el('#pause').addEventListener('click', () => { void command({ type: 'pause', paused: !(frame?.paused ?? true) }); }, options);
   el('#town-road').addEventListener('click', () => { if (frame) void command({ type: 'road', edgeId: 'centre-market', blocked: !frame.snapshot.blockedEdges.includes('centre-market') }); }, options);
   el('#reset').addEventListener('click', () => {

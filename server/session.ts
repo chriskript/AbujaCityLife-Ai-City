@@ -1,3 +1,4 @@
+import { ordinaryRejection } from '../shared/neighbourhood/decision-recovery.js';
 import { randomUUID, createHash } from 'node:crypto';
 import { PhoneControl,projectPhone,type PhoneControlInput,type PhoneActionInput,type PhoneLease,type PhoneView } from '../shared/neighbourhood/phone.js';
 import type { MapId } from '../shared/world/town-layout.js';
@@ -14,10 +15,13 @@ import type { ConversationInput, ConversationResult, ConversationTurn, Generatio
 import { NeighbourhoodMockProvider } from '../shared/neighbourhood/mock-provider.js';
 import { MockNeighbourhoodProvider, maximumGenerationUsd, validateConversation, type NeighbourhoodProvider } from './inference/neighbourhood-provider.js';
 import { generationReservation } from './inference/model-limits.js';
+import { legacyOperatingMigrationAuthorized, type LocalMusePolicy } from './controls/local-policy.js';
 
 export class SessionError extends Error { constructor(readonly status: number, message: string) { super(message); } }
 interface Receipt { hash: string; status: 'pending' | 'done' | 'failed'; value: unknown }
 interface Checkpoint {
+  operating?: true;
+  legacyPlan?: NonNullable<Checkpoint['plan']>;
   interruptedDecisions?:Record<NpcId,{request:NpcDecisionRequest;reason:string;recordedAt:number}>;
   version: 1; sessionId: string; sequence: number; world: string; paused: boolean; speed: 1 | 2 | 4;
   requests: number; recent: number[]; last: Partial<Record<NpcId, { wall: number; simulation: number; worldId?: string }>>;
@@ -58,14 +62,26 @@ export class NeighbourhoodServerSession {
   private constructor(private readonly options: ConstructorParametersInternal) { this.provider = options.provider ?? new MockNeighbourhoodProvider(); }
   static async open(options: ConstructorParametersInternal): Promise<NeighbourhoodServerSession> {
     const session = new NeighbourhoodServerSession(options);
-    if (session.provider.mode === 'live-meta' || options.plan) validateLivePlan(options.plan);
+    if (options.operating) {
+      if(options.plan || session.provider.mode!=='live-meta' || !session.provider.sourceFor || !session.provider.routineDecisions)throw new Error('Local operation requires the selective Muse provider and no evaluation plan');
+      await options.operating.refresh();
+    } else if (session.provider.mode === 'live-meta' || options.plan) validateLivePlan(options.plan);
     if(options.plan?.phase==='7g-d-society'&&session.provider.mode!=='live-meta')throw new Error('Muse society requires live reasoning; offline downgrade refused');
     if(options.plan?.phase==='7g-d-society'&&(!session.provider.sourceFor||session.provider.routineDecisions!==true))throw new Error('Muse society requires its explicit reasoning/mechanics boundary');
     await mkdir(dirname(options.checkpoint), { recursive: true });
+    let loaded=false;
     try {
       const savedText=await readFile(options.checkpoint,'utf8');
+      loaded=true;
       const data = JSON.parse(savedText) as Checkpoint;
       if (data.version !== 1 || typeof data.sessionId !== 'string' || !Number.isSafeInteger(data.sequence) || data.sequence < 0 || !Number.isSafeInteger(data.requests) || data.requests < 0 || !Array.isArray(data.recent) || !data.last || !data.history || !data.receipts || !Array.isArray(data.metrics) || typeof data.paused !== 'boolean' || ![1,2,4].includes(data.speed)) throw new Error('Invalid server checkpoint');
+      if(data.operating && !options.operating)throw new Error('Persistent live society requires dev:live; mock mode cannot own it');
+      if(data.legacyPlan&&(!data.operating||!options.operating||data.legacyPlan.profile||!/^[\w-]{1,80}$/.test(data.legacyPlan.id)||!Number.isSafeInteger(data.legacyPlan.used)||data.legacyPlan.used<0||data.legacyPlan.used>12||data.legacyPlan.used>data.requests||!Number.isFinite(data.legacyPlan.reservedUsd)||data.legacyPlan.reservedUsd<0||data.legacyPlan.reservedUsd>.25))throw new Error('Invalid retained legacy plan accounting');
+      if(options.operating && data.plan){
+        // Only an owner-reviewed exact copy of the canonical legacy server world
+        // may migrate. Dedicated society evaluation worlds remain isolated.
+        if(!legacyOperatingMigrationAuthorized(savedText,await options.operating.read()))throw new Error('Evaluation checkpoints cannot become the operating society without exact legacy operating migration authorization');
+      }
       session.world = Neighbourhood.restore(data.world);
       const npcIds = session.world.residentIds;
       if(data.plan?.profile==='7g-d-society'&&(options.plan?.phase!=='7g-d-society'||session.provider.mode!=='live-meta'))throw new Error('Muse society checkpoint cannot resume under an offline or different profile');
@@ -78,8 +94,8 @@ export class NeighbourhoodServerSession {
         }
       }
       if (data.routineRecent !== undefined && (!Array.isArray(data.routineRecent) || data.routineRecent.length > (session.world.hasTownEconomy ? offlineTownLimits.perMinute : 6) || data.routineRecent.some(time => !Number.isFinite(time) || time < 0 || time > session.world.time))) throw new Error('Invalid routine accounting checkpoint');
-      if (data.routineRequests!==undefined && (!Number.isSafeInteger(data.routineRequests) || data.routineRequests<0 || data.routineRequests>offlineTownLimits.maximumDecisions)) throw new Error('Invalid routine allowance');
-      if (data.requests > session.maximumRequests || data.recent.length > 6 || data.recent.some(time => !Number.isFinite(time) || time < 0) || Object.keys(data.receipts).length > 512 || Object.values(data.receipts).some(receipt => !receipt || !/^[a-f0-9]{64}$/.test(receipt.hash) || !['pending','done','failed'].includes(receipt.status)) || Object.entries(data.last).some(([id, time]) => !npcIds.includes(id as NpcId) || !time || !Number.isFinite(time.wall) || !Number.isFinite(time.simulation) || time.simulation < 0) || data.metrics.length > session.maximumRequests || (data.plan !== null && (!data.plan || !/^[\w-]{1,80}$/.test(data.plan.id) || !Number.isSafeInteger(data.plan.used) || data.plan.used < 0 || data.plan.used > (options.plan?.phase==='7g-d-society'?200:options.plan?.phase==='7g-d-context'?48:options.plan?.phase==='7g-c-unity'?36:12) || !Number.isFinite(data.plan.reservedUsd) || data.plan.reservedUsd < 0 || data.plan.reservedUsd > (options.plan?.phase==='7g-d-society'?5:options.plan?.phase==='7g-d-context'?.90:options.plan?.phase==='7g-c-unity'?.60:.25)))) throw new Error('Invalid server accounting checkpoint');
+      if (data.routineRequests!==undefined && (!Number.isSafeInteger(data.routineRequests) || data.routineRequests<0 || !options.operating && data.routineRequests>offlineTownLimits.maximumDecisions)) throw new Error('Invalid routine allowance');
+      if (data.requests > session.maximumRequests || data.recent.length > 6 || data.recent.some(time => !Number.isFinite(time) || time < 0) || !options.operating && Object.keys(data.receipts).length > 512 || Object.values(data.receipts).some(receipt => !receipt || !/^[a-f0-9]{64}$/.test(receipt.hash) || !['pending','done','failed'].includes(receipt.status)) || Object.entries(data.last).some(([id, time]) => !npcIds.includes(id as NpcId) || !time || !Number.isFinite(time.wall) || !Number.isFinite(time.simulation) || time.simulation < 0) || data.metrics.length > (options.operating?200:session.maximumRequests) || (data.plan !== null && (!data.plan || !/^[\w-]{1,80}$/.test(data.plan.id) || !Number.isSafeInteger(data.plan.used) || data.plan.used < 0 || data.plan.used > (options.plan?.phase==='7g-d-society'?200:options.plan?.phase==='7g-d-context'?48:options.plan?.phase==='7g-c-unity'?36:12) || !Number.isFinite(data.plan.reservedUsd) || data.plan.reservedUsd < 0 || data.plan.reservedUsd > (options.plan?.phase==='7g-d-society'?5:options.plan?.phase==='7g-d-context'?.90:options.plan?.phase==='7g-c-unity'?.60:.25)))) throw new Error('Invalid server accounting checkpoint');
       for (const id of npcIds) if (!Array.isArray(data.history[id]) || data.history[id].length > 12) throw new Error('Invalid conversation checkpoint');
       if (JSON.parse(data.world).version === 1) {
         // Keep an exclusive rollback copy before upgrading an existing operator world.
@@ -89,6 +105,10 @@ export class NeighbourhoodServerSession {
         data.history.chris = [];
       }
       session.data = data;
+      if(options.operating&&data.plan){
+        if(data.legacyPlan)throw new Error('Legacy plan history already exists; reviewed recovery required');
+        data.legacyPlan=structuredClone(data.plan);data.plan=null;
+      }
       if (options.townPopulation!==false && !options.initialWorld) {
         const residents=townResidents(options.townPopulation ?? prototypePopulation);
         if (!session.world.hasTownEconomy || residents.some(npc=>!session.world.hasResident(npc.id))) {
@@ -100,9 +120,25 @@ export class NeighbourhoodServerSession {
       }
       for (const receipt of Object.values(data.receipts)) if (receipt.status === 'pending') { receipt.status = 'failed'; receipt.value = 'Interrupted by restart; request will not be repeated'; }
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      if (loaded || (error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
       session.world = options.initialWorld ? Neighbourhood.restore(options.initialWorld) : options.townPopulation===false ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,options.townPopulation ?? prototypePopulation,{map:options.townMap ?? 'town-v1'});
       session.data = { version: 1, sessionId: randomUUID(), sequence: 0, world: '', paused: false, speed: 2, requests: 0, recent: [], last: {}, receipts: {}, history: Object.fromEntries(session.world.residentIds.map(id => [id, []])), metrics: [], plan: null };
+    }
+    if (options.operating) {
+      if (!session.data.operating) {
+        try {
+          const prior=await readFile(options.checkpoint,'utf8');
+          Neighbourhood.restore(JSON.parse(prior).world);
+          const backupPath=options.checkpoint+'.pre-local-muse-'+randomUUID()+'.backup';
+          const backup=await open(backupPath,'wx',0o600);
+          try {await backup.writeFile(prior);await backup.sync();}finally{await backup.close();}
+          if(await readFile(backupPath,'utf8')!==prior)throw new Error('Operating migration rollback verification failed');
+        } catch(error) {if(loaded||(error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+        session.world.enableSocialVisits();session.data.operating=true;
+      }
+      if(JSON.stringify(session.world.residentIds)!==JSON.stringify(townResidents(16).map(n=>n.id)) || !session.world.snapshot.socialVisits)throw new Error('Persistent Muse operation requires all sixteen residents and social continuity');
+      Neighbourhood.restore(session.world.serialize()); // Verify the migrated snapshot before atomic commit.
+      if(Object.keys(session.data.interruptedDecisions??{}).length)session.data.paused=true;
     }
     if (options.plan) {
       if (session.data.plan && session.data.plan.id !== options.plan.id) throw new Error('Different live plan requires reviewed session migration');
@@ -135,17 +171,28 @@ export class NeighbourhoodServerSession {
     await session.commit(); return session;
   }
   private now(): number { return (this.options.now ?? Date.now)(); }
+  private async suspendInference(reason?:string):Promise<void>{
+    try{await this.options.operating!.suspend(reason);}catch{this.failed=true;throw new SessionError(503,'Inference suspension could not be saved; session stopped for review');}
+  }
   private get reservationUsd():number{return generationReservation(this.options.plan?.inputTokenLimit ?? 6000);}
-  private get maximumRequests():number{return this.options.plan?.phase==='7g-d-society'?200:48;}
+  private get maximumRequests():number{if(this.options.operating)return Number.MAX_SAFE_INTEGER;return this.options.plan?.phase==='7g-d-society'?200:48;}
   get interruptions(){return Object.entries(this.data.interruptedDecisions ?? {}).map(([actorId,item])=>({actorId,requestId:item.request.id,reason:item.reason,recordedAt:item.recordedAt}));}
   get frame(): NeighbourhoodFrame { return structuredClone(this.current); }
   hasResident(id: string): boolean { return this.world.hasResident(id); }
   get mode(): 'mock' | 'live-meta' { return this.provider.mode; }
-  // Only the explicitly approved bounded society may run Muse autonomously
-  // without an observer. Legacy live demonstrations retain their observer gate.
-  get advancesWithoutObserver():boolean {return this.mode==='mock'||this.options.plan?.phase==='7g-d-society'&&this.options.plan.allowAutonomy;}
+  // Local operation and explicitly approved society experiments run autonomously
+  // without observers. Legacy live demonstrations retain their observer gate.
+  get advancesWithoutObserver():boolean {return !!this.options.operating||this.mode==='mock'||this.options.plan?.phase==='7g-d-society'&&this.options.plan.allowAutonomy;}
   get paused(): boolean { return this.data.paused; }
-  private get boundedTown():boolean { return this.mode==='mock' || this.provider.routineDecisions===true; }
+  invalidatePending():void {this.epoch++;}
+  async refreshOperations():Promise<void>{
+    if(!this.options.operating)return;
+    await this.transaction(async()=>{
+      const status=await this.options.operating!.refresh();
+      if(JSON.stringify(status)!==JSON.stringify(this.current.muse))await this.commit();
+    });
+  }
+  private get boundedTown():boolean { return !this.options.operating && (this.mode==='mock' || this.provider.routineDecisions===true); }
   get operational():boolean{return !this.failed && !this.closed;}
   history(id: NpcId): ConversationTurn[] { if (this.failed) throw new SessionError(503, 'Session unavailable'); if (!this.hasResident(id)) throw new SessionError(400, 'Unknown resident'); return structuredClone(this.committedHistory[id] ?? []); }
   subscribe(listener: (frame: NeighbourhoodFrame) => void): () => void { this.listeners.add(listener); listener(this.frame); return () => this.listeners.delete(listener); }
@@ -168,6 +215,7 @@ export class NeighbourhoodServerSession {
     this.committedHistory = structuredClone(this.data.history);
     this.current = { version: 2, sessionId: this.data.sessionId, sequence: this.data.sequence, mode: this.provider.mode, paused: this.data.paused, speed: this.data.speed, conversationAvailable: true, decisionBudget: this.mode==='mock' && this.world.hasTownEconomy ? {used:this.data.routineRequests ?? 0,limit:offlineTownLimits.maximumDecisions} : { used: this.data.requests, limit: this.maximumRequests }, ...projection };
     if (this.boundedTown) this.current.progression = { used: this.data.progression!.used, limit: this.data.progression!.limit, stopped: this.data.progression!.used >= this.data.progression!.limit };
+    if(this.options.operating){this.current.muse=this.options.operating.status;this.current.stoppedDecisions=this.interruptions;}
     for (const listener of this.listeners) listener(this.frame);
   }
   private receipt(id: string, payload: unknown): Receipt | null {
@@ -180,7 +228,7 @@ export class NeighbourhoodServerSession {
       return old;
     }
     // Fail closed instead of evicting deduplication evidence from this controlled session.
-    if (Object.keys(this.data.receipts).length >= 512) throw new SessionError(429, 'Session interaction limit reached');
+    if (!this.options.operating && Object.keys(this.data.receipts).length >= 512) throw new SessionError(429, 'Session interaction limit reached');
     this.data.receipts[id] = { hash, status: 'pending', value: null }; return null;
   }
   private requireWorld(id: string): void { if (id !== this.world.id) throw new SessionError(409, 'World changed'); }
@@ -202,21 +250,23 @@ export class NeighbourhoodServerSession {
       const value={accepted:outcome.accepted,reason:outcome.reason};Object.assign(this.data.receipts[input.id]!,{status:'done',value});await this.commit();return value;
     });
   }
-  private reserveRequest(id: NpcId, routine = false): void {
+  private async reserveRequest(id: NpcId, routine = false): Promise<void> {
     const now = this.now(); this.data.recent = this.data.recent.filter(time => time > now - 60_000);
     // Only deterministic autonomous mock mechanics use simulation-time scheduling.
     // Conversations and EVERY live request retain the original wall-clock safeguards.
-    routine = routine && this.boundedTown;
+    routine = routine && (this.boundedTown || !!this.options.operating);
     const simulation = this.world.time;
     const townRoutine=routine && this.world.hasTownEconomy;
     this.data.routineRecent = (this.data.routineRecent ?? []).filter(time => time > simulation - 60);
     if (this.busy) throw new SessionError(409, 'A decision is already pending');
-    if ((townRoutine ? (this.data.routineRequests ?? 0)>=offlineTownLimits.maximumDecisions : this.data.requests >= this.maximumRequests) || (routine ? this.data.routineRecent.length >= (townRoutine ? offlineTownLimits.perMinute : 6) : this.data.recent.length >= 6 || now - (this.data.last[id]?.wall ?? -Infinity) < 3000)) throw new SessionError(429, 'Decision limit or cooldown reached');
+    if ((townRoutine ? !this.options.operating && (this.data.routineRequests ?? 0)>=offlineTownLimits.maximumDecisions : this.data.requests >= this.maximumRequests) || (routine ? this.data.routineRecent.length >= (townRoutine ? offlineTownLimits.perMinute : 6) : this.data.recent.length >= 6 || now - (this.data.last[id]?.wall ?? -Infinity) < 3000)) throw new SessionError(429, 'Decision limit or cooldown reached');
     if (this.mode === 'live-meta' && !routine) {
+      if(this.options.operating){const status=await this.options.operating.refresh();if(!status.available)throw new SessionError(429,status.status);}else{
       const plan = this.options.plan!; validateLivePlan(plan);
       const used = this.data.plan!;
       if (used.used >= plan.maxGenerations || used.reservedUsd + this.reservationUsd > plan.maxEstimatedUsd) throw new SessionError(429, 'Approved evaluation allowance exhausted');
       used.used++; used.reservedUsd = plan.phase==='7g-d-society'?(Math.round(used.reservedUsd*1_000_000)+Math.round(this.reservationUsd*1_000_000))/1_000_000:used.reservedUsd+this.reservationUsd;
+      }
     }
     if (townRoutine) this.data.routineRequests=(this.data.routineRequests ?? 0)+1; else this.data.requests++;
     if (routine) this.data.routineRecent.push(simulation); else this.data.recent.push(now);
@@ -225,7 +275,15 @@ export class NeighbourhoodServerSession {
   async command(command: SessionCommand): Promise<CommandReceipt> {
     return this.transaction(async () => {
       this.requireWorld(command.worldId); const old = this.receipt(command.id, command); if (old) return old.value as CommandReceipt;
-      if (command.type === 'pause') {
+      if(command.type==='inference-stop') {
+        if(!this.options.operating)throw new SessionError(400,'Local operating policy unavailable');
+        await this.suspendInference();this.epoch++;
+      } else if(command.type==='review-inference') {
+        if(!this.options.operating || !this.data.paused || this.busy)throw new SessionError(409,'Pause and wait for inference to settle before review');
+        for(const item of Object.values(this.data.interruptedDecisions??{}))this.world.abandonDecision(item.request.id);
+        this.data.interruptedDecisions={};this.epoch++;
+      } else if (command.type === 'pause') {
+        if(!command.paused&&this.options.operating&&this.interruptions.length)throw new SessionError(409,'Review and acknowledge interrupted Muse decisions before resuming');
         if (!command.paused && this.boundedTown && (this.data.progression!.used >= this.data.progression!.limit || this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions)) throw new SessionError(429, 'Controlled advancement or decision allowance exhausted; reset and restart do not replenish it');
         this.data.paused = command.paused; this.epoch++;
       }
@@ -238,6 +296,7 @@ export class NeighbourhoodServerSession {
         Object.assign(this.data.receipts[command.id]!, { status: 'done', value }); await this.commit(); return value;
       } else {
         if(this.interruptions.length)throw new SessionError(409,'Pending Muse decisions require manual review before any reset');
+        if(this.options.operating)throw new SessionError(409,'Persistent society cannot be reset; preserve its checkpoint');
         if(this.options.plan?.phase==='7g-d-society')throw new SessionError(409,'Muse society resets require a fresh isolated approved session');
         this.world = this.options.townPopulation===false || this.options.initialWorld && !this.world.hasTownEconomy ? new Neighbourhood(`server-${randomUUID()}`) : createTown(`server-${randomUUID()}`,this.options.townPopulation || prototypePopulation,{map:this.options.townMap ?? 'town-v1'}); this.proposals.clear(); this.epoch++;
         this.data.routineRecent = [];
@@ -251,6 +310,7 @@ export class NeighbourhoodServerSession {
   async tick(seconds: number): Promise<void> {
     if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 60) throw new SessionError(400, 'Clock step must be between zero and sixty real seconds');
     await this.transaction(async () => {
+      await this.options.operating?.refresh();
       for (const [id, proposal] of this.proposals) if (proposal.expires < this.now()) { this.world.abandonDecision(proposal.request.id); this.proposals.delete(id); }
       if (this.boundedTown && this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions && !this.data.paused) { this.data.paused = true; await this.commit(); }
       if (!this.data.paused) {
@@ -266,7 +326,7 @@ export class NeighbourhoodServerSession {
     let request: NpcDecisionRequest | null = null; let origin: Neighbourhood; let epoch = 0;let controlGeneration=0,expectedMuse=false;
     await this.transaction(async () => {
       if (this.data.paused || this.busy) return;
-      if (!actorId && this.mode === 'live-meta' && !this.options.plan?.allowAutonomy) return;
+      if (!actorId && this.mode === 'live-meta' && !this.options.operating && !this.options.plan?.allowAutonomy) return;
       const npcIds = this.world.residentIds;
       if(actorId && this.provider.sourceFor)throw new SessionError(400,'Selective reasoning uses autonomous opportunities, not forced resident decisions');
       if (actorId && !this.hasResident(actorId)) throw new SessionError(400, 'Unknown resident');
@@ -283,10 +343,12 @@ export class NeighbourhoodServerSession {
         if (!actorId && (previousLast?.worldId === undefined || previousLast.worldId === this.world.id) && this.world.time - (previousLast?.simulation ?? -Infinity) < 20) continue;
         const source=this.provider.sourceFor?.(this.world.observe(id),this.world.decisionTriggers(id)) ?? this.mode;
         const routine=!actorId && source==='mock';
-        try { this.reserveRequest(id, routine); } catch (error) { if (actorId) throw error; continue; }
+        try { await this.reserveRequest(id, routine); } catch (error) { if (actorId) throw error; continue; }
         request = actorId && !triggerOnly ? this.world.requestInteractionDecision(id) : this.world.requestDecision(id);
-        if (!request) { this.busy = false; if (routine && this.world.hasTownEconomy) this.data.routineRequests!--; else this.data.requests--; if (routine) this.data.routineRecent!.pop(); else this.data.recent.pop(); if (previousLast) this.data.last[id] = previousLast; else delete this.data.last[id]; if (this.mode === 'live-meta' && !routine) { this.data.plan!.used--; this.data.plan!.reservedUsd -= this.reservationUsd; } continue; }
-        expectedMuse=source==='live-meta';origin = this.world; epoch = this.epoch;controlGeneration=this.phoneControl.generation(id); await this.commit(); return;
+        if (!request) { this.busy = false; if (routine && this.world.hasTownEconomy) this.data.routineRequests!--; else this.data.requests--; if (routine) this.data.routineRecent!.pop(); else this.data.recent.pop(); if (previousLast) this.data.last[id] = previousLast; else delete this.data.last[id]; if (this.mode === 'live-meta' && !routine && !this.options.operating) { this.data.plan!.used--; this.data.plan!.reservedUsd -= this.reservationUsd; } continue; }
+        expectedMuse=source==='live-meta';
+        if(expectedMuse&&this.options.operating){this.data.interruptedDecisions??={};this.data.interruptedDecisions[id]={request:structuredClone(request),reason:'Inference pending at checkpoint; interrupted results are never replayed.',recordedAt:this.now()};}
+        origin = this.world; epoch = this.epoch;controlGeneration=this.phoneControl.generation(id); await this.commit(); return;
       }
     });
     if (!request) return;
@@ -295,15 +357,22 @@ export class NeighbourhoodServerSession {
       const result = await this.provider.decide(pending);
       if(expectedMuse&&result.mode!=='meta')throw new Error('Muse decision expected; offline substitution refused');
       await this.transaction(async () => {
-        if (origin! !== this.world || this.data.paused || epoch !== this.epoch || controlGeneration!==this.phoneControl.generation(pending.actorId)) origin!.abandonDecision(pending.id);
-        else this.world.applyDecision(pending.id, result.decision, { mode: result.mode, model: result.model });
+        if(this.options.operating){await this.options.operating.refresh();delete this.data.interruptedDecisions?.[pending.actorId];}
+        if (origin! !== this.world || this.data.paused || epoch !== this.epoch || controlGeneration!==this.phoneControl.generation(pending.actorId) || expectedMuse && this.options.operating && !this.options.operating.status.enabled) origin!.abandonDecision(pending.id);
+        else {
+          const outcome=this.world.applyDecision(pending.id, result.decision, { mode: result.mode, model: result.model });
+          if(expectedMuse&&this.options.operating&&!outcome.accepted&&!ordinaryRejection(outcome.reason)) {
+            await this.suspendInference('Muse proposal failed validation; inspect recorded events before reauthorizing');this.data.paused=true;this.epoch++;
+          }
+        }
         this.captureMetrics(pending.id, pending.actorId); await this.commit();
       });
     } catch (error) {
       if(this.failed)throw error;
       await this.transaction(async () => {
         if (origin! === this.world){
-          if(expectedMuse&&this.options.plan?.phase==='7g-d-society'){
+          if(expectedMuse&&(this.options.operating||this.options.plan?.phase==='7g-d-society')){
+            if(this.options.operating){await this.suspendInference('Muse inference failed; inspect stopped decisions and credentials/ledger before reauthorizing');this.data.paused=true;this.epoch++;}
             this.data.interruptedDecisions ??={};
             this.data.interruptedDecisions[pending.actorId]={request:structuredClone(pending),reason:'Muse inference interrupted; pending decision retained without retry.',recordedAt:this.now()};
             this.world.interruptDecision(pending.id);
@@ -313,13 +382,14 @@ export class NeighbourhoodServerSession {
       });
     } finally { this.busy = false; }
   }
-  private captureMetrics(requestId: string, actorId: NpcId): void { if (this.provider.metrics) this.data.metrics = [...this.data.metrics, { ...this.provider.metrics, requestId, actorId, recordedAt: this.now() }].slice(-this.maximumRequests); }
+  private captureMetrics(requestId: string, actorId: NpcId): void { if (this.provider.metrics) this.data.metrics = [...this.data.metrics, { ...this.provider.metrics, requestId, actorId, recordedAt: this.now() }].slice(-(this.options.operating?200:this.maximumRequests)); }
   async converse(input: ConversationInput): Promise<ConversationResult> {
     let oldResult: ConversationResult | null = null; let revision = 0; let origin!: Neighbourhood; let epoch = 0;
     let context!: Parameters<NeighbourhoodProvider['converse']>[0];
     await this.transaction(async () => {
+      if(this.options.operating&&this.data.paused)throw new SessionError(409,'Resume the society before requesting Muse conversation');
       this.requireWorld(input.worldId); if (!this.hasResident(input.actorId)) throw new SessionError(400, 'Unknown resident');if(this.phoneControl.controlled(this.world.id,input.actorId))throw new SessionError(409,'Release phone control before requesting another inference'); const old = this.receipt(input.id, input); if (old) { oldResult = old.value as ConversationResult; return; }
-      this.reserveRequest(input.actorId);
+      await this.reserveRequest(input.actorId);
       for (const [id, proposal] of this.proposals) if (proposal.request.actorId === input.actorId) { this.world.abandonDecision(proposal.request.id); this.proposals.delete(id); }
       this.world.recordConversation(input.actorId, 'player', input.message);
       this.data.history[input.actorId]!.push({ speaker: 'player', text: input.message, mode: this.mode });
@@ -330,8 +400,9 @@ export class NeighbourhoodServerSession {
     if (oldResult) return oldResult;
     try {
       const response = await this.provider.converse(context); validateConversation(response, context);
+      await this.options.operating?.refresh();
       return await this.transaction(async () => {
-        if (origin !== this.world || epoch !== this.epoch || this.world.observe(input.actorId).actor.revision !== revision) throw new SessionError(409, 'Character state changed during conversation');
+        if (origin !== this.world || this.options.operating && (this.data.paused || !this.options.operating.status.enabled) || epoch !== this.epoch || this.world.observe(input.actorId).actor.revision !== revision) throw new SessionError(409, 'Character state changed during conversation');
         this.world.recordConversation(input.actorId, 'npc', response.reply);
         this.data.history[input.actorId]!.push({ speaker: 'npc', text: response.reply, mode: this.mode }); this.data.history[input.actorId]! = this.data.history[input.actorId]!.slice(-12);
         let proposalId: string | null = null;
@@ -344,7 +415,7 @@ export class NeighbourhoodServerSession {
       });
     } catch (error) {
       if(this.failed)throw error;
-      await this.transaction(async () => { Object.assign(this.data.receipts[input.id]!, { status: 'failed', value: 'Inference unavailable; no action executed' }); this.captureMetrics(input.id, input.actorId); await this.commit(); });
+      await this.transaction(async () => { if(this.options.operating){await this.suspendInference('Muse conversation failed; inspect credentials and spending ledgers before reauthorizing');this.data.paused=true;this.epoch++;} Object.assign(this.data.receipts[input.id]!, { status: 'failed', value: 'Inference unavailable; no action executed' }); this.captureMetrics(input.id, input.actorId); await this.commit(); });
       throw error instanceof SessionError ? error : new SessionError(502, 'Inference unavailable; no mock substitution or retry');
     } finally { this.busy = false; }
   }
@@ -357,9 +428,9 @@ export class NeighbourhoodServerSession {
       const value = { accepted: outcome.accepted, reason: outcome.reason }; Object.assign(this.data.receipts[input.id]!, { status: 'done', value }); await this.commit(); return value;
     });
   }
-  async close(): Promise<void> { await this.tail; this.closed = true; this.listeners.clear(); }
+  async close(): Promise<void> { this.epoch++;this.closed=true;await this.tail; this.listeners.clear(); }
 }
-type ConstructorParametersInternal = { checkpoint: string; provider?: NeighbourhoodProvider; plan?: LivePlan; now?: () => number; initialWorld?: string; townPopulation?: false | 8 | 16;townMap?:MapId };
+type ConstructorParametersInternal = { operating?: LocalMusePolicy; checkpoint: string; provider?: NeighbourhoodProvider; plan?: LivePlan; now?: () => number; initialWorld?: string; townPopulation?: false | 8 | 16;townMap?:MapId };
 function mockExperiment(experiment: Experiment): NeighbourhoodProvider {
   return new MockNeighbourhoodProvider(new NeighbourhoodMockProvider({ trader: experiment === 'cooperate' || experiment === 'decline' ? 'cooperate' : experiment, driver: experiment === 'decline' ? 'decline' : 'accept' }));
 }

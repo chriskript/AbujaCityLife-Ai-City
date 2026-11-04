@@ -70,8 +70,8 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
         exact(body,['id','worldId','actorId','leaseId','action']);if(typeof body.actorId!=='string' || typeof body.leaseId!=='string' || body.leaseId.length>80)throw new SessionError(400,'Invalid phone action');return json(res,200,await session.phoneAction(body as any));
       }
       if (url.pathname === '/api/commands') {
-        const keys = body.type === 'pause' ? ['id', 'worldId', 'type', 'paused'] : body.type === 'speed' ? ['id', 'worldId', 'type', 'speed'] : body.type === 'road' ? ['id','worldId','type','edgeId','blocked'] : ['id', 'worldId', 'type', 'experiment']; exact(body, keys);
-        if (!(body.type === 'pause' && typeof body.paused === 'boolean') && !(body.type === 'speed' && [1,2,4].includes(body.speed)) && !(body.type === 'road' && typeof body.edgeId === 'string' && body.edgeId.length <= 80 && typeof body.blocked === 'boolean') && !(body.type === 'reset' && ['cooperate','decline','wait','self-collect','reduce-sales'].includes(body.experiment))) throw new SessionError(400, 'Invalid control');
+        const keys = ['inference-stop','review-inference'].includes(body.type) ? ['id','worldId','type'] : body.type === 'pause' ? ['id', 'worldId', 'type', 'paused'] : body.type === 'speed' ? ['id', 'worldId', 'type', 'speed'] : body.type === 'road' ? ['id','worldId','type','edgeId','blocked'] : ['id', 'worldId', 'type', 'experiment']; exact(body, keys);
+        if (!(['inference-stop','review-inference'].includes(body.type)) && !(body.type === 'pause' && typeof body.paused === 'boolean') && !(body.type === 'speed' && [1,2,4].includes(body.speed)) && !(body.type === 'road' && typeof body.edgeId === 'string' && body.edgeId.length <= 80 && typeof body.blocked === 'boolean') && !(body.type === 'reset' && ['cooperate','decline','wait','self-collect','reduce-sales'].includes(body.experiment))) throw new SessionError(400, 'Invalid control');
         return json(res, 200, await session.command(body as any));
       }
       if (url.pathname === '/api/conversations') {
@@ -86,7 +86,8 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
   server.requestTimeout = 25_000; server.headersTimeout = 10_000; server.maxHeadersCount = 32;
   const timer = setInterval(() => {
     if(options.tick===false||reviewStopped)return;
-    if(session.mode==='live-meta'&&session.advancesWithoutObserver){
+    if(session.frame.muse)void session.refreshOperations().catch(()=>{});
+    if(session.mode==='live-meta'&&session.advancesWithoutObserver&&!session.frame.muse){
       const frame=session.frame;
       const seriousProposal=frame.events.some(e=>e.type==='action-validated'&&e.data.accepted===false&&!ordinaryRejection(e.detail)&&frame.events.some(p=>p.type==='action-proposed'&&p.subject===e.subject&&p.data.mode==='meta'));
       if(session.interruptions.length||seriousProposal){
@@ -100,7 +101,7 @@ export function createNeighbourhoodHttp(session: NeighbourhoodServerSession, acc
     if(!streams.size&&!session.advancesWithoutObserver)return;
     void progression.pulse().catch(error => { console.error(error instanceof SessionError?error.message:'Authoritative progression stopped; inspect the checkpoint before restarting.');for(const stream of streams)stream.end(); });
   }, 250); timer.unref();
-  return { server, async close() { clearInterval(timer); await progression.stop().catch(() => {}); for (const stream of streams) stream.end(); await new Promise<void>(resolve => server.close(() => resolve())); await session.close(); } };
+  return { server, async close() { clearInterval(timer); session.invalidatePending(); await progression.stop().catch(() => {}); for (const stream of streams) stream.end(); await new Promise<void>(resolve => server.close(() => resolve())); await session.close(); } };
 }
 function json(res: ServerResponse, status: number, value: unknown): void { res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(value)); }
 function exact(value: object, keys: string[]): void { if (Object.keys(value).sort().join(',') !== keys.sort().join(',')) throw new SessionError(400, 'Invalid request fields'); }

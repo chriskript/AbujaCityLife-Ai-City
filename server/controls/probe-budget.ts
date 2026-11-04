@@ -3,6 +3,16 @@ import { dirname } from 'node:path';
 
 interface Reservation { day: string; microUsd: number }
 interface Ledger { version: 1; reservations: Reservation[] }
+export interface ProbeLimits {dailyUsd:number;totalUsd:number;dailyUsdUntil?:string;totalUsdUntil?:string}
+
+export async function inspectProbeBudget(path:string,limits:ProbeLimits,now=new Date()) {
+  const ledger:Ledger=JSON.parse(await readFile(path,'utf8'));
+  if(ledger.version!==1||!Array.isArray(ledger.reservations)||ledger.reservations.some(r=>!r||typeof r.day!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(r.day)||!Number.isSafeInteger(r.microUsd)||r.microUsd<=0))throw new Error('Invalid Meta spending ledger');
+  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Lagos',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  const total=ledger.reservations.reduce((s,r)=>s+r.microUsd,0),daily=ledger.reservations.filter(r=>r.day===day).reduce((s,r)=>s+r.microUsd,0);
+  return {remainingDailyUsd:Math.max(0,usdToMicroUsd(effectiveDailyProbeUsd(limits.dailyUsd,limits.dailyUsdUntil,now))-daily)/1e6,
+    remainingTotalUsd:Math.max(0,usdToMicroUsd(effectiveTotalProbeUsd(limits.totalUsd,limits.totalUsdUntil,now))-total)/1e6};
+}
 
 // An optional temporary allowance expires after the named Lagos calendar day.
 // Expiry restores the original daily ceiling without erasing any reservations.
