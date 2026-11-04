@@ -59,3 +59,16 @@ it('authorizes only the exact canonical legacy operating checkpoint for migratio
   await writeFile(path,JSON.stringify({...saved,plan:{...saved.plan,profile:'7g-d-society'}}));
   expect(cli(d,'muse-policy','authorize-migration').status).toBe(1);expect(await readFile(policyPath,'utf8')).toBe(JSON.stringify(policy,null,2)+'\n');
 });
+
+it('configures exhaustion behavior and reads policies written before the toggle existed',async()=>{
+  const d=await fixture();expect(cli(d,'muse-policy','init').status).toBe(0);
+  const path=join(d,'runtime/muse-policy.json');
+  expect(cli(d,'muse-policy','configure','--on-exhausted=continuity').status).toBe(0);
+  expect(JSON.parse(await readFile(path,'utf8')).onExhausted).toBe('continuity');
+  expect(cli(d,'muse-policy','configure','--on-exhausted=pause').status).toBe(0);
+  expect(cli(d,'muse-policy','configure','--on-exhausted=delete-everything').status).toBe(1);
+  const legacy=JSON.parse(await readFile(path,'utf8'));delete legacy.onExhausted;await writeFile(path,JSON.stringify(legacy));
+  const status=cli(d,'muse-policy','status');expect(status.status,status.stderr).toBe(0);
+  expect(cli(d,'muse-policy','authorize').status).toBe(0);
+  expect(JSON.parse(await readFile(path,'utf8')).onExhausted).toBe('pause');
+},15000);

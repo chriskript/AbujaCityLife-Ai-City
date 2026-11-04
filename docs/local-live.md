@@ -66,6 +66,22 @@ Policy changes are observed while running and while paused. No setting silently 
 
 To restart, use **Ctrl+C**, wait for shutdown, then `npm run dev:live`. Keep `runtime/neighbourhood-session.json`, its rollback copies and both spending ledgers. Normal shutdown releases only its own ownership lock. Restarts restore the same session, world, pause state, residents, memories, communications, work, inventories, economic state and world history. Persistent mode disallows the Reset control.
 
+## Suspension and continuity
+
+When Muse becomes terminally unavailable — allowance exhausted, authorization expired or revoked, upstream allowance exhausted, or a stopped policy — the society suspends automatically instead of advancing without minds:
+
+- Default (`--on-exhausted=pause`): the society pauses with a persisted reason. The browser badge reads **Muse suspended**, the notice names the reason, and resume is refused until you re-authorize. Mid-travel residents, held wages, and escrowed deliveries resume untouched.
+- Optional (`--on-exhausted=continuity`, requires explicit configure + re-authorize): the clock keeps running on deterministic continuity routines only. Continuity honours previously accepted deliveries and bounded self-maintenance (eating owned food, resting at valid places, stranded residents returning home); it never starts conversations, relationships, purchases, employment, negotiations, or social activity. Every continuity decision carries `continuity` provenance in the event record and the badge reads **Continuity routines** — never Live Muse.
+- Transient states never suspend: rate-limit waits and in-flight requests keep the society running and recover on their own.
+- Routine completions with nothing pending, calm needs, and no recent failure are handled by continuity without consuming a generation (at most two in a row per resident, then Muse is consulted). Suppression counts are recorded durably in the checkpoint and shown in the Muse status panel.
+
+```sh
+npm run muse:policy -- configure --on-exhausted=continuity
+npm run muse:policy -- authorize
+```
+
+Re-authorizing with headroom clears the suspension on the next decision (continuity mode) or on resume (paused mode).
+
 ## Spending and failures
 
 Local policy limits are **additional to** the original Meta ledger ceilings. The existing temporary $50 daily / $100 cumulative allowance and November 4, 2026 Lagos expiry are unchanged. After expiry the existing upstream mechanism restores its conservative ceilings without deleting historical reservations; if historical total already exceeds that cap, new inference remains blocked. Local authorization cannot override this.

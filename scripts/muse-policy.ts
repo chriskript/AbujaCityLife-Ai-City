@@ -23,7 +23,7 @@ try {
   } else if(['configure','authorize','authorize-migration','disable'].includes(command??'')) {
     const lock=await open(path+'.lock','wx',0o600);
     try {
-      const p=JSON.parse(await readFile(path,'utf8')) as LocalPolicy;validateLocalPolicy(p);
+      const p=JSON.parse(await readFile(path,'utf8')) as LocalPolicy;if(p.onExhausted===undefined)p.onExhausted='pause';validateLocalPolicy(p);
       if(command==='authorize-migration') {
         if(args.length)throw new Error('authorize-migration takes no source path or options; only the canonical legacy operating world is eligible');
         try{await access('runtime/neighbourhood-session.lock');throw new Error('Stop the operating backend before reviewing migration');}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;}
@@ -33,8 +33,8 @@ try {
         p.enabled=false;p.authorizedAt=null;p.stoppedReason=null;
         console.log(JSON.stringify({migration:'Exact canonical legacy checkpoint authorized for next startup; rollback copy and plan consumption will be retained',residents:world.residentIds.length,simulationSeconds:world.time,priorRequests:saved.requests,priorPlanRequests:saved.plan.used,priorPlanReservedUsd:saved.plan.reservedUsd}));
       }else if(command==='configure') {
-        const names:Record<string,keyof LocalPolicy>={'daily-usd':'dailyUsd','total-usd':'totalUsd','requests':'maximumRequests','tokens':'maximumTokens','input-tokens':'inputTokenLimit','rate':'requestsPerMinute','concurrency':'concurrency','run-requests':'runRequests','run-usd':'runUsd'};
-        for(const [key,value]of Object.entries(flags)){if(!names[key])throw new Error('Unknown policy option: '+key);(p as unknown as Record<string,unknown>)[names[key]!]=value==='none'?null:Number(value);}
+        const names:Record<string,keyof LocalPolicy>={'daily-usd':'dailyUsd','total-usd':'totalUsd','requests':'maximumRequests','tokens':'maximumTokens','input-tokens':'inputTokenLimit','rate':'requestsPerMinute','concurrency':'concurrency','run-requests':'runRequests','run-usd':'runUsd','on-exhausted':'onExhausted'};
+        for(const [key,value]of Object.entries(flags)){if(!names[key])throw new Error('Unknown policy option: '+key);if(names[key]==='onExhausted'){if(value!=='pause'&&value!=='continuity')throw new Error('on-exhausted must be pause or continuity');p.onExhausted=value;}else (p as unknown as Record<string,unknown>)[names[key]!]=value==='none'?null:Number(value);}
         p.enabled=false;p.authorizedAt=null;p.stoppedReason=null;
       }else if(command==='authorize') {
         if(Object.keys(flags).some(k=>k!=='until'))throw new Error('authorize accepts only --until=ISO-date');
@@ -44,5 +44,5 @@ try {
       validateLocalPolicy(p);await durableJson(path,p);
       console.log(command==='authorize'?'Owner authorization saved. Existing application and upstream consumption counters remain in force.':'Policy saved; paid inference disabled.');
     }finally{await lock.close();await unlink(path+'.lock');}
-  }else throw new Error('Use muse:policy init | init-meta-ledger (new installations only) | status | configure --daily-usd=.25 --total-usd=1 --requests=48 --tokens=500000 --rate=6 [--run-requests=12 --run-usd=.25] | authorize [--until=ISO-date] | authorize-migration | disable');
+  }else throw new Error('Use muse:policy init | init-meta-ledger (new installations only) | status | configure --daily-usd=.25 --total-usd=1 --requests=48 --tokens=500000 --rate=6 [--run-requests=12 --run-usd=.25] [--on-exhausted=pause|continuity] | authorize [--until=ISO-date] | authorize-migration | disable');
 }catch(error){console.error(error instanceof SyntaxError?'Invalid local policy JSON; preserve files and inspect configuration':(error as Error).message);process.exitCode=1;}

@@ -14,11 +14,12 @@ export interface LocalPolicy {
   dailyUsd: number; totalUsd: number; maximumRequests: number; maximumTokens: number;
   inputTokenLimit: InputTokenLimit; outputTokenLimit: 2048; concurrency: 1; requestsPerMinute: number;
   runRequests: number | null; runUsd: number | null; stoppedReason: string | null;
+  onExhausted: 'pause' | 'continuity';
 }
 export const defaultLocalPolicy: LocalPolicy = { version: 1, enabled: false, authorizedAt: null, expiresAt: null,migrationCheckpointHash:null,
   dailyUsd: .25, totalUsd: 1, maximumRequests: 48, maximumTokens: 500000,
   inputTokenLimit: 8000, outputTokenLimit: 2048, concurrency: 1, requestsPerMinute: 6,
-  runRequests: null, runUsd: null, stoppedReason: null };
+  runRequests: null, runUsd: null, stoppedReason: null, onExhausted: 'pause' };
 export function legacyOperatingMigrationAuthorized(text:string,policy:LocalPolicy):boolean {
   try{const saved=JSON.parse(text),world=JSON.parse(saved.world);return saved.version===1&&!saved.operating&&!!saved.plan&&!saved.plan.profile&&/^server-[a-f0-9-]+$/.test(world.id)&&policy.migrationCheckpointHash===createHash('sha256').update(text).digest('hex');}catch{return false;}
 }
@@ -33,7 +34,14 @@ export function validateLocalPolicy(p: LocalPolicy): void {
       p.runUsd!==null&&(!Number.isFinite(p.runUsd)||p.runUsd<=0||p.runUsd>150) ||
       p.authorizedAt!==null&&(typeof p.authorizedAt!=='string'||!Number.isFinite(Date.parse(p.authorizedAt))) ||
       p.expiresAt!==null&&(typeof p.expiresAt!=='string'||!Number.isFinite(Date.parse(p.expiresAt))) ||
-      p.enabled&&!p.authorizedAt || p.stoppedReason!==null&&typeof p.stoppedReason!=='string') throw new Error('Invalid local Muse policy; use muse:policy configure');
+      p.enabled&&!p.authorizedAt || p.stoppedReason!==null&&typeof p.stoppedReason!=='string' ||
+      p.onExhausted!=='pause'&&p.onExhausted!=='continuity') throw new Error('Invalid local Muse policy; use muse:policy configure');
+}
+// Statuses that clear on their own: a rate ceiling waits, an in-flight request
+// settles. Every other unavailable status is terminal until the owner acts.
+const transientMuseStatuses=new Set(['Rate limit; waiting','Inference pending']);
+export function terminalMuseUnavailable(status:{available:boolean;status:string}):boolean {
+  return !status.available&&!transientMuseStatuses.has(status.status);
 }
 export async function durableJson(path: string, value: unknown, exclusive=false): Promise<void> {
   await mkdir(dirname(path),{recursive:true});
@@ -51,7 +59,7 @@ export class LocalMusePolicy {
   private view: MuseStatus = {enabled:false,available:false,status:'Policy not loaded',inFlight:false,requests:0,reservedUsd:0,remainingDailyUsd:0,remainingTotalUsd:0,remainingRequests:0,remainingTokens:0,estimatedUsd:0,inputTokenLimit:8000,outputTokenLimit:2048};
   constructor(readonly path:string,readonly usagePath:string,private readonly upstream?:{path:string;limits:ProbeLimits}) {}
   get status():MuseStatus {return {...this.view,inFlight:this.active,estimatedUsd:this.estimated};}
-  async read():Promise<LocalPolicy>{const p=JSON.parse(await readFile(this.path,'utf8'));validateLocalPolicy(p);return p;}
+  async read():Promise<LocalPolicy>{const p=JSON.parse(await readFile(this.path,'utf8')) as LocalPolicy;if(p.onExhausted===undefined)p.onExhausted='pause';validateLocalPolicy(p);return p;}
   private async usage():Promise<Usage>{
     const u=JSON.parse(await readFile(this.usagePath,'utf8')) as Usage;
     if(u.version!==1||!Array.isArray(u.reservations)||u.reservations.some(r=>!Number.isFinite(r.at)||r.at<0||typeof r.run!=='string'||!Number.isSafeInteger(r.microUsd)||r.microUsd<=0||!Number.isSafeInteger(r.tokens)||r.tokens<=0))throw new Error('Invalid local usage ledger; preserve it for review');return u;

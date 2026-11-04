@@ -3,6 +3,7 @@ export interface MuseStatus {
   enabled:boolean; available:boolean; status:string; inFlight:boolean; requests:number; reservedUsd:number;
   remainingDailyUsd:number; remainingTotalUsd:number; remainingRequests:number; remainingTokens:number;
   estimatedUsd:number; inputTokenLimit:number; outputTokenLimit:number;
+  suppressedDecisions?:number;
 }
 
 import { mapFor, buildingFor, addressFor, type MapId } from '../world/town-layout.js';
@@ -40,6 +41,8 @@ export interface NeighbourhoodFrame {
   paused: boolean; speed: 1 | 2 | 4; conversationAvailable: boolean;
   decisionBudget: { used: number; limit: number };
   muse?: MuseStatus;
+  suspendedReason?: string|null;
+  continuityActive?: boolean;
   stoppedDecisions?: {actorId:string;requestId:string;reason:string;recordedAt:number}[];
   progression?: { used: number; limit: number; stopped: boolean };
   snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null;

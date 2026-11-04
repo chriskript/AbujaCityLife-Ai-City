@@ -462,7 +462,7 @@ export class Neighbourhood {
     this.record('inference-interrupted',request.actorId,[request.actorId],requestId,'Muse decision remains pending for manual review; no offline substitution or automatic retry');
   }
 
-  applyDecision(requestId: string, proposal: unknown, provenance: { mode: 'mock' | 'meta' | 'player'; model: string }): DecisionOutcome {
+  applyDecision(requestId: string, proposal: unknown, provenance: { mode: 'mock' | 'meta' | 'player' | 'continuity'; model: string }): DecisionOutcome {
     const previous = this.processed.get(requestId);
     if (previous) return { ...previous, duplicate: true };
     const request = this.pending.get(requestId);

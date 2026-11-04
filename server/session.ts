@@ -15,7 +15,9 @@ import type { ConversationInput, ConversationResult, ConversationTurn, Generatio
 import { NeighbourhoodMockProvider } from '../shared/neighbourhood/mock-provider.js';
 import { MockNeighbourhoodProvider, maximumGenerationUsd, validateConversation, type NeighbourhoodProvider } from './inference/neighbourhood-provider.js';
 import { generationReservation } from './inference/model-limits.js';
-import { legacyOperatingMigrationAuthorized, type LocalMusePolicy } from './controls/local-policy.js';
+import { continuityDecision } from '../shared/neighbourhood/continuity-policy.js';
+import { MAX_CONSECUTIVE_SUPPRESSIONS, routineContinuationOnly } from './inference/selective-provider.js';
+import { legacyOperatingMigrationAuthorized, terminalMuseUnavailable, type LocalMusePolicy } from './controls/local-policy.js';
 
 export class SessionError extends Error { constructor(readonly status: number, message: string) { super(message); } }
 interface Receipt { hash: string; status: 'pending' | 'done' | 'failed'; value: unknown }
@@ -23,6 +25,9 @@ interface Checkpoint {
   operating?: true;
   legacyPlan?: NonNullable<Checkpoint['plan']>;
   interruptedDecisions?:Record<NpcId,{request:NpcDecisionRequest;reason:string;recordedAt:number}>;
+  suspendedReason?: string | null;
+  continuityActive?: boolean;
+  suppression?: Record<string, { total: number; consecutive: number }>;
   version: 1; sessionId: string; sequence: number; world: string; paused: boolean; speed: 1 | 2 | 4;
   requests: number; recent: number[]; last: Partial<Record<NpcId, { wall: number; simulation: number; worldId?: string }>>;
   receipts: Record<string, Receipt>; history: Record<NpcId, ConversationTurn[]>;
@@ -91,6 +96,14 @@ export class NeighbourhoodServerSession {
         for(const [id,item] of Object.entries(data.interruptedDecisions)){
           const r=item?.request;
           if(!npcIds.includes(id)||!r||r.actorId!==id||r.worldId!==session.world.id||typeof r.id!=='string'||!r.observation||r.observation.actor?.id!==id||!Array.isArray(r.triggers)||r.triggers.length>8||r.triggers.some(t=>typeof t!=='string')||JSON.stringify(r).length>100_000||typeof item.reason!=='string'||item.reason.length>160||!Number.isFinite(item.recordedAt)||item.recordedAt<0)throw new Error('Invalid pending inference checkpoint');
+        }
+      }
+      if (data.suspendedReason !== undefined && data.suspendedReason !== null && (typeof data.suspendedReason !== 'string' || data.suspendedReason.length > 500)) throw new Error('Invalid suspension checkpoint');
+      if (data.continuityActive !== undefined && typeof data.continuityActive !== 'boolean') throw new Error('Invalid continuity checkpoint');
+      if (data.suppression !== undefined) {
+        if (!data.suppression || typeof data.suppression !== 'object' || Array.isArray(data.suppression) || Object.keys(data.suppression).length > npcIds.length) throw new Error('Invalid suppression checkpoint');
+        for (const [id, counts] of Object.entries(data.suppression)) {
+          if (!npcIds.includes(id) || !counts || !Number.isSafeInteger(counts.total) || counts.total < 0 || !Number.isSafeInteger(counts.consecutive) || counts.consecutive < 0 || counts.consecutive > counts.total) throw new Error('Invalid suppression checkpoint');
         }
       }
       if (data.routineRecent !== undefined && (!Array.isArray(data.routineRecent) || data.routineRecent.length > (session.world.hasTownEconomy ? offlineTownLimits.perMinute : 6) || data.routineRecent.some(time => !Number.isFinite(time) || time < 0 || time > session.world.time))) throw new Error('Invalid routine accounting checkpoint');
@@ -215,7 +228,9 @@ export class NeighbourhoodServerSession {
     this.committedHistory = structuredClone(this.data.history);
     this.current = { version: 2, sessionId: this.data.sessionId, sequence: this.data.sequence, mode: this.provider.mode, paused: this.data.paused, speed: this.data.speed, conversationAvailable: true, decisionBudget: this.mode==='mock' && this.world.hasTownEconomy ? {used:this.data.routineRequests ?? 0,limit:offlineTownLimits.maximumDecisions} : { used: this.data.requests, limit: this.maximumRequests }, ...projection };
     if (this.boundedTown) this.current.progression = { used: this.data.progression!.used, limit: this.data.progression!.limit, stopped: this.data.progression!.used >= this.data.progression!.limit };
-    if(this.options.operating){this.current.muse=this.options.operating.status;this.current.stoppedDecisions=this.interruptions;}
+    if(this.options.operating){this.current.muse={...this.options.operating.status,suppressedDecisions:Object.values(this.data.suppression ?? {}).reduce((n,c)=>n+c.total,0)};this.current.stoppedDecisions=this.interruptions;}
+    this.current.suspendedReason=this.data.suspendedReason ?? null;
+    this.current.continuityActive=!!this.data.continuityActive;
     for (const listener of this.listeners) listener(this.frame);
   }
   private receipt(id: string, payload: unknown): Receipt | null {
@@ -285,6 +300,13 @@ export class NeighbourhoodServerSession {
       } else if (command.type === 'pause') {
         if(!command.paused&&this.options.operating&&this.interruptions.length)throw new SessionError(409,'Review and acknowledge interrupted Muse decisions before resuming');
         if (!command.paused && this.boundedTown && (this.data.progression!.used >= this.data.progression!.limit || this.world.hasTownEconomy && (this.data.routineRequests ?? 0) >= offlineTownLimits.maximumDecisions)) throw new SessionError(429, 'Controlled advancement or decision allowance exhausted; reset and restart do not replenish it');
+        if(!command.paused&&this.options.operating){
+          const status=await this.options.operating.refresh();
+          if(terminalMuseUnavailable(status)){
+            let continuity=false;try{continuity=(await this.options.operating.read()).onExhausted==='continuity';}catch{continuity=false;}
+            if(!continuity)throw new SessionError(409,'Muse suspended ('+status.status+'); re-authorize before resuming');
+          }else{this.data.suspendedReason=null;this.data.continuityActive=false;}
+        }
         this.data.paused = command.paused; this.epoch++;
       }
       else if (command.type === 'speed') {
@@ -322,9 +344,30 @@ export class NeighbourhoodServerSession {
       }
     });
   }
+  // Suspension reflects terminal Muse unavailability in simulation state.
+  // Transient waits (rate ceiling, in-flight request) never suspend. Runs
+  // inside the decide() transaction; commits only when state changes.
+  private async refreshSuspension(): Promise<void> {
+    const operating = this.options.operating; if (!operating) return;
+    const status = await operating.refresh();
+    if (terminalMuseUnavailable(status)) {
+      let continuity = false;
+      try { continuity = (await operating.read()).onExhausted === 'continuity'; } catch { continuity = false; }
+      const reason = this.data.suspendedReason ?? status.status;
+      const paused = continuity ? this.data.paused : true;
+      if (reason !== this.data.suspendedReason || continuity !== !!this.data.continuityActive || paused !== this.data.paused) {
+        this.data.suspendedReason = reason; this.data.continuityActive = continuity; this.data.paused = paused;
+        await this.commit();
+      }
+    } else if (this.data.suspendedReason || this.data.continuityActive) {
+      this.data.suspendedReason = null; this.data.continuityActive = false;
+      await this.commit();
+    }
+  }
   async decide(actorId?: NpcId, triggerOnly = false): Promise<void> {
-    let request: NpcDecisionRequest | null = null; let origin: Neighbourhood; let epoch = 0;let controlGeneration=0,expectedMuse=false;
+    let request: NpcDecisionRequest | null = null; let origin: Neighbourhood; let epoch = 0;let controlGeneration=0,expectedMuse=false,useContinuity=false;
     await this.transaction(async () => {
+      if (this.options.operating && !actorId) await this.refreshSuspension();
       if (this.data.paused || this.busy) return;
       if (!actorId && this.mode === 'live-meta' && !this.options.operating && !this.options.plan?.allowAutonomy) return;
       const npcIds = this.world.residentIds;
@@ -342,11 +385,25 @@ export class NeighbourhoodServerSession {
         const previousLast = this.data.last[id];
         if (!actorId && (previousLast?.worldId === undefined || previousLast.worldId === this.world.id) && this.world.time - (previousLast?.simulation ?? -Infinity) < 20) continue;
         const source=this.provider.sourceFor?.(this.world.observe(id),this.world.decisionTriggers(id)) ?? this.mode;
-        const routine=!actorId && source==='mock';
+        let suppressed=false,continuity=false;
+        if (!actorId && this.options.operating && source==='live-meta') {
+          const status=this.options.operating.status;
+          if (terminalMuseUnavailable(status)) {
+            if (!this.data.continuityActive) continue;
+            continuity=true;
+          } else if (status.available && (this.data.suppression?.[id]?.consecutive ?? 0)<MAX_CONSECUTIVE_SUPPRESSIONS &&
+            routineContinuationOnly(this.world.observe(id),this.world.decisionTriggers(id))) suppressed=continuity=true;
+        }
+        const routine=!actorId && (source==='mock'||continuity);
         try { await this.reserveRequest(id, routine); } catch (error) { if (actorId) throw error; continue; }
         request = actorId && !triggerOnly ? this.world.requestInteractionDecision(id) : this.world.requestDecision(id);
         if (!request) { this.busy = false; if (routine && this.world.hasTownEconomy) this.data.routineRequests!--; else this.data.requests--; if (routine) this.data.routineRecent!.pop(); else this.data.recent.pop(); if (previousLast) this.data.last[id] = previousLast; else delete this.data.last[id]; if (this.mode === 'live-meta' && !routine && !this.options.operating) { this.data.plan!.used--; this.data.plan!.reservedUsd -= this.reservationUsd; } continue; }
-        expectedMuse=source==='live-meta';
+        if (!actorId && this.options.operating) {
+          const counts=this.data.suppression?.[id] ?? {total:0,consecutive:0};
+          this.data.suppression??={};
+          this.data.suppression[id]=suppressed?{total:counts.total+1,consecutive:counts.consecutive+1}:{total:counts.total,consecutive:0};
+        }
+        expectedMuse=source==='live-meta'&&!continuity;useContinuity=continuity;
         if(expectedMuse&&this.options.operating){this.data.interruptedDecisions??={};this.data.interruptedDecisions[id]={request:structuredClone(request),reason:'Inference pending at checkpoint; interrupted results are never replayed.',recordedAt:this.now()};}
         origin = this.world; epoch = this.epoch;controlGeneration=this.phoneControl.generation(id); await this.commit(); return;
       }
@@ -354,7 +411,7 @@ export class NeighbourhoodServerSession {
     if (!request) return;
     const pending = request as NpcDecisionRequest;
     try {
-      const result = await this.provider.decide(pending);
+      const result = useContinuity ? { mode: 'continuity' as const, model: 'town-continuity-v1', decision: continuityDecision(pending) } : await this.provider.decide(pending);
       if(expectedMuse&&result.mode!=='meta')throw new Error('Muse decision expected; offline substitution refused');
       await this.transaction(async () => {
         if(this.options.operating){await this.options.operating.refresh();delete this.data.interruptedDecisions?.[pending.actorId];}
@@ -365,7 +422,7 @@ export class NeighbourhoodServerSession {
             await this.suspendInference('Muse proposal failed validation; inspect recorded events before reauthorizing');this.data.paused=true;this.epoch++;
           }
         }
-        this.captureMetrics(pending.id, pending.actorId); await this.commit();
+        if(!useContinuity)this.captureMetrics(pending.id, pending.actorId); await this.commit();
       });
     } catch (error) {
       if(this.failed)throw error;
@@ -378,7 +435,7 @@ export class NeighbourhoodServerSession {
             this.world.interruptDecision(pending.id);
           }else this.world.abandonDecision(pending.id);
         }
-        this.captureMetrics(pending.id, pending.actorId); await this.commit();
+        if(!useContinuity)this.captureMetrics(pending.id, pending.actorId); await this.commit();
       });
     } finally { this.busy = false; }
   }

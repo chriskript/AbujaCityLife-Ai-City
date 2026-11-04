@@ -41,6 +41,27 @@ export function reasoningOpportunity(o: NpcObservation, triggers: string[]): str
   return null;
 }
 
+// Extremely conservative trigger suppression: a routine completion alone never
+// suppresses Muse. Suppression additionally requires positive evidence of
+// quiescence (nothing pending, needs calm, no recent failure). The caller
+// bounds consecutive suppressions per resident and records counts.
+// personal-needs-changed is the periodic background metabolism tick; it only
+// matters when needs turn urgent, which is checked independently below.
+const ROUTINE_COMPLETION_TRIGGERS = new Set(['activity-completed', 'action-completed', 'meal-completed', 'personal-needs-changed']);
+export const MAX_CONSECUTIVE_SUPPRESSIONS = 2;
+export function routineContinuationOnly(o: NpcObservation, triggers: string[]): boolean {
+  if (!triggers.length || !triggers.every(t => ROUTINE_COMPLETION_TRIGGERS.has(t))) return false;
+  if (o.decisionRecovery) return false;
+  const id = o.actor.id;
+  if ((o.communication?.threads ?? []).some(t => (t.initiator === id || t.recipient === id) && ['queued', 'pending', 'connected', 'ignored'].includes(t.status))) return false;
+  if (o.encounters.some(e => (e.initiator === id || e.recipient === id) && e.status === 'pending')) return false;
+  if (o.tasks.some(t => (t.requester === id || t.recipient === id) && ['proposed', 'accepted', 'collected'].includes(t.status))) return false;
+  if ((o.socialVisits?.invitations ?? []).some(i => i.expiresAt > o.time && (i.update.status === 'pending' || i.update.status === 'accepted'))) return false;
+  const n = o.actor.needs;
+  if (n.food >= 0.85 || (n.rest ?? 0) >= 0.85 || n.income >= 0.85 || n.stock >= 0.5) return false;
+  return true;
+}
+
 export class SelectiveNeighbourhoodProvider implements NeighbourhoodProvider {
   readonly mode='live-meta'; readonly routineDecisions=true;
   metrics:GenerationMetrics|null=null;

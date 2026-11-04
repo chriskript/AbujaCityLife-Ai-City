@@ -234,11 +234,12 @@ function updateUi(force = false): void {
   el<HTMLSelectElement>('#speed').disabled = frame.mode==='live-meta';
   el('#muse-status').textContent = frame.muse ? `${frame.muse.status} ? ${frame.muse.inFlight ? 'pending' : 'idle'} ? ${view.actors.length} residents ? ${view.actors.filter(a=>a.activity!=='idle').length} active ? ${frame.decisionBudget.used} session requests ? ${frame.muse.requests} policy requests ? ${frame.muse.reservedUsd.toFixed(4)} reserved ? remaining ${frame.muse.remainingDailyUsd.toFixed(4)} today / ${frame.muse.remainingTotalUsd.toFixed(4)} total ? ${frame.muse.remainingRequests} requests / ${frame.muse.remainingTokens} tokens ? upstream remaining ${frame.muse.upstreamRemainingDailyUsd?.toFixed(4) ?? "?"} today / ${frame.muse.upstreamRemainingTotalUsd?.toFixed(4) ?? "?"} total ? known estimate this run ${frame.muse.estimatedUsd.toFixed(4)} ? ${frame.stoppedDecisions?.length ?? 0} stopped decisions` : '';
   el<HTMLButtonElement>('#reset').disabled = !!frame.muse;
-  el('#event-details').textContent = JSON.stringify({ muse:frame.muse,stoppedDecisions:frame.stoppedDecisions, mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, communications:view.communications,events: frame.events }, null, 2);
+  el('#event-details').textContent = JSON.stringify({ muse:frame.muse,suspendedReason:frame.suspendedReason,continuityActive:frame.continuityActive,stoppedDecisions:frame.stoppedDecisions, mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, communications:view.communications,events: frame.events }, null, 2);
   const mode = el('.mode-pill'); mode.replaceChildren(); const dot = document.createElement('i');
-  mode.title = frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
-  mode.append(dot, document.createTextNode(frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Muse / backend'));
-  el('#feed-mode').textContent = frame.mode === 'mock' ? 'MOCK' : 'LIVE MUSE';
+  const suspended = !!frame.suspendedReason, continuity = !!frame.continuityActive;
+  mode.title = suspended ? (continuity ? 'Muse suspended. Deterministic continuity routines only; no live AI decisions.' : 'Muse suspended. Simulation paused; re-authorize to resume.') : frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
+  mode.append(dot, document.createTextNode(suspended ? (continuity ? 'Continuity routines / backend' : 'Muse suspended') : frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Muse / backend'));
+  el('#feed-mode').textContent = suspended ? (continuity ? 'CONTINUITY' : 'SUSPENDED') : frame.mode === 'mock' ? 'MOCK' : 'LIVE MUSE';
   document.body.dataset.worldId = view.worldId; document.body.dataset.task = task?.status ?? 'none';
   document.body.dataset.selected = selected; document.body.dataset.paused = String(frame.paused);
   document.body.dataset.marketGoods = String(view.resources.marketGoods);
@@ -247,6 +248,8 @@ function updateUi(force = false): void {
   el<HTMLTextAreaElement>('#conversation-input').disabled = !remote;
   if (frame.decisionBudget.used >= frame.decisionBudget.limit) el('#notice').textContent = 'Session decision limit reached. Reset preserves request and spending limits.';
   if (frame.progression?.stopped) el('#notice').textContent = 'Controlled server advancement limit reached. The town is paused; reset and restart preserve this allowance.';
+  else if(frame.suspendedReason&&frame.continuityActive)el('#notice').textContent = `Continuity routines while Muse is suspended (${frame.suspendedReason}). Deterministic maintenance only; no live AI decisions.`;
+  else if(frame.suspendedReason)el('#notice').textContent = `Muse suspended (${frame.suspendedReason}). Simulation paused; re-authorize to resume.`;
   else if(frame.muse)el('#notice').textContent = `Live Muse ? ${frame.muse.status}. Actions are validated by the authoritative backend.`;
   else el('#notice').textContent = frame.mode === 'live-meta' ? 'Live Meta decisions. Actions are validated by the authoritative backend.' : local ? 'Local mock test mode. No backend or Meta requests.' : 'Authoritative backend · mock activities and labelled conversation fixtures · no Meta requests.';
 }

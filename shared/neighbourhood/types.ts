@@ -163,7 +163,7 @@ export interface NpcDecisionRequest {
   id: string; worldId: string; actorId: NpcId; actorRevision: number;
   worldRevision: number; observation: NpcObservation; triggers: string[];
 }
-export interface NpcInferenceResult { mode: 'mock' | 'meta'; model: string; decision: unknown }
+export interface NpcInferenceResult { mode: 'mock' | 'meta' | 'continuity'; model: string; decision: unknown }
 export interface NpcDecisionProvider { decide(request: NpcDecisionRequest): Promise<NpcInferenceResult> }
 export interface DecisionOutcome { accepted: boolean; reason: string; duplicate: boolean }
 export interface WorkBooking { businessId: string; wage: number; inputs: number; output: number; siteNode?:string }
