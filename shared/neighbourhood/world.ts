@@ -100,10 +100,10 @@ export class Neighbourhood {
   applyPhoneAction(id:NpcId,action:unknown):DecisionOutcome {
     const actor=this.state.npcs[id];if(!actor)return {accepted:false,reason:'unknown-resident',duplicate:false};
     const proposal={goalId:(actor.goals.find(goal=>goal.status==='active') ?? actor.goals[0]!).id,reason:'Player operating this resident’s phone',action};
-    if(!isNpcDecision(proposal) || !['order-external','fund-business','communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'].includes(proposal.action.type))return {accepted:false,reason:'invalid-phone-action',duplicate:false};
+    if(!isNpcDecision(proposal) || !['order-external','fund-business','communicate','respond-communication','end-call','amend-communication','offer-contact','propose-transport','respond-transport'].includes(proposal.action.type))return {accepted:false,reason:'invalid-phone-action',duplicate:false};
     if(proposal.action.type==='propose-transport' && !remoteExchange(this.state,id,proposal.action.recipient))return {accepted:false,reason:'accepted-discussion-required',duplicate:false};
     if(proposal.action.type==='respond-transport' && (!this.state.tasks[proposal.action.taskId]?.communicationId || actor.knowledge.tasks[proposal.action.taskId]!=='proposed'))return {accepted:false,reason:'delivered-phone-offer-required',duplicate:false};
-    const reason=this.validate(id,proposal.action);if(reason)return {accepted:false,reason,duplicate:false};
+    const reason=this.validate(id,proposal.action,'player');if(reason)return {accepted:false,reason,duplicate:false};
     const request=this.requestInteractionDecision(id);if(!request)return {accepted:false,reason:'actor-busy',duplicate:false};
     return this.applyDecision(request.id,proposal,{mode:'player',model:'player-phone'});
   }
@@ -499,7 +499,7 @@ export class Neighbourhood {
     const reason = actor.revision !== request.actorRevision ? 'stale-actor' :
       !isNpcDecision(proposal) ? 'invalid-schema' :
       !actor.goals.some(goal => goal.id === proposal.goalId) ? 'unknown-goal' :
-      !actor.goals.some(goal => goal.id === proposal.goalId && goal.status === 'active') ? 'inactive-goal' : this.validate(request.actorId, proposal.action);
+      !actor.goals.some(goal => goal.id === proposal.goalId && goal.status === 'active') ? 'inactive-goal' : this.validate(request.actorId, proposal.action, provenance.mode === 'player' ? 'player' : undefined);
     const proposalData: WorldEvent['data'] = { mode: provenance.mode, model: provenance.model };
     if (isNpcDecision(proposal)) {
       const { type, ...arguments_ } = proposal.action;
@@ -532,9 +532,10 @@ export class Neighbourhood {
     return this.state.resources.supplierGoods - Object.values(this.state.tasks).reduce((sum, task) => sum + task.reserved, 0);
   }
 
-  private validate(id: NpcId, action: Action): string | null {
+  private validate(id: NpcId, action: Action, via?: 'player'): string | null {
     const npc = this.state.npcs[id]!;
-    if (!npc.capabilities.includes(action.type)) return 'missing-capability';
+    if (action.type === 'amend-communication' && via !== 'player') return 'player-only-action';
+    if (action.type !== 'amend-communication' && !npc.capabilities.includes(action.type)) return 'missing-capability';
     if (!this.available(id)) return 'actor-busy';
     const tradeError=validateTrade(this.state,id,action);if(tradeError)return tradeError;
     const communicationError=validateCommunication(this.state,id,action);if(communicationError)return communicationError;

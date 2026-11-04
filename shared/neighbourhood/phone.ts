@@ -1,7 +1,7 @@
 import type { Action, NpcId, NpcObservation } from './types.js';
 import { Neighbourhood } from './world.js';
 import { communicationObservation } from './communication.js';
-export const phoneActionTypes=['order-external','fund-business','communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'] as const;
+export const phoneActionTypes=['order-external','fund-business','communicate','respond-communication','end-call','amend-communication','offer-contact','propose-transport','respond-transport'] as const;
 export type PhoneAction=Extract<Action,{type:typeof phoneActionTypes[number]}>;
 export interface PhoneControlStatus {actorId:string;expiresAt:number}
 export interface PhoneLease extends PhoneControlStatus {leaseId:string;worldId:string}

@@ -104,10 +104,13 @@ describe('grounded contact communication',()=>{
   apply(world,'amina',send());expect(apply(world,'amina',send()).reason).toBe('communication-cooldown');
  });
  it('keeps schema content bounds aligned and rejects extra fields',()=>{
-  expect(npcDecisionSchema.properties.action.anyOf).toHaveLength(34);
+  expect(npcDecisionSchema.properties.action.anyOf).toHaveLength(35);
   for (const type of ['adopt-goal','revise-goal','reprioritize-goal','set-goal-status','schedule-reconsideration','cancel-reconsideration']) expect(JSON.stringify(npcDecisionSchema.properties.action.anyOf)).toContain(`"enum":["${type}"]`);
   const decision=(action:unknown)=>({goalId:'restock',reason:'Test',action});expect(isNpcDecision(decision(send()))).toBe(true);
   expect(isNpcDecision(decision({...send(),message:'x'.repeat(160)}))).toBe(true);expect(isNpcDecision(decision({...send(),message:'x'.repeat(161)}))).toBe(false);
+  expect(JSON.stringify(npcDecisionSchema.properties.action.anyOf)).toContain('"enum":["amend-communication"]');
+  expect(isNpcDecision(decision({type:'amend-communication',communicationId:'communication-1',message:'Lake entrance, not the market'}))).toBe(true);
+  expect(isNpcDecision(decision({type:'amend-communication',communicationId:'communication-1',message:'x'.repeat(161)}))).toBe(false);
   expect(isNpcDecision(decision({...send(),privateTargetState:{needs:0}}))).toBe(false);
  });
 });
@@ -277,6 +280,99 @@ describe('conversational phone messaging',()=>{
    await session.decide('musa');
    const answered=JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
    expect(answered.communication.threads['communication-1'].response).toBe('accept');
+  }finally{await session?.close();await rm(dir,{recursive:true,force:true});}
+ });
+ it('amends an own unanswered text once without new threads, cooldowns or triggers',()=>{
+  const world=createTown('amend-once');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Come and pick me up'});world.advance(6);
+  const before=world.decisionTriggers('musa'),cooldown=(world.snapshot.communication!.cooldowns as Record<string,number>)['amina:musa'];
+  expect(world.applyPhoneAction('amina',{type:'amend-communication',communicationId:'communication-1',message:'I need to visit the lake'}).accepted).toBe(true);
+  const item=world.snapshot.communication!.threads['communication-1']!;
+  expect(item.message).toBe('Come and pick me up');
+  expect(item.clarification).toMatchObject({message:'I need to visit the lake',source:'player'});
+  expect(item.clarification!.createdAt).toBe(world.snapshot.time);
+  expect(Object.keys(world.snapshot.communication!.threads)).toHaveLength(1);
+  expect((world.snapshot.communication!.cooldowns as Record<string,number>)['amina:musa']).toBe(cooldown);
+  expect(world.decisionTriggers('musa')).toEqual(before);
+  expect(world.applyPhoneAction('amina',{type:'amend-communication',communicationId:'communication-1',message:'Again'}).reason).toBe('communication-already-clarified');
+  expect(world.applyPhoneAction('musa',{type:'amend-communication',communicationId:'communication-1',message:'Mine'}).reason).toBe('wrong-communication-initiator');
+  expect(world.applyPhoneAction('amina',{type:'amend-communication',communicationId:'communication-1',message:'x'.repeat(161)}).reason).toBe('invalid-phone-action');
+  expect(projectPhone(world,'musa',false,null).communication.threads[0]!.clarification).toMatchObject({message:'I need to visit the lake',source:'player'});
+  assertSnapshot(world.snapshot);
+ });
+ it('rejects amendments after response, ignore or expiry',()=>{
+  const world=createTown('amend-closed');
+  apply(world,'amina',{...send('musa','text','chat'),message:'First'});world.advance(6);
+  apply(world,'musa',{...reply('accept'),message:'Yes'});
+  expect(world.applyPhoneAction('amina',{type:'amend-communication',communicationId:'communication-1',message:'Late'}).reason).toBe('communication-not-open');
+  apply(world,'chris',{type:'communicate',recipient:'musa',channel:'text',purpose:'chat',message:'Second',memoryId:null});world.advance(6);
+  apply(world,'musa',{type:'respond-communication',communicationId:'communication-2',response:'ignore',message:'No',memoryId:null});
+  expect(world.applyPhoneAction('chris',{type:'amend-communication',communicationId:'communication-2',message:'Late'}).reason).toBe('communication-not-open');
+  apply(world,'yusuf',{type:'communicate',recipient:'grace',channel:'text',purpose:'chat',message:'Third',memoryId:null});advance(world,400);
+  expect(world.applyPhoneAction('yusuf',{type:'amend-communication',communicationId:'communication-3',message:'Late'}).reason).toBe('communication-not-open');
+ });
+ it('rejects autonomous amend attempts as player-only',()=>{
+  const world=createTown('amend-player-only');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Hello'});world.advance(6);
+  expect(apply(world,'amina',{type:'amend-communication',communicationId:'communication-1',message:'Sneaky'}).reason).toBe('player-only-action');
+  expect(world.snapshot.npcs.amina.capabilities).not.toContain('amend-communication');
+  expect(world.observe('amina').permittedActions).not.toContain('amend-communication');
+ });
+ it('preserves clarifications across restart for the recipient decision',()=>{
+  const world=createTown('amend-restart');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Come and pick me up'});world.advance(6);
+  world.applyPhoneAction('amina',{type:'amend-communication',communicationId:'communication-1',message:'I need to visit the lake'});
+  const restored=Neighbourhood.restore(world.serialize());
+  expect(restored.snapshot.communication!.threads['communication-1']!.clarification).toMatchObject({message:'I need to visit the lake',source:'player'});
+  expect(restored.observe('musa').communication!.threads[0]!.clarification!.message).toBe('I need to visit the lake');
+  expect(reasoningOpportunity(restored.observe('musa'),restored.decisionTriggers('musa'))).toBe('incoming-communication');
+  assertSnapshot(restored.snapshot);
+ });
+ it('keeps amended threads frozen through continuity and answers after resume',()=>{
+  const world=createTown('amend-freeze');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Come and pick me up'});
+  world.applyPhoneAction('amina',{type:'amend-communication',communicationId:'communication-1',message:'I need to visit the lake'});
+  for(let i=0;i<7;i++)world.advance(60,{freezeCommunicationExpiry:true});
+  const held=world.snapshot.communication!.threads['communication-1']!;
+  expect(held.status).toBe('pending');expect(held.clarification!.message).toBe('I need to visit the lake');
+  expect(apply(world,'musa',{...reply('accept'),message:'On my way'}).accepted).toBe(true);
+  world.advance(6);
+  expect(world.snapshot.communication!.threads['communication-1']!.responseNotified).toBe(true);
+  assertSnapshot(world.snapshot);
+ });
+ it('completes an in-flight recipient decision cleanly when an amendment lands',()=>{
+  const world=createTown('amend-race');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Come and pick me up'});world.advance(6);
+  const request=world.requestInteractionDecision('musa')!;
+  expect(world.applyPhoneAction('amina',{type:'amend-communication',communicationId:'communication-1',message:'I need to visit the lake'}).accepted).toBe(true);
+  const goal=request.observation.actor.goals.find(g=>g.status==='active')!.id;
+  expect(world.applyDecision(request.id,{goalId:goal,reason:'Recipient reply',action:{type:'respond-communication',communicationId:'communication-1',response:'accept',message:'On my way',memoryId:null}},{mode:'mock',model:'probe'}).accepted).toBe(true);
+  world.advance(6);
+  expect(world.snapshot.events.filter(e=>e.type==='communication-replied')).toHaveLength(1);
+  expect(world.snapshot.communication!.threads['communication-1']!.clarification!.message).toBe('I need to visit the lake');
+ });
+ it('amends through the phone lease with suspension around delivery',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'comm-amend-'));let session:NeighbourhoodServerSession|undefined;
+  try{
+   const checkpoint=join(dir,'session.json');
+   session=await NeighbourhoodServerSession.open({checkpoint,townPopulation:16});
+   const worldId=session.frame.snapshot.worldId;
+   const lease=(await session.controlPhone({worldId,actorId:'amina',operation:'acquire'}))!;
+   expect((await session.phoneAction({id:'send-1',worldId,actorId:'amina',leaseId:lease.leaseId,action:{type:'communicate',recipient:'musa',channel:'text',purpose:'chat',message:'Come and pick me up',memoryId:null}})).accepted).toBe(true);
+   expect((await session.phoneAction({id:'amend-1',worldId,actorId:'amina',leaseId:lease.leaseId,action:{type:'amend-communication',communicationId:'communication-1',message:'I need to visit the lake'}})).accepted).toBe(true);
+   await expect(session.phoneAction({id:'amend-2',worldId,actorId:'amina',leaseId:'wrong-lease',action:{type:'amend-communication',communicationId:'communication-1',message:'Nope'}})).rejects.toThrow('belongs to another observer');
+   await session.command({id:'pause-1',worldId,type:'pause',paused:true});
+   await session.tick(60);
+   const held=JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
+   expect(held.communication.threads['communication-1'].clarification.message).toBe('I need to visit the lake');
+   await session.command({id:'resume-1',worldId,type:'pause',paused:false});
+   await session.tick(60);
+   await session.decide('musa');
+   await session.tick(6);
+   const answered=JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
+   expect(answered.communication.threads['communication-1'].response).toBe('accept');
+   expect(answered.events.filter((e:any)=>e.type==='communication-clarified')).toHaveLength(1);
+   await session.controlPhone({worldId,actorId:'amina',operation:'release',leaseId:lease.leaseId});
   }finally{await session?.close();await rm(dir,{recursive:true,force:true});}
  });
  it('exposes inference availability and cooldown timing to the phone view',()=>{

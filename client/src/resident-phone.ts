@@ -70,7 +70,7 @@ export class ResidentPhone {
  }
  private async act(action:PhoneAction){
   if(!this.view || !this.lease || !this.canAct())return;const view=this.view,lease=this.lease;this.busy=true;this.controls();
-  try{const result=await this.session.phoneAction({id:crypto.randomUUID(),worldId:view.worldId,actorId:view.owner.id,leaseId:lease.leaseId,action});const sentText=view.inferenceAvailable?'Text sent. A reply is up to them.':`Text sent and kept. ${this.contact?this.name(this.contact):'They'} cannot reply while Muse inference is suspended.`;const success=action.type==='communicate'?(action.channel==='call'?'Calling. They decide whether to answer.':sentText):action.type==='propose-transport'?'Delivery offer sent. Waiting for their decision.':action.type==='respond-transport'?'Your decision was sent. Release phone control to continue your plans.':action.type==='end-call'?'Call ended.':action.type==='offer-contact'?'You shared your number.':'Your response was recorded.';this.status(result.accepted?success:`Unable to act: ${result.reason.replaceAll('-',' ')}`);if(result.accepted)this.el<HTMLTextAreaElement>('#phone-message').value='';this.signature='';await this.load();}
+  try{const result=await this.session.phoneAction({id:crypto.randomUUID(),worldId:view.worldId,actorId:view.owner.id,leaseId:lease.leaseId,action});const sentText=view.inferenceAvailable?'Text sent. A reply is up to them.':`Text sent and kept. ${this.contact?this.name(this.contact):'They'} cannot reply while Muse inference is suspended.`;const success=action.type==='communicate'?(action.channel==='call'?'Calling. They decide whether to answer.':sentText):action.type==='propose-transport'?'Delivery offer sent. Waiting for their decision.':action.type==='respond-transport'?'Your decision was sent. Release phone control to continue your plans.':action.type==='end-call'?'Call ended.':action.type==='amend-communication'?'Clarification added to your message.':action.type==='offer-contact'?'You shared your number.':'Your response was recorded.';this.status(result.accepted?success:`Unable to act: ${result.reason.replaceAll('-',' ')}`);if(result.accepted)this.el<HTMLTextAreaElement>('#phone-message').value='';this.signature='';await this.load();}
   catch(error){this.status((error as Error).message);}finally{this.busy=false;this.signature='';this.render();}
  }
  private button(label:string,run:()=>void,enabled=true){const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=!enabled;button.addEventListener('click',run);return button;}
@@ -89,7 +89,7 @@ export class ResidentPhone {
     for(const accept of [true,false])card.append(this.button(accept?'Accept delivery job':'Decline job',()=>{void this.act({type:'respond-transport',taskId:task.id,accept});},this.canAct()));
     card.append(this.button('Clarify job',()=>{const question=this.el<HTMLTextAreaElement>('#phone-message').value.trim();if(!question){this.status('Write your question first.');return;}void this.act({type:'respond-transport',taskId:task.id,accept:'clarify',question});},this.canAct()));
    }parent.append(card);
-  }else if(item.initiator===this.owner && item.purpose==='request-help' && item.taskId===null && item.response==='accept' && item.expiresAt>view.time && ['accepted','connected'].includes(item.status) && view.capabilities.includes('propose-transport')){
+  }else if(item.initiator===this.owner && item.purpose==='request-help' && item.taskId===null && item.response==='accept' && item.expiresAt+(item.frozenSeconds ?? 0)>view.time && ['accepted','connected'].includes(item.status) && view.capabilities.includes('propose-transport')){
    card.append(this.paragraph('Discussion accepted. You may make a separate delivery offer.'));
    card.append(this.button('Offer delivery',()=>{const quantity=Number(this.el<HTMLInputElement>('#phone-quantity').value);void this.act({type:'propose-transport',recipient:item.recipient,quantity});},this.canAct()));parent.append(card);
   }
@@ -122,6 +122,7 @@ export class ResidentPhone {
     const outgoing=item.initiator===this.owner;
     const state=outgoing?(!item.delivered?' · sending':item.response===null?(item.status==='expired'||item.status==='missed'?' · expired without reply':view.inferenceAvailable?' · delivered · awaiting reply':' · delivered · kept while inference is suspended'):' · delivered'):'';
     const bubble=this.paragraph(item.message,`phone-bubble ${outgoing?'outgoing':'incoming'}`);bubble.append(this.paragraph(`${clock(item.createdAt)} · ${item.channel}${state}`,'phone-note'));content.append(bubble);
+    if(item.clarification)content.append(this.paragraph(`Clarification ${clock(item.clarification.createdAt)} · player control · ${outgoing?'you':this.name(item.initiator)}: ${item.clarification.message}`,'phone-note'));
     if(item.reply && item.response!=='ignore'){const response=this.paragraph(item.reply,`phone-bubble ${item.recipient===this.owner?'outgoing':'incoming'}`);response.append(this.paragraph(`${item.response}${item.recipient===this.owner&&!item.responseNotified?' · sending':''}`,'phone-note'));content.append(response);}
     this.responses(item,content);this.tasks(item,content);if(item.channel==='call' && item.status==='connected')content.append(this.button('End call',()=>{void this.act({type:'end-call',communicationId:item.id});},this.canAct()));
    }
@@ -132,8 +133,10 @@ export class ResidentPhone {
     if(!incoming){
      const until=view.communication.cooldownUntil?.[this.contact] ?? 0;
      const open=view.communication.threads.some(item=>[item.initiator,item.recipient].includes(this.contact!) && ['queued','pending','connected','ignored'].includes(item.status));
-     content.append(this.paragraph(until>view.time?`New messages to ${this.name(this.contact)} unlock at ${clock(until)}.` : open?`Awaiting ${this.name(this.contact)}'s reply before a new message.`:'Messaging is unavailable right now.','phone-note'));
+     content.append(this.paragraph(open?`Awaiting ${this.name(this.contact)}'s reply before a new message.` : until>view.time?`New messages to ${this.name(this.contact)} unlock at ${clock(until)}.`:'Messaging is unavailable right now.','phone-note'));
     }
+    const amendable=view.communication.threads.find(item=>item.initiator===this.owner && (item.status==='queued' || item.status==='pending') && item.response===null && !item.clarification && [item.initiator,item.recipient].includes(this.contact!));
+    if(amendable)content.append(this.button('Add clarification',()=>{const message=this.el<HTMLTextAreaElement>('#phone-message').value.trim();if(!message){this.status('Write the clarification in the message field first.');return;}void this.act({type:'amend-communication',communicationId:amendable.id,message});},this.canAct()));
    }
   }
   if(query && !content.children.length)content.append(this.paragraph('No matching contacts. Try another name.','phone-note'));

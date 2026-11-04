@@ -4,7 +4,7 @@ import type { SocialContextState, SocialObservation } from './social-context.js'
 export const legacyNpcIds = ['musa', 'amina', 'zainab'] as const;
 // Legacy fixture IDs are retained for compatibility; runtime membership is world-owned.
 export type NpcId = string;
-export const actionTypes = ['order-external', 'fund-business', 'travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat', 'offer-contact', 'communicate', 'respond-communication', 'end-call', 'invite-social', 'respond-social', 'join-social', 'socialise', 'leave-social', 'adopt-goal', 'revise-goal', 'reprioritize-goal', 'set-goal-status', 'schedule-reconsideration', 'cancel-reconsideration'] as const;
+export const actionTypes = ['order-external', 'fund-business', 'travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat', 'offer-contact', 'communicate', 'respond-communication', 'end-call', 'amend-communication', 'invite-social', 'respond-social', 'join-social', 'socialise', 'leave-social', 'adopt-goal', 'revise-goal', 'reprioritize-goal', 'set-goal-status', 'schedule-reconsideration', 'cancel-reconsideration'] as const;
 export type MemoryKind = 'fact' | 'observed' | 'reported' | 'belief' | 'commitment' | 'outcome';
 export interface Memory {
   id: string; kind: MemoryKind; eventId: string; source: NpcId | 'world' | 'player';
@@ -85,6 +85,7 @@ export type Action =
   | { type: 'communicate'; recipient: NpcId; channel: 'text' | 'call'; purpose: 'chat' | 'request-help'; message: string; memoryId: string | null }
   | { type: 'respond-communication'; communicationId: string; response: 'accept' | 'decline' | 'defer' | 'clarify' | 'ignore'; message: string; memoryId: string | null }
   | { type: 'end-call'; communicationId: string }
+  | { type: 'amend-communication'; communicationId: string; message: string }
   | { type: 'take-work'; businessId: string }
   | { type: 'rest'; seconds: number }
   | { type: 'eat'; quantity: number }
@@ -167,7 +168,7 @@ export interface Communication {
   status: 'queued' | 'pending' | 'connected' | 'accepted' | 'declined' | 'deferred' | 'clarified' | 'ignored' | 'missed' | 'expired' | 'ended';
   createdAt: number; availableAt: number; expiresAt: number; delivered: boolean;
   responseAt: number | null; responseNotified: boolean;
-  taskId: string | null; frozenSeconds?: number;
+  taskId: string | null; frozenSeconds?: number; clarification?: { message: string; createdAt: number; source: 'player' } | null;
 }
 export interface NpcDecisionRequest {
   id: string; worldId: string; actorId: NpcId; actorRevision: number;

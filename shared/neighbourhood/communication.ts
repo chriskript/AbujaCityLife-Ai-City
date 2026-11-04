@@ -20,7 +20,7 @@ export function enableCommunication(state:WorldState):boolean {
  return changed;
 }
 export function remoteExchange(state:WorldState,a:string,b:string):Communication|undefined {
- return Object.values(state.communication?.threads ?? {}).find(item=>item.initiator===a && item.recipient===b && item.purpose==='request-help' && item.taskId===null && item.response==='accept' && item.responseNotified && ['accepted','connected'].includes(item.status) && state.time<item.expiresAt);
+ return Object.values(state.communication?.threads ?? {}).find(item=>item.initiator===a && item.recipient===b && item.purpose==='request-help' && item.taskId===null && item.response==='accept' && item.responseNotified && ['accepted','connected'].includes(item.status) && state.time<item.expiresAt+(item.frozenSeconds ?? 0));
 }
 export function communicationObservation(state:WorldState,id:string,historyLimit=6,includeCooldowns=false):NpcObservation['communication'] {
  if(!state.communication)return undefined;const npc=state.npcs[id]!;
@@ -52,7 +52,7 @@ export function communicationObservation(state:WorldState,id:string,historyLimit
 }
 export function validateCommunication(state:WorldState,id:string,action:Action):string|null {
  const comm=state.communication,npc=state.npcs[id]!;
- if(!communicationCapabilities.includes(action.type as typeof communicationCapabilities[number]))return null;
+ if(action.type!=='amend-communication' && !communicationCapabilities.includes(action.type as typeof communicationCapabilities[number]))return null;
  if(!comm)return 'communication-unavailable';
  if('memoryId' in action && action.memoryId!==null && !npc.memories.some(memory=>memory.id===action.memoryId))return 'unknown-memory';
  if(action.type==='offer-contact') {
@@ -75,11 +75,17 @@ export function validateCommunication(state:WorldState,id:string,action:Action):
  if(action.type==='respond-communication') {
   const item=comm.threads[action.communicationId];
   if(!item || item.recipient!==id)return 'wrong-communication-recipient';
-  if(!item.delivered || item.status!=='pending' || state.time>=item.expiresAt)return 'communication-not-open';
+  if(!item.delivered || item.status!=='pending' || state.time>=item.expiresAt+(item.frozenSeconds ?? 0))return 'communication-not-open';
  }
  if(action.type==='end-call') {
   const item=comm.threads[action.communicationId];
   if(!item || ![item.initiator,item.recipient].includes(id) || item.channel!=='call' || item.status!=='connected')return 'call-not-connected';
+ }
+ if(action.type==='amend-communication') {
+  const item=comm.threads[action.communicationId];
+  if(!item || item.initiator!==id)return 'wrong-communication-initiator';
+  if(item.response!==null || !['queued','pending'].includes(item.status))return 'communication-not-open';
+  if(item.clarification)return 'communication-already-clarified';
  }
  return null;
 }
@@ -109,6 +115,11 @@ export function executeCommunication(host:CommunicationHost,id:string,action:Act
   const item=comm.threads[action.communicationId]!;item.status='ended';
   record('call-ended',id,[item.initiator,item.recipient],item.id,'Ended the phone conversation',{},'outcome');
   trigger(item.initiator,'communication-ended');trigger(item.recipient,'communication-ended');return true;
+ }
+ if(action.type==='amend-communication') {
+  const item=comm.threads[action.communicationId]!;
+  item.clarification={message:action.message,createdAt:state.time,source:'player'};
+  record('communication-clarified',id,[id],item.id,action.message,{threadId:item.id},'observed','player');return true;
  }
  return false;
 }

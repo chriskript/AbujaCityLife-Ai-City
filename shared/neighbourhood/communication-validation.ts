@@ -19,6 +19,7 @@ export function assertCommunication(state:WorldState):void {
  for(const [key,item]of Object.entries(comm.threads)) {
   check(object(item) && key===item.id && /^communication-\d+$/.test(key) && Number(key.slice(14))<comm.nextId);
   check(item.frozenSeconds===undefined || time(item.frozenSeconds));
+  check(item.clarification===undefined || item.clarification===null || (object(item.clarification) && text(item.clarification.message) && time(item.clarification.createdAt) && item.clarification.createdAt>=item.createdAt && item.clarification.createdAt<=state.time && item.clarification.source==='player'));
   const effective=item.expiresAt+(item.frozenSeconds ?? 0);
   check(ids.includes(item.initiator) && ids.includes(item.recipient) && item.initiator!==item.recipient && state.npcs[item.initiator]!.knowledge.contacts!.includes(item.recipient));
   check(['call','text'].includes(item.channel) && ['chat','request-help'].includes(item.purpose) && text(item.message));
