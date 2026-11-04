@@ -889,7 +889,7 @@ export class Neighbourhood {
     return true;
   }
 
-  advance(seconds: number, options?: { freezeIntentionExpiry?: boolean }): void {
+  advance(seconds: number, options?: { freezeIntentionExpiry?: boolean; freezeCommunicationExpiry?: boolean }): void {
     if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 60) throw new Error('Advance must be between 0 and 60 simulation seconds');
     this.state.revision++;
     let remaining = seconds;
@@ -948,7 +948,7 @@ export class Neighbourhood {
       }
       if(advanceTrade(this.communicationHost()))for(const id of this.residentIds)this.perceive(id);
       this.detectEncounters();
-      if(this.state.communication)advanceCommunications(this.communicationHost());
+      if(this.state.communication)advanceCommunications(this.communicationHost(),dt,options?.freezeCommunicationExpiry===true);
       if(this.state.socialVisits)advanceSocialVisits(this.communicationHost());
       this.townNeeds();
     }

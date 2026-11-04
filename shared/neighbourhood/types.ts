@@ -127,7 +127,7 @@ export interface NpcObservation {
   nearbyPeople: { id: NpcId; name: string | null; occupation: string | null; activity: Activity['kind']; known: boolean; canTransport: boolean }[];
   encounters: Encounter[];
   encounterOpportunities: NpcId[];
-  communication?: { contacts: { id: NpcId; name: string; canTransport: boolean }[]; threads: Communication[]; canContact: NpcId[]; canCall: NpcId[]; contactOffers: NpcId[]; rules: {textDelay:number;callLifetime:number;textLifetime:number;cooldown:number;maximumThreads:number;maximumPending:number} };
+  communication?: { contacts: { id: NpcId; name: string; canTransport: boolean }[]; threads: Communication[]; canContact: NpcId[]; canCall: NpcId[]; contactOffers: NpcId[]; rules: {textDelay:number;callLifetime:number;textLifetime:number;cooldown:number;maximumThreads:number;maximumPending:number}; cooldownUntil?: Record<string, number> };
   town?: {
     marketPrice: number; ownsMarket: boolean; transportPayment: number; marketServing: boolean | null;
     work: { id: string; name: string; node: string; skill: string; wage: number; seconds: number; available: boolean | null; observedAt: number | null;
@@ -167,7 +167,7 @@ export interface Communication {
   status: 'queued' | 'pending' | 'connected' | 'accepted' | 'declined' | 'deferred' | 'clarified' | 'ignored' | 'missed' | 'expired' | 'ended';
   createdAt: number; availableAt: number; expiresAt: number; delivered: boolean;
   responseAt: number | null; responseNotified: boolean;
-  taskId: string | null;
+  taskId: string | null; frozenSeconds?: number;
 }
 export interface NpcDecisionRequest {
   id: string; worldId: string; actorId: NpcId; actorRevision: number;

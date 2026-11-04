@@ -9,11 +9,14 @@ import { HeadlessTownRunner } from '../shared/neighbourhood/headless-runner.js';
 import { NeighbourhoodMockProvider } from '../shared/neighbourhood/mock-provider.js';
 import { isNpcDecision,npcDecisionSchema } from '../shared/neighbourhood/decision-schema.js';
 import { projectNeighbourhood } from '../shared/neighbourhood/presentation.js';
+import { assertSnapshot } from '../shared/neighbourhood/snapshot.js';
+import { projectPhone } from '../shared/neighbourhood/phone.js';
+import { reasoningOpportunity } from '../server/inference/selective-provider.js';
 import type { Action,WorldState } from '../shared/neighbourhood/types.js';
 
 function apply(world:Neighbourhood,id:string,action:Action){const request=world.requestInteractionDecision(id)!;expect(request).not.toBeNull();return world.applyDecision(request.id,{goalId:request.observation.actor.goals[0]!.id,reason:'Offline communication test',action},{mode:'mock',model:'offline'});}
-const send=(recipient='musa',channel:'text'|'call'='text',purpose:'chat'|'request-help'='request-help'):Action=>({type:'communicate',recipient,channel,purpose,message:'Could we discuss a paid delivery?',memoryId:null});
-const reply=(response:'accept'|'decline'|'defer'|'clarify'|'ignore'='accept',channelId='communication-1'):Action=>({type:'respond-communication',communicationId:channelId,response,message:response==='ignore'?'I prefer not to engage.':'I can discuss the terms.',memoryId:null});
+const send=(recipient='musa',channel:'text'|'call'='text',purpose:'chat'|'request-help'='request-help'):Extract<Action,{type:'communicate'}>=>({type:'communicate',recipient,channel,purpose,message:'Could we discuss a paid delivery?',memoryId:null});
+const reply=(response:'accept'|'decline'|'defer'|'clarify'|'ignore'='accept',channelId='communication-1'):Extract<Action,{type:'respond-communication'}>=>({type:'respond-communication',communicationId:channelId,response,message:response==='ignore'?'I prefer not to engage.':'I can discuss the terms.',memoryId:null});
 function advance(world:Neighbourhood,seconds:number){for(let remaining=seconds;remaining>0;){const step=Math.min(60,remaining);world.advance(step);remaining-=step;}}
 function conservation(state:WorldState){
  const jobs=Object.values(state.npcs).flatMap(npc=>npc.activity.kind==='work' && npc.activity.job?[npc.activity.job]:[]);
@@ -166,5 +169,124 @@ describe('communication and real commitments',()=>{
   const world=agreed();apply(world,'amina',{type:'propose-transport',recipient:'musa',quantity:4});
   const mutations:((state:WorldState)=>void)[]=[s=>{s.npcs.amina.knowledge.contacts!.push('nobody');},s=>{s.communication!.threads['communication-1']!.recipient='chris';},s=>{s.communication!.threads['communication-1']!.availableAt=-1;},s=>{s.tasks['task-1']!.availableAt=0;},s=>{s.communication!.threads['communication-1']!.taskId='missing';},s=>{s.communication!.threads['communication-1']!.responseNotified=false;}];
   for(const mutate of mutations){const state=world.snapshot;mutate(state);expect(()=>Neighbourhood.restore(JSON.stringify(state))).toThrow();}
+ });
+});
+describe('conversational phone messaging',()=>{
+ it('holds multi-turn conversations with replies unlocking follow-ups',()=>{
+  const world=createTown('turns');
+  expect(apply(world,'amina',{...send('musa','text','chat'),message:'First leg'}).accepted).toBe(true);world.advance(5);
+  expect(apply(world,'musa',{...reply('accept'),message:'Got it'}).accepted).toBe(true);
+  expect(apply(world,'amina',{...send('musa','text','chat'),message:'Second leg'}).accepted).toBe(true);world.advance(5);
+  expect(apply(world,'musa',{...reply('accept','communication-2'),message:'Still here'}).accepted).toBe(true);
+  expect(apply(world,'musa',{type:'communicate',recipient:'amina',channel:'text',purpose:'chat',message:'Return leg',memoryId:null}).accepted).toBe(true);world.advance(5);
+  expect(apply(world,'amina',{type:'respond-communication',communicationId:'communication-3',response:'accept',message:'See you soon',memoryId:null}).accepted).toBe(true);world.advance(5);
+  const state=world.snapshot;
+  expect(Object.keys(state.communication!.threads)).toHaveLength(3);
+  expect(state.events.filter(e=>e.type==='text-delivered')).toHaveLength(3);
+  expect(state.events.filter(e=>e.type==='communication-replied')).toHaveLength(3);
+  conservation(state);assertSnapshot(state);
+ });
+ it('still rate-limits cold outreach after an unanswered call',()=>{
+  const world=createTown('cold');
+  expect(apply(world,'amina',send('musa','call')).accepted).toBe(true);advance(world,65);
+  expect(world.snapshot.communication!.threads['communication-1']!.status).toBe('missed');
+  expect(apply(world,'amina',{...send('musa','text','chat'),message:'Are you there?'}).reason).toBe('communication-cooldown');
+  advance(world,120);
+  expect(apply(world,'amina',{...send('musa','text','chat'),message:'Are you there?'}).accepted).toBe(true);
+ });
+ it('keeps ignored texts private while the pair stays blocked until expiry',()=>{
+  const world=createTown('ignored');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Hello?'});world.advance(6);
+  const id=world.snapshot.communication!.threads['communication-1']!.id;
+  apply(world,'musa',{type:'respond-communication',communicationId:id,response:'ignore',message:'No',memoryId:null});
+  expect(world.observe('amina').communication!.threads[0]).toMatchObject({status:'pending',reply:null,response:null});
+  expect(apply(world,'amina',{...send('musa','text','chat'),message:'Again?'}).reason).toBe('communication-cooldown');
+  advance(world,200);
+  expect(apply(world,'amina',{...send('musa','text','chat'),message:'Again?'}).reason).toBe('conversation-already-open');
+  advance(world,100);
+  expect(world.snapshot.communication!.threads[id]!.status).toBe('expired');
+  expect(apply(world,'amina',{...send('musa','text','chat'),message:'Again?'}).accepted).toBe(true);
+ });
+ it('freezes thread expiry while inference is unavailable and resumes after',()=>{
+  const world=createTown('frozen-thread');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Frozen?'});world.advance(6);
+  for(let i=0;i<7;i++)world.advance(60,{freezeCommunicationExpiry:true});
+  const held=world.snapshot.communication!.threads['communication-1']!;
+  expect(held.status).toBe('pending');expect(held.frozenSeconds).toBe(420);
+  expect(world.decisionTriggers('musa')).toContain('communication-received');
+  const restored=Neighbourhood.restore(world.serialize());
+  expect(restored.snapshot.communication!.threads['communication-1']!.frozenSeconds).toBe(420);
+  advance(restored,300);
+  expect(restored.snapshot.communication!.threads['communication-1']!.status).toBe('expired');
+  expect(restored.snapshot.events.filter(e=>e.type==='communication-closed')).toHaveLength(1);
+  assertSnapshot(restored.snapshot);
+ });
+ it('routes a pending recipient to live reasoning after restart',()=>{
+  const world=createTown('route-restart');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Restart?'});world.advance(6);
+  const restored=Neighbourhood.restore(world.serialize());
+  expect(reasoningOpportunity(restored.observe('musa'),restored.decisionTriggers('musa'))).toBe('incoming-communication');
+  expect(restored.requestDecision('musa')).not.toBeNull();
+ });
+ it('keeps all sixteen residents eligible to converse within their contacts',()=>{
+  const world=createTown('everyone');
+  expect(world.residentIds).toHaveLength(16);
+  for(const id of world.residentIds){const comm=world.observe(id).communication!;if(comm.contacts.length)expect(comm.canContact.length).toBeGreaterThan(0);}
+  for(const [a,b]of [['chris','musa'],['yusuf','grace']] as const){
+   expect(apply(world,a,{type:'communicate',recipient:b,channel:'text',purpose:'chat',message:'Can you talk?',memoryId:null}).accepted).toBe(true);
+   world.advance(6);
+   const thread=Object.values(world.snapshot.communication!.threads).find(t=>t.initiator===a && t.recipient===b)!;
+   expect(apply(world,b,{type:'respond-communication',communicationId:thread.id,response:'accept',message:'Yes',memoryId:null}).accepted).toBe(true);
+  }
+  assertSnapshot(world.snapshot);
+ });
+ it('pauses a player text through suspension and earns an autonomous response after resume',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'comm-suspend-'));let session:NeighbourhoodServerSession|undefined;
+  try{
+   const checkpoint=join(dir,'session.json');
+   session=await NeighbourhoodServerSession.open({checkpoint,townPopulation:16});
+   const worldId=session.frame.snapshot.worldId;
+   const lease=(await session.controlPhone({worldId,actorId:'amina',operation:'acquire'}))!;
+   expect((await session.phoneAction({id:'send-1',worldId,actorId:'amina',leaseId:lease.leaseId,action:{type:'communicate',recipient:'musa',channel:'text',purpose:'chat',message:'Can we talk?',memoryId:null}})).accepted).toBe(true);
+   await session.command({id:'pause-1',worldId,type:'pause',paused:true});
+   await session.tick(60);
+   expect(JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world).communication.threads['communication-1'].delivered).toBe(false);
+   await session.command({id:'resume-1',worldId,type:'pause',paused:false});
+   await session.tick(60);
+   expect(JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world).communication.threads['communication-1'].delivered).toBe(true);
+   await session.decide('musa');
+   await session.tick(6);
+   const answered=JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
+   expect(answered.communication.threads['communication-1'].response).toBe('accept');
+   expect(answered.communication.threads['communication-1'].responseNotified).toBe(true);
+   expect(answered.events.filter((e:any)=>e.type==='text-delivered')).toHaveLength(1);
+   expect(answered.events.filter((e:any)=>e.type==='communication-replied')).toHaveLength(1);
+   await session.controlPhone({worldId,actorId:'amina',operation:'release',leaseId:lease.leaseId});
+  }finally{await session?.close();await rm(dir,{recursive:true,force:true});}
+ });
+ it('preserves a pending recipient opportunity across restart',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'comm-restart-'));let session:NeighbourhoodServerSession|undefined;
+  try{
+   const checkpoint=join(dir,'session.json');
+   session=await NeighbourhoodServerSession.open({checkpoint,townPopulation:16});
+   const worldId=session.frame.snapshot.worldId;
+   const lease=(await session.controlPhone({worldId,actorId:'amina',operation:'acquire'}))!;
+   expect((await session.phoneAction({id:'send-1',worldId,actorId:'amina',leaseId:lease.leaseId,action:{type:'communicate',recipient:'musa',channel:'text',purpose:'chat',message:'Are you there?',memoryId:null}})).accepted).toBe(true);
+   await session.tick(60);await session.close();
+   session=await NeighbourhoodServerSession.open({checkpoint});
+   await session.decide('musa');
+   const answered=JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
+   expect(answered.communication.threads['communication-1'].response).toBe('accept');
+  }finally{await session?.close();await rm(dir,{recursive:true,force:true});}
+ });
+ it('exposes inference availability and cooldown timing to the phone view',()=>{
+  const world=createTown('phone-view');
+  apply(world,'amina',{...send('musa','text','chat'),message:'Timing?'});
+  const view=projectPhone(world,'amina',false,null);
+  expect(view.inferenceAvailable).toBe(true);
+  expect(view.communication.cooldownUntil).toMatchObject({musa:180});
+  expect(view.communication.canContact).not.toContain('musa');
+  expect(projectPhone(world,'amina',false,null,false).inferenceAvailable).toBe(false);
+  expect(projectPhone(world,'musa',false,null).communication.cooldownUntil).toMatchObject({amina:180});
  });
 });

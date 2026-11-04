@@ -70,7 +70,7 @@ export class ResidentPhone {
  }
  private async act(action:PhoneAction){
   if(!this.view || !this.lease || !this.canAct())return;const view=this.view,lease=this.lease;this.busy=true;this.controls();
-  try{const result=await this.session.phoneAction({id:crypto.randomUUID(),worldId:view.worldId,actorId:view.owner.id,leaseId:lease.leaseId,action});const success=action.type==='communicate'?(action.channel==='call'?'Calling. They decide whether to answer.':'Text sent. A reply is up to them.'):action.type==='propose-transport'?'Delivery offer sent. Waiting for their decision.':action.type==='respond-transport'?'Your decision was sent. Release phone control to continue your plans.':action.type==='end-call'?'Call ended.':action.type==='offer-contact'?'You shared your number.':'Your response was recorded.';this.status(result.accepted?success:`Unable to act: ${result.reason.replaceAll('-',' ')}`);if(result.accepted)this.el<HTMLTextAreaElement>('#phone-message').value='';this.signature='';await this.load();}
+  try{const result=await this.session.phoneAction({id:crypto.randomUUID(),worldId:view.worldId,actorId:view.owner.id,leaseId:lease.leaseId,action});const sentText=view.inferenceAvailable?'Text sent. A reply is up to them.':`Text sent and kept. ${this.contact?this.name(this.contact):'They'} cannot reply while Muse inference is suspended.`;const success=action.type==='communicate'?(action.channel==='call'?'Calling. They decide whether to answer.':sentText):action.type==='propose-transport'?'Delivery offer sent. Waiting for their decision.':action.type==='respond-transport'?'Your decision was sent. Release phone control to continue your plans.':action.type==='end-call'?'Call ended.':action.type==='offer-contact'?'You shared your number.':'Your response was recorded.';this.status(result.accepted?success:`Unable to act: ${result.reason.replaceAll('-',' ')}`);if(result.accepted)this.el<HTMLTextAreaElement>('#phone-message').value='';this.signature='';await this.load();}
   catch(error){this.status((error as Error).message);}finally{this.busy=false;this.signature='';this.render();}
  }
  private button(label:string,run:()=>void,enabled=true){const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=!enabled;button.addEventListener('click',run);return button;}
@@ -119,13 +119,22 @@ export class ResidentPhone {
   }else{
    content.append(this.button('‹ All messages',()=>{this.contact=null;this.signature='';this.render();}));
    for(const item of threads.filter(item=>[item.initiator,item.recipient].includes(this.contact!))){
-    const bubble=this.paragraph(item.message,`phone-bubble ${item.initiator===this.owner?'outgoing':'incoming'}`);bubble.append(this.paragraph(`${clock(item.createdAt)} · ${item.channel}${item.initiator===this.owner?(item.delivered?' · delivered':' · sending'):''}`,'phone-note'));content.append(bubble);
+    const outgoing=item.initiator===this.owner;
+    const state=outgoing?(!item.delivered?' · sending':item.response===null?(item.status==='expired'||item.status==='missed'?' · expired without reply':view.inferenceAvailable?' · delivered · awaiting reply':' · delivered · kept while inference is suspended'):' · delivered'):'';
+    const bubble=this.paragraph(item.message,`phone-bubble ${outgoing?'outgoing':'incoming'}`);bubble.append(this.paragraph(`${clock(item.createdAt)} · ${item.channel}${state}`,'phone-note'));content.append(bubble);
     if(item.reply && item.response!=='ignore'){const response=this.paragraph(item.reply,`phone-bubble ${item.recipient===this.owner?'outgoing':'incoming'}`);response.append(this.paragraph(`${item.response}${item.recipient===this.owner&&!item.responseNotified?' · sending':''}`,'phone-note'));content.append(response);}
     this.responses(item,content);this.tasks(item,content);if(item.channel==='call' && item.status==='connected')content.append(this.button('End call',()=>{void this.act({type:'end-call',communicationId:item.id});},this.canAct()));
    }
    const saved=view.communication.contacts.some(person=>person.id===this.contact);
    if(!saved)content.append(this.paragraph('This contact is not saved. You can respond to a delivered invitation, but cannot start another call or text.','phone-note'));
-   else if(!view.communication.canContact.includes(this.contact))content.append(this.paragraph('Another exchange or the pair cooldown prevents a new message right now. You can still respond to an open invitation.','phone-note'));
+   else if(!view.communication.canContact.includes(this.contact)){
+    const incoming=view.communication.threads.some(item=>item.recipient===this.owner && item.status==='pending' && [item.initiator,item.recipient].includes(this.contact!));
+    if(!incoming){
+     const until=view.communication.cooldownUntil?.[this.contact] ?? 0;
+     const open=view.communication.threads.some(item=>[item.initiator,item.recipient].includes(this.contact!) && ['queued','pending','connected','ignored'].includes(item.status));
+     content.append(this.paragraph(until>view.time?`New messages to ${this.name(this.contact)} unlock at ${clock(until)}.` : open?`Awaiting ${this.name(this.contact)}'s reply before a new message.`:'Messaging is unavailable right now.','phone-note'));
+    }
+   }
   }
   if(query && !content.children.length)content.append(this.paragraph('No matching contacts. Try another name.','phone-note'));
   content.scrollTop=this.contact && this.tab==='chats' && atBottom?content.scrollHeight:previousScroll;

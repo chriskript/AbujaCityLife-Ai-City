@@ -252,7 +252,7 @@ export class NeighbourhoodServerSession {
     this.data.receipts[id] = { hash, status: 'pending', value: null }; return null;
   }
   private requireWorld(id: string): void { if (id !== this.world.id) throw new SessionError(409, 'World changed'); }
-  phone(actorId:string):PhoneView {if(this.failed || this.closed)throw new SessionError(503,'Session unavailable');try{return projectPhone(this.world,actorId,this.data.paused,this.phoneControl.status(this.world.id));}catch{throw new SessionError(400,'Phone unavailable for this resident');}}
+  phone(actorId:string):PhoneView {if(this.failed || this.closed)throw new SessionError(503,'Session unavailable');try{return projectPhone(this.world,actorId,this.data.paused,this.phoneControl.status(this.world.id),!this.options.operating || (this.options.operating.status.available && !this.data.suspendedReason));}catch{throw new SessionError(400,'Phone unavailable for this resident');}}
   async controlPhone(input:PhoneControlInput):Promise<PhoneLease|null> {
     return this.transaction(async()=>{
       this.requireWorld(input.worldId);let lease:PhoneLease|null;
@@ -343,7 +343,7 @@ export class NeighbourhoodServerSession {
       if (!this.data.paused) {
         const progression = this.data.progression!;
         const advance = this.boundedTown ? Math.min(seconds * this.data.speed, progression.limit - progression.used) : seconds * this.data.speed;
-        for (let remaining = advance; remaining > 0.000001;) { const step=Math.min(60,remaining); this.world.advance(step, this.data.continuityActive ? { freezeIntentionExpiry: true } : undefined); remaining-=step; }
+        for (let remaining = advance; remaining > 0.000001;) { const step=Math.min(60,remaining); this.world.advance(step, this.data.continuityActive ? { freezeIntentionExpiry: true, freezeCommunicationExpiry: true } : undefined); remaining-=step; }
         if (this.boundedTown) { progression.used += advance; if (progression.used >= progression.limit) this.data.paused = true; }
         await this.commit();
       }

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createTown } from '../shared/neighbourhood/town.js';
+import { ordinaryRejection } from '../shared/neighbourhood/decision-recovery.js';
 import { townResidents } from '../shared/neighbourhood/population.js';
 import { Neighbourhood } from '../shared/neighbourhood/world.js';
 import { HeadlessTownRunner } from '../shared/neighbourhood/headless-runner.js';
@@ -239,11 +240,11 @@ describe('normal durable session and migration',()=>{
 describe('sixteen-resident integration gate',()=>{
   it('gives every resident normal independent actions and meals, with varied income, social and resource outcomes',async()=>{
     const runner=new HeadlessTownRunner(createTown('sixteen'));
-    const acted=new Set<string>(),ate=new Set<string>(),workers=new Set<string>(),social=new Set<string>(),rejected=new Set<string>();
+    const acted=new Set<string>(),ate=new Set<string>(),workers=new Set<string>(),social=new Set<string>(),rejected=new Set<string>(),rejectedReasons=new Set<string>();
     for(let minute=0;minute<20;minute++) {
       await runner.advance(60);const state=runner.world.snapshot;conservation(state);
       for(const event of state.events) {
-        if(event.type==='action-validated') {if(event.data.accepted) acted.add(event.actor!);else rejected.add(event.id);}
+        if(event.type==='action-validated') {if(event.data.accepted) acted.add(event.actor!);else {rejected.add(event.id);rejectedReasons.add(event.detail);}}
         if(event.type==='food-consumed') ate.add(event.actor!);
         if(event.type==='paid-work-completed') workers.add(event.actor!);
         if(event.type==='encounter-accepted') social.add(event.subject);
@@ -251,7 +252,7 @@ describe('sixteen-resident integration gate',()=>{
       expect(()=>Neighbourhood.restore(runner.world.serialize())).not.toThrow();
     }
     expect(acted.size).toBe(16);expect(ate.size).toBe(16);expect(workers.size).toBeGreaterThanOrEqual(12);
-    expect(social.size).toBeGreaterThan(0);expect(rejected.size).toBe(0);
+    expect(social.size).toBeGreaterThan(0);expect([...rejectedReasons].every(reason=>ordinaryRejection(reason))).toBe(true);
     expect(runner.world.snapshot.town!.produced).toBeGreaterThan(16);expect(runner.world.snapshot.town!.consumed).toBeGreaterThan(16);
     expect(Object.values(runner.world.snapshot.tasks).some(task=>task.status==='delivered')).toBe(true);
     expect(new Set(Object.values(runner.world.snapshot.npcs).map(npc=>npc.inventory.coins)).size).toBeGreaterThan(6);

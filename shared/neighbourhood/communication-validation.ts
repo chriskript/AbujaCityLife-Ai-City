@@ -18,6 +18,8 @@ export function assertCommunication(state:WorldState):void {
  const openCalls=new Set<string>();
  for(const [key,item]of Object.entries(comm.threads)) {
   check(object(item) && key===item.id && /^communication-\d+$/.test(key) && Number(key.slice(14))<comm.nextId);
+  check(item.frozenSeconds===undefined || time(item.frozenSeconds));
+  const effective=item.expiresAt+(item.frozenSeconds ?? 0);
   check(ids.includes(item.initiator) && ids.includes(item.recipient) && item.initiator!==item.recipient && state.npcs[item.initiator]!.knowledge.contacts!.includes(item.recipient));
   check(['call','text'].includes(item.channel) && ['chat','request-help'].includes(item.purpose) && text(item.message));
   check(item.purpose!=='request-help' || state.npcs[item.initiator]!.capabilities.includes('propose-transport'));
@@ -32,14 +34,14 @@ export function assertCommunication(state:WorldState):void {
   if(item.responseNotified)check(item.response!==null && item.response!=='ignore' && item.responseAt!<=state.time);
   if(item.response!==null)check(item.delivered && item.responseAt!-(item.channel==='text'?communicationRules.textDelay:0)>=item.availableAt);
   if(item.response!==null && item.response!=='ignore' && !item.responseNotified)check(item.responseAt!>state.time);
-  if(['queued','pending'].includes(item.status))check(item.response===null && state.time<item.expiresAt);
+  if(['queued','pending'].includes(item.status))check(item.response===null && state.time<effective);
   if(item.status==='queued')check(item.channel==='text' && !item.delivered);
   if(item.status==='pending')check(item.delivered);
   if(['connected','accepted'].includes(item.status))check(item.response==='accept' && (item.status==='connected'?item.channel==='call':item.channel==='text'));
   for(const [status,response]of [['declined','decline'],['deferred','defer'],['clarified','clarify'],['ignored','ignore']])if(item.status===status)check(item.response===response);
-  if(['pending','connected','ignored'].includes(item.status))check(state.time<item.expiresAt);
-  if(item.status==='missed')check(item.channel==='call' && state.time>=item.expiresAt && (item.response===null || item.response==='ignore'));
-  if(item.status==='expired')check(item.channel==='text' && state.time>=item.expiresAt && (item.response===null || item.response==='ignore'));
+  if(['pending','connected','ignored'].includes(item.status))check(state.time<effective);
+  if(item.status==='missed')check(item.channel==='call' && state.time>=effective && (item.response===null || item.response==='ignore'));
+  if(item.status==='expired')check(item.channel==='text' && state.time>=effective && (item.response===null || item.response==='ignore'));
   if(item.status==='ended')check(item.channel==='call' && item.response==='accept');
   if(item.channel==='call' && ['pending','connected'].includes(item.status))for(const id of [item.initiator,item.recipient]){check(!openCalls.has(id));openCalls.add(id);}
  }

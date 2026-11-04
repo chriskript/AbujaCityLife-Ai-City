@@ -22,7 +22,7 @@ export function enableCommunication(state:WorldState):boolean {
 export function remoteExchange(state:WorldState,a:string,b:string):Communication|undefined {
  return Object.values(state.communication?.threads ?? {}).find(item=>item.initiator===a && item.recipient===b && item.purpose==='request-help' && item.taskId===null && item.response==='accept' && item.responseNotified && ['accepted','connected'].includes(item.status) && state.time<item.expiresAt);
 }
-export function communicationObservation(state:WorldState,id:string,historyLimit=6):NpcObservation['communication'] {
+export function communicationObservation(state:WorldState,id:string,historyLimit=6,includeCooldowns=false):NpcObservation['communication'] {
  if(!state.communication)return undefined;const npc=state.npcs[id]!;
  const relevant=Object.values(state.communication.threads).filter(item=>item.initiator===id || item.recipient===id && item.delivered);
  // Keep current exchanges even if older than recent completed conversations.
@@ -41,7 +41,14 @@ export function communicationObservation(state:WorldState,id:string,historyLimit
  const canContact=contacts.filter(other=>validateCommunication(state,id,{type:'communicate',recipient:other.id,channel:'text',purpose:'chat',message:'Check availability',memoryId:null})===null).map(other=>other.id);
  const canCall=contacts.filter(other=>validateCommunication(state,id,{type:'communicate',recipient:other.id,channel:'call',purpose:'chat',message:'Check availability',memoryId:null})===null).map(other=>other.id);
  const contactOffers=npc.knowledge.sharedContacts ?? [];
- return {contacts,threads,canContact,canCall,contactOffers,rules:communicationRules};
+ if(!includeCooldowns)return {contacts,threads,canContact,canCall,contactOffers,rules:communicationRules};
+ const cooldownUntil:Record<string,number>={};
+ for(const other of contacts) {
+  if(canContact.includes(other.id))continue;
+  if(validateCommunication(state,id,{type:'communicate',recipient:other.id,channel:'text',purpose:'chat',message:'Check cooldown',memoryId:null})!=='communication-cooldown')continue;
+  cooldownUntil[other.id]=state.communication!.cooldowns[pair(id,other.id)] ?? state.time;
+ }
+ return {contacts,threads,canContact,canCall,contactOffers,rules:communicationRules,cooldownUntil};
 }
 export function validateCommunication(state:WorldState,id:string,action:Action):string|null {
  const comm=state.communication,npc=state.npcs[id]!;
@@ -57,7 +64,10 @@ export function validateCommunication(state:WorldState,id:string,action:Action):
   if(id===action.recipient || !npc.knowledge.contacts?.includes(action.recipient))return 'missing-contact';
   if(Object.keys(comm.threads).length>=communicationRules.maximumThreads)return 'communication-capacity';
   if([id,action.recipient].some(person=>Object.values(comm.threads).filter(item=>['queued','pending','connected','ignored'].includes(item.status) && [item.initiator,item.recipient].includes(person)).length>=communicationRules.maximumPending))return 'communication-inbox-full';
-  if((comm.cooldowns[pair(id,action.recipient)] ?? 0)>state.time)return 'communication-cooldown';
+  const pairThreads=Object.values(comm.threads).filter(item=>[item.initiator,item.recipient].includes(id) && [item.initiator,item.recipient].includes(action.recipient));
+  const latest=pairThreads.sort((a,b)=>b.createdAt-a.createdAt || Number(b.id.slice(14))-Number(a.id.slice(14)))[0];
+  const conversing=latest!==undefined && latest.response!==null && latest.response!=='ignore';
+  if(!conversing && (comm.cooldowns[pair(id,action.recipient)] ?? 0)>state.time)return 'communication-cooldown';
   if(action.purpose==='request-help' && !npc.capabilities.includes('propose-transport'))return 'missing-assistance-capability';
   if(Object.values(comm.threads).some(item=>['queued','pending','connected','ignored'].includes(item.status) && [item.initiator,item.recipient].includes(id) && [item.initiator,item.recipient].includes(action.recipient)))return 'conversation-already-open';
   if(action.channel==='call' && Object.values(comm.threads).some(item=>liveCall(item) && [item.initiator,item.recipient].some(person=>person===id || person===action.recipient)))return 'phone-busy';
@@ -102,7 +112,7 @@ export function executeCommunication(host:CommunicationHost,id:string,action:Act
  }
  return false;
 }
-export function advanceCommunications({state,record,trigger}:CommunicationHost):void {
+export function advanceCommunications({state,record,trigger}:CommunicationHost,elapsed=0,freezeExpiry=false):void {
  for(const item of Object.values(state.communication?.threads ?? {})) {
   if(!item.delivered && state.time>=item.availableAt) {
    item.delivered=true;item.status='pending';
@@ -116,7 +126,8 @@ export function advanceCommunications({state,record,trigger}:CommunicationHost):
    if(item.replyReport)record('communication-report',item.recipient,[item.initiator],item.replyReport.subject,item.replyReport.detail,{},'reported',item.recipient,true);
    trigger(item.initiator,'communication-reply');
   }
-  if(state.time>=item.expiresAt && ['queued','pending','connected','ignored'].includes(item.status)) {
+  if(freezeExpiry && ['queued','pending','connected','ignored'].includes(item.status))item.frozenSeconds=(item.frozenSeconds ?? 0)+elapsed;
+  if(state.time>=item.expiresAt+(item.frozenSeconds ?? 0) && ['queued','pending','connected','ignored'].includes(item.status)) {
    item.status=item.channel==='call'?(item.status==='connected'?'ended':'missed'):'expired';
    record('communication-closed',null,[item.initiator,item.recipient],item.id,item.status==='ended'?'Call duration reached its bound':item.channel==='call'?'Call was not answered':'Message received no reply before expiry',{status:item.status},'outcome');
    trigger(item.initiator,'communication-ended');trigger(item.recipient,'communication-ended');
