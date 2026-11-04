@@ -59,6 +59,7 @@ AI Town is a separate hackathon entry that builds on the broader Abuja City Life
 
 ## Learn more
 
+- [Project status as of 4 November 2026: town, residents, relationships and Muse achievements](docs/project-status-2026-11-04.md)
 - [Unity Gardens redesign: planning, migration, screenshots and verification](docs/unity-gardens-redesign.md)
 - [Unity Gardens: history and residents](docs/unity-gardens.md)
 - [Local operation and controls](docs/backend.md)
