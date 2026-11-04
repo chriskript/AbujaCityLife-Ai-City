@@ -1,9 +1,10 @@
 import type { NeighbourhoodSession } from '../../shared/neighbourhood/presentation.js';
 import type { PhoneView,PhoneLease,PhoneAction } from '../../shared/neighbourhood/phone.js';
 import type { Communication } from '../../shared/neighbourhood/types.js';
+import { formatSimTimeCompact } from '../../shared/neighbourhood/time-format.js';
 import './resident-phone.css';
 
-const clock=(time:number)=>`${String(Math.floor(time/60)).padStart(2,'0')}:${String(Math.floor(time%60)).padStart(2,'0')}`;
+const clock=(time:number)=>formatSimTimeCompact(time);
 export class ResidentPhone {
  private readonly dialog=document.createElement('dialog');
  private owner:string|null=null;private view:PhoneView|null=null;private lease:PhoneLease|null=null;
@@ -64,7 +65,7 @@ export class ResidentPhone {
  }
  private send(channel:'text'|'call'){
   if(!this.contact || !this.view)return;
-  const message=this.el<HTMLTextAreaElement>('#phone-message').value.trim() || 'Do you have time to talk?';
+  const message=this.el<HTMLTextAreaElement>('#phone-message').value.trim();if(!message)return;
   const purpose=this.el<HTMLSelectElement>('#phone-purpose').value as 'chat'|'request-help',memoryId=this.el<HTMLSelectElement>('#phone-memory').value || null;
   void this.act({type:'communicate',recipient:this.contact,channel,purpose,message,memoryId});
  }
@@ -73,13 +74,13 @@ export class ResidentPhone {
   try{const result=await this.session.phoneAction({id:crypto.randomUUID(),worldId:view.worldId,actorId:view.owner.id,leaseId:lease.leaseId,action});const sentText=view.inferenceAvailable?'Text sent. A reply is up to them.':`Text sent and kept. ${this.contact?this.name(this.contact):'They'} cannot reply while Muse inference is suspended.`;const success=action.type==='communicate'?(action.channel==='call'?'Calling. They decide whether to answer.':sentText):action.type==='propose-transport'?'Delivery offer sent. Waiting for their decision.':action.type==='respond-transport'?'Your decision was sent. Release phone control to continue your plans.':action.type==='end-call'?'Call ended.':action.type==='amend-communication'?'Clarification added to your message.':action.type==='offer-contact'?'You shared your number.':'Your response was recorded.';this.status(result.accepted?success:`Unable to act: ${result.reason.replaceAll('-',' ')}`);if(result.accepted)this.el<HTMLTextAreaElement>('#phone-message').value='';this.signature='';await this.load();}
   catch(error){this.status((error as Error).message);}finally{this.busy=false;this.signature='';this.render();}
  }
- private button(label:string,run:()=>void,enabled=true){const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=!enabled;button.addEventListener('click',run);return button;}
+ private button(label:string,run:()=>void,enabled=true,title=''){const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=!enabled;if(title)button.title=title;button.addEventListener('click',run);return button;}
  private paragraph(text:string,className=''){const p=document.createElement('p');p.textContent=text;p.className=className;return p;}
  private responses(item:Communication,parent:HTMLElement){
   if(item.recipient!==this.owner || item.status!=='pending')return;
   const group=document.createElement('div');group.className='phone-actions';
   for(const response of ['accept','decline','defer','clarify','ignore'] as const){const label=response==='accept'?(item.channel==='call'?'Answer':'Reply'):response==='clarify'?'Ask a question':response==='defer'?'Later':response==='ignore'?'Ignore':'Decline';
-   group.append(this.button(label,()=>{const draft=this.el<HTMLTextAreaElement>('#phone-message').value.trim();if(response==='clarify' && !draft){this.status('Write your question in the message field first.');return;}void this.act({type:'respond-communication',communicationId:item.id,response,message:draft || (response==='accept'?'I can discuss this.':response==='defer'?'I have another priority now.':response==='ignore'?'I choose not to respond.':'I am not available.'),memoryId:null});},this.canAct()));
+   group.append(this.button(label,()=>{const draft=this.el<HTMLTextAreaElement>('#phone-message').value.trim();if(response==='clarify' && !draft){this.status('Write your question in the message field first.');return;}void this.act({type:'respond-communication',communicationId:item.id,response,message:draft || (response==='accept'?'I can discuss this.':response==='defer'?'I have another priority now.':response==='ignore'?'I choose not to respond.':'I am not available.'),memoryId:null});},this.canAct(),'Sends your message field text, or a default line, as this resident under player control'));
   }parent.append(group);
  }
  private tasks(item:Communication,parent:HTMLElement){
@@ -95,7 +96,7 @@ export class ResidentPhone {
   }
  }
  private render(){
-  const view=this.view;if(!view)return;this.el('#phone-clock').textContent=clock(view.time);this.el('#phone-owner').textContent=`${view.owner.name}’s phone`;
+  const view=this.view;if(!view)return;this.el('#phone-clock').textContent=`${clock(view.time)}${view.paused?' · paused':''}`;this.el('#phone-clock').title='Simulation time';this.el('#phone-owner').textContent=`${view.owner.name}’s phone`;
   this.el('#phone-title').textContent=this.tab==='chats'?(this.contact?this.name(this.contact):'Messages'):this.tab==='calls'?'Calls':'Contacts';
   for(const tab of this.dialog.querySelectorAll<HTMLButtonElement>('[data-phone-tab]'))tab.setAttribute('aria-pressed',String(tab.dataset.phoneTab===this.tab));
   this.controls();
@@ -107,11 +108,11 @@ export class ResidentPhone {
   const threads=[...view.communication.threads].sort((a,b)=>a.createdAt-b.createdAt);
   if(this.tab==='contacts'){
    for(const person of view.communication.contacts.filter(person=>person.name.toLowerCase().includes(query))){const row=this.button(`${person.name}${person.canTransport?' · transport contact':''}`,()=>{this.contact=person.id;this.tab='chats';this.signature='';this.render();});row.className='phone-row';content.append(row);}
-   if(!view.communication.contacts.length)content.append(this.paragraph('No phone contacts yet. Introductions and voluntary sharing can change this.'));
+   if(!view.communication.contacts.length)content.append(this.paragraph(`No phone contacts yet · ${view.nearby.length} nearby known · introductions and voluntary sharing can change this.`));
    if(view.nearby.length){content.append(this.paragraph('Share my number nearby','phone-note'));for(const person of view.nearby)content.append(this.button(`Share with ${person.name}`,()=>{void this.act({type:'offer-contact',recipient:person.id});},this.canAct()));}
   }else if(this.tab==='calls'){
    for(const item of [...threads].reverse().filter(item=>item.channel==='call' && this.name(item.initiator===this.owner?item.recipient:item.initiator).toLowerCase().includes(query))){const card=document.createElement('article');card.className='phone-row';card.append(this.paragraph(`${item.initiator===this.owner?'Outgoing':'Incoming'} · ${this.name(item.initiator===this.owner?item.recipient:item.initiator)}`),this.paragraph(`${clock(item.createdAt)} · ${item.status}`),this.paragraph(item.message));this.responses(item,card);if(item.status==='connected')card.append(this.button('End call',()=>{void this.act({type:'end-call',communicationId:item.id});},this.canAct()));this.tasks(item,card);content.append(card);}
-   if(!threads.some(item=>item.channel==='call'))content.append(this.paragraph('No calls yet. Select a saved contact to place one.'));
+   if(!threads.some(item=>item.channel==='call'))content.append(this.paragraph(`No calls on ${view.owner.name}’s phone yet · ${view.communication.contacts.length} saved contacts.`));
   }else if(!this.contact){
    const peers=[...new Set([...threads].reverse().filter(item=>item.channel==='text').map(item=>item.initiator===this.owner?item.recipient:item.initiator))];
    for(const peer of peers.filter(peer=>this.name(peer).toLowerCase().includes(query))){const items=threads.filter(item=>item.channel==='text' && [item.initiator,item.recipient].includes(peer)),last=items.at(-1)!;const row=this.button('',()=>{this.contact=peer;this.signature='';this.render();});row.className='phone-row phone-preview';const avatar=document.createElement('span');avatar.className='phone-avatar';avatar.textContent=this.name(peer).slice(0,1);const text=document.createElement('span');text.append(this.paragraph(this.name(peer),'phone-peer'),this.paragraph((last.reply && last.response!=='ignore'?last.reply:last.message).slice(0,80)),this.paragraph(clock(last.createdAt),'phone-note'));row.append(avatar,text);content.append(row);}
@@ -133,7 +134,8 @@ export class ResidentPhone {
     if(!incoming){
      const until=view.communication.cooldownUntil?.[this.contact] ?? 0;
      const open=view.communication.threads.some(item=>[item.initiator,item.recipient].includes(this.contact!) && ['queued','pending','connected','ignored'].includes(item.status));
-     content.append(this.paragraph(open?`Awaiting ${this.name(this.contact)}'s reply before a new message.` : until>view.time?`New messages to ${this.name(this.contact)} unlock at ${clock(until)}.`:'Messaging is unavailable right now.','phone-note'));
+     const wait=until>view.time?Math.ceil(until-view.time):0;
+     content.append(this.paragraph(open?`Awaiting ${this.name(this.contact)}'s reply before a new message.` : until>view.time?`New messages to ${this.name(this.contact)} unlock in ${Math.floor(wait/60)}m ${wait%60}s (${clock(until)}).`:'Messaging is unavailable right now.','phone-note'));
     }
     const amendable=view.communication.threads.find(item=>item.initiator===this.owner && (item.status==='queued' || item.status==='pending') && item.response===null && !item.clarification && [item.initiator,item.recipient].includes(this.contact!));
     if(amendable)content.append(this.button('Add clarification',()=>{const message=this.el<HTMLTextAreaElement>('#phone-message').value.trim();if(!message){this.status('Write the clarification in the message field first.');return;}void this.act({type:'amend-communication',communicationId:amendable.id,message});},this.canAct()));

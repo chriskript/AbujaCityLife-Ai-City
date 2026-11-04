@@ -61,6 +61,14 @@ describe('bounded model context without lost authority or private knowledge',()=
     expect(prepared.instructions).toContain('Missing stock/salesOpen fields mean unknown');
     expect(prepared.instructions).toContain('historical observations are not current');
   });
+  it('supplies the current simulated day and clock time without imposing a schedule',()=>{
+    const request=failed().request;request.observation.time=2*86400+18*3600+45*60;
+    const prepared=prepareModelInput(request,'decision');
+    expect(prepared.input.observation.time).toBe(2*86400+18*3600+45*60);
+    expect(prepared.input.observation.simClock).toBe('Day 3 · Wednesday · 6:45 PM');
+    expect(prepared.instructions).toContain('simClock states the current simulated day, weekday and 12-hour clock time');
+    expect(prepared.instructions).toContain('No universal schedule is imposed');
+  });
   it('retains conflicting reports, promises, verified outcomes and active tasks regardless of recency',()=>{
     const request=failed().request,o=request.observation;
     o.actor.memories=[

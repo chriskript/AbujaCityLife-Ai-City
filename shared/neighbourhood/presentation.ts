@@ -90,9 +90,10 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
     const npc = state.npcs[id]!; const node = nodes.find(item => item.id === npc.node)!;
     const pose = { x: node.x, z: node.z, heading: Math.PI / 2 };
     const motion = npc.activity;
-    let activity = motion.kind === 'idle' ? 'Between activities' : motion.kind === 'wait' ? 'Waiting' : motion.kind === 'work' ? npc.capabilities.includes('set-sales') ? 'Working at the stall' : npc.mobility === 'taxi' ? 'Taking care of the taxi' : 'Continuing local errands' : 'Travelling';
-    if ((motion.kind==='wait' || motion.kind==='work') && motion.resting) activity='Resting';
-    if (motion.kind==='work' && motion.job) activity=`Working at ${state.town!.businesses[motion.job.businessId]!.name} · ${motion.job.wage} demo credits on completion`;
+    const placeName = places.find(place=>place.id===npc.node)?.name ?? npc.node;
+    const remaining = (motion.kind==='wait' || motion.kind==='work') && motion.until>state.time ? ` · ${Math.ceil(motion.until-state.time)}s left` : '';
+    let activity = motion.kind === 'idle' ? `At ${placeName} · no timed activity` : motion.kind === 'wait' ? motion.resting ? `Resting at ${placeName}${remaining}` : `Waiting at ${placeName}${remaining}` : motion.kind === 'work' ? npc.capabilities.includes('set-sales') ? `Tending the stall at ${placeName}${remaining}` : npc.mobility === 'taxi' ? `With the taxi at ${placeName}${remaining}` : `Running local errands at ${placeName}${remaining}` : 'Travelling';
+    if (motion.kind==='work' && motion.job) activity=`Working at ${state.town!.businesses[motion.job.businessId]!.name} · ${motion.job.wage} demo credits on completion${remaining}`;
     if (motion.kind === 'travel') {
       const next = nodes.find(item => item.id === motion.path.nodeIds[motion.step + 1])!;
       const edge = edges.find(item => item.id === motion.path.edgeIds[motion.step])!;
@@ -103,7 +104,7 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
     }
     const indoor=node.kind==='home' || node.kind==='workplace' || motion.kind==='travel' && edges.find(edge=>edge.id===motion.path.edgeIds[motion.step])?.kind==='indoor';
     const inside=indoor ? buildingFor(npc.node,state.mapId) ?? (motion.kind==='travel'?buildingFor(motion.path.nodeIds[motion.step+1]!,state.mapId):undefined):undefined;
-    if(inside && !['travel'].includes(motion.kind))activity=`${motion.kind==='work'?'Working':motion.kind==='wait' && motion.resting?'Resting':'Indoors'} · ${inside.name}`;
+    if(inside && !['travel'].includes(motion.kind))activity=`${motion.kind==='work'?'Working':motion.kind==='wait' && motion.resting?'Resting':'Indoors'} · ${inside.name}${remaining}`;
     return { id, name: npc.name, occupation: npc.occupation, node: npc.node, pose, mobility: npc.mobility ?? 'walk',
       ...(motion.kind==='travel'?{pathKind:edges.find(edge=>edge.id===motion.path.edgeIds[motion.step])?.kind ?? 'road'}:{}),
       moving: motion.kind === 'travel', activity,

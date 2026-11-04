@@ -35,7 +35,8 @@
     "autonomy:dry-run": "tsx scripts/autonomy-dry-run.ts",
     "social-context:compare": "tsx scripts/compare-social-context.ts",
     "dev:live": "tsx scripts/dev-live.ts",
-    "muse:policy": "tsx scripts/muse-policy.ts"
+    "muse:policy": "tsx scripts/muse-policy.ts",
+    "world": "tsx scripts/world.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

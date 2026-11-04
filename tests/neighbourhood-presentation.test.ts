@@ -103,7 +103,7 @@ describe('one shared simulation, local and future remote presentation', () => {
     for (let step = 0; step < 500; step++) await local.session.step();
     const frame = local.frame();
     if (experiment === 'decline') expect(frame.snapshot.tasks[0]?.status).toBe('declined');
-    if (experiment === 'wait') { expect(frame.snapshot.tasks).toEqual([]); expect(frame.snapshot.actors.find(actor => actor.id === 'amina')!.activity).toBe('Waiting'); }
+    if (experiment === 'wait') { expect(frame.snapshot.tasks).toEqual([]); expect(frame.snapshot.actors.find(actor => actor.id === 'amina')!.activity).toMatch(/^Waiting at Market Square · \d+s left$/); }
     if (experiment === 'self-collect') expect(frame.events.some(event => event.type === 'stock-stall')).toBe(true);
     if (experiment === 'reduce-sales') expect(frame.snapshot.resources.salesOpen).toBe(false);
     expect(frame.events.some(event => event.type === 'transport-delivered')).toBe(false);
