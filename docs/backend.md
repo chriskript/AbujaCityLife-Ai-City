@@ -22,6 +22,46 @@ Open **http://127.0.0.1:8787/**. Copy the `token` field from ignored `runtime/de
 
 For frontend development, keep the backend running and use `npm run dev` in another terminal. Vite at **http://127.0.0.1:5173/** proxies `/api` to port 8787. Sign in on that origin. Use port 8787 if 5173 is occupied; do not stop unrelated applications. `npm run preview` alone has no backend proxy: use the backend's built-file server for the full experience.
 
+## Fresh local Muse society
+
+Use `npm run backend:society -- --check` for a read-only preflight, then
+`npm run backend:society` after explicit owner approval. On Windows PowerShell
+with script execution disabled, use `npm.cmd` in place of `npm`.
+
+This launcher requires `runtime/approved-live-plan.json` with the
+`7g-d-society` profile, the ordered sixteen-resident registry, autonomy enabled,
+8,000 input / 2,048 output tokens, a 30-second inference deadline, at most
+64 generations / $1.25, `maximumSimulationSeconds:1800`, and
+`maximumWallMs:900000`. An unapproved draft (`approved:false`) cannot start it.
+After approving these exact limits, the owner must authorize setting
+`approved:true`, `notBefore` to the current ISO timestamp and `expiresAt` to a
+fresh window with at least fifteen minutes remaining. A new unique plan ID is
+required for each session. A key, existing allowance or historical approval
+does not authorize a new session.
+
+The complete browser observer is **http://127.0.0.1:8792/**. Sign in using the
+existing token from `runtime/demo-access.json`, then press Resume. The session
+starts paused; the fifteen-minute wall limit includes time spent paused.
+All sixteen residents are eligible for live Muse reasoning, including without
+an SSE observer. Established activity mechanics remain deterministic; a failed
+Muse decision never falls back to a mock decision. The launcher uses the
+reviewed HTTP society driver and stops on its inference/validation safeguards
+or generation, simulation, wall-time and approval boundaries.
+
+Each run writes an exclusive retained claim in `runtime/` and a fresh world,
+checkpoint, evidence and report under `output/local-live-society/<plan-id>/`.
+It never opens the operating checkpoint or its lock and never resumes an old
+run. It retains the shared `runtime/meta-probe-budget.json` ledger and existing
+temporary allowance expiry. `--check` makes no provider calls or claim/checkpoint
+writes. Authentication and account credit remain unverified until an approved
+provider invocation. The application ledger is a reservation ceiling, not the
+Meta account balance.
+
+`npm run backend -- --mode=live-meta` is the older checkpoint-based launcher;
+it does not assemble the selective reasoning provider and fresh social world
+required by the full society profile. Do not put a society plan into that
+command or delete its operating lock to force a new run.
+
 ## HTTP boundary
 
 | Endpoint | Purpose | Access |
