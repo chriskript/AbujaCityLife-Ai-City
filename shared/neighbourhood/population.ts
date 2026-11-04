@@ -1,4 +1,4 @@
-import { defaultResidents } from './initial-state.js';
+import { defaultResidents, seedGoals } from './initial-state.js';
 import { initialPlaceFacts } from './knowledge.js';
 import type { Business, Inhabitant } from './types.js';
 
@@ -30,8 +30,8 @@ export function townResidents(count: 8 | 16 = prototypePopulation): Inhabitant[]
     const known = [...new Set([p.home,p.workplace,p.leisure,'market','centre'])];
     return { id:p.id,name:p.name,occupation:p.occupation,node:p.node,home:p.home,mobility:'walk',circumstances:p.circumstances,
       personality:[p.sociability >= .6 ? 'welcomes suitable social opportunities' : 'selective about interruptions','adapts plans to needs and available work'],
-      revision:0,intention:null,activity:{kind:'idle'},inventory:{goods:0,rewards:0},
-      goals:[{id:'livelihood',description:p.ambition},{id:'personal',description:'Meet personal needs and choose time for rest and neighbours'}],
+      revision:0,intention:null,activity:{kind:'idle'},inventory:{goods:0,rewards:0},intentions:[],
+      goals:seedGoals([{id:'livelihood',description:p.ambition},{id:'personal',description:'Meet personal needs and choose time for rest and neighbours'}]),
       needs:{food:p.food,stock:0,income:p.income},priorities:['honour accepted commitments',p.ambition,'keep food and rest manageable'],
       capabilities:['travel','wait','work','buy','share','encounter','respond-encounter',...(p.skill === 'transport' ? ['respond-transport','fulfil-transport'] as const : []),...(p.skill==='food' ? ['collect-self','stock-stall','propose-transport'] as const : [])],
       knowledge:{places:known,placeFacts:initialPlaceFacts(known),people:p.people,transporters:[],blockedEdges:[],tasks:{},resources:{supplierGoods:null,marketGoods:null,salesOpen:null}},

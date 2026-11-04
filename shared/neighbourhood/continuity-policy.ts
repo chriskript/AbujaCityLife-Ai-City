@@ -35,7 +35,7 @@ export function isStrandedResident(o: NpcObservation, triggers: string[]): boole
 
 export function continuityDecision(request: NpcDecisionRequest): NpcDecision {
   const o = request.observation, a = o.actor;
-  const goalId = a.goals[0]!.id;
+  const goalId = (a.goals.find(goal => goal.status === 'active') ?? a.goals[0]!).id;
   const audit = ` [${request.triggers.join(', ')}]`;
   const choose = (action: NpcDecision['action'], reason: string): NpcDecision => ({ goalId, reason: ('CONTINUITY: ' + reason + audit).slice(0, 400), action });
   const permitted = (type: NpcDecision['action']['type']): boolean => o.permittedActions.includes(type);

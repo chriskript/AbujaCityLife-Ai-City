@@ -34,7 +34,7 @@ function invite(world: Neighbourhood, initiator = 'amina', recipient = 'chris') 
 function gameplay({events:_events,revision:_revision,nextEvent:_nextEvent,triggers:_triggers,decisionRecovery:_recovery,npcs,...state}: WorldState) {
   return {...state,npcs:Object.fromEntries(Object.entries(npcs).map(([id,{memories:_memories,revision:_actorRevision,...npc}])=>[id,npc]))};
 }
-function extra(id: string): Inhabitant { const resident = chrisResident(); return { ...resident,id,name:id.toUpperCase(),knowledge:{ ...resident.knowledge,people:[],transporters:[] },relationships:{} }; }
+function extra(id: string): Inhabitant { const resident = chrisResident(); return { ...resident,id,name:id.toUpperCase(),goals:resident.goals.map(goal => ({ ...goal,origin:'resident' as const })),knowledge:{ ...resident.knowledge,people:[],transporters:[] },relationships:{} }; }
 
 describe('extensible resident registry', () => {
   it('retains the original three-person cooperation fixture and identities', async () => {
@@ -103,7 +103,7 @@ describe('extensible resident registry', () => {
     residents.find(npc => npc.id === 'chris')!.node = 'market';
     residents.find(npc => npc.id === 'amina')!.knowledge.people.push('chris');
     const trader = legacyResidents().find(npc => npc.id === 'amina')!;
-    const ada: Inhabitant = { ...trader,id:'ada',name:'Ada',occupation:'Market supplier' };
+    const ada: Inhabitant = { ...trader,id:'ada',name:'Ada',occupation:'Market supplier',goals:trader.goals.map(goal => ({ ...goal,origin:'resident' as const })) };
     const world = new Neighbourhood('parallel-jobs',[...residents,ada]);
     expect(apply(world,'amina',{type:'propose-transport',recipient:'chris',quantity:2}).accepted).toBe(true);
     expect(apply(world,'ada',{type:'propose-transport',recipient:'musa',quantity:2}).accepted).toBe(true);
@@ -291,7 +291,7 @@ describe('bounded progression and recovery', () => {
     const after = JSON.parse(JSON.parse(await readFile(checkpoint,'utf8')).world);
     for(const id of ['amina','musa','zainab']) for(const field of ['name','occupation','memories','relationships','inventory','activity','node','intention']) expect(after.npcs[id][field]).toEqual(old.npcs[id][field]);
     expect(after.tasks).toEqual(old.tasks); expect(after.resources).toEqual(old.resources);
-    expect(after.version).toBe(4); expect(migrated.hasResident('chris')).toBe(true);
+    expect(after.version).toBe(5); expect(migrated.hasResident('chris')).toBe(true);
     expect(migrated.frame.decisionBudget.used).toBe(envelope.requests);
   });
   it.each(['recipient','capacity','evidence'] as const)('rejects corrupt social/registry %s checkpoints', kind => {

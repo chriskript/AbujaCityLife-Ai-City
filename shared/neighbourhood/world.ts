@@ -5,11 +5,11 @@ import { mapFor, initialHomes, initialLocations, workSites, type MapId } from '.
 import { pathToNode } from '../navigation/routes.js';
 import { initialState, defaultResidents } from './initial-state.js';
 import { isNpcDecision, isResidentId } from './decision-schema.js';
-import { type Inhabitant, type Action, type DecisionOutcome, type MemoryKind, type NpcDecisionRequest, type NpcId, type NpcObservation, type TransportTask, type WorldEvent, type WorldState } from './types.js';
+import { type Inhabitant, type Action, type DecisionOutcome, type GoalRecord, type MemoryKind, type NpcDecisionRequest, type NpcId, type NpcObservation, type TransportTask, type WorldEvent, type WorldState } from './types.js';
 import { assertSnapshot, migrateSnapshot } from './snapshot.js';
 import { projectPlaceKnowledge } from './knowledge.js';
 import { ensureSocialContext, projectSocialContext } from './social-context.js';
-import { quantityBounds, transportCapacity, selfCollectionCapacity } from './action-limits.js';
+import { quantityBounds, transportCapacity, selfCollectionCapacity, goalBounds, intentionBounds } from './action-limits.js';
 import { residentPlan, townBusinesses } from './population.js';
 import { initialPlaceFacts } from './knowledge.js';
 import { enableCommunication, communicationObservation, validateCommunication, executeCommunication, advanceCommunications, remoteExchange, communicationRules } from './communication.js';
@@ -17,6 +17,17 @@ import { enableSocialVisits, socialVisitObservation, validateSocialVisit, execut
 
 let worldSequence = 0;
 const copy = <T>(value: T): T => structuredClone(value);
+
+// Oldest terminal resident-authored goal. Seed goals are never evicted and live
+// (active/suspended) goals are never evicted. Returns the victim id, if any.
+function evictableGoal(goals: GoalRecord[]): string | undefined {
+  let victim: GoalRecord | undefined;
+  for (const goal of goals) {
+    if ((goal.status !== 'abandoned' && goal.status !== 'achieved') || goal.origin !== 'resident') continue;
+    if (!victim || goal.updatedAt < victim.updatedAt) victim = goal;
+  }
+  return victim?.id;
+}
 
 export class Neighbourhood {
   private state: WorldState;
@@ -88,7 +99,7 @@ export class Neighbourhood {
   }
   applyPhoneAction(id:NpcId,action:unknown):DecisionOutcome {
     const actor=this.state.npcs[id];if(!actor)return {accepted:false,reason:'unknown-resident',duplicate:false};
-    const proposal={goalId:actor.goals[0]!.id,reason:'Player operating this resident’s phone',action};
+    const proposal={goalId:(actor.goals.find(goal=>goal.status==='active') ?? actor.goals[0]!).id,reason:'Player operating this resident’s phone',action};
     if(!isNpcDecision(proposal) || !['order-external','fund-business','communicate','respond-communication','end-call','offer-contact','propose-transport','respond-transport'].includes(proposal.action.type))return {accepted:false,reason:'invalid-phone-action',duplicate:false};
     if(proposal.action.type==='propose-transport' && !remoteExchange(this.state,id,proposal.action.recipient))return {accepted:false,reason:'accepted-discussion-required',duplicate:false};
     if(proposal.action.type==='respond-transport' && (!this.state.tasks[proposal.action.taskId]?.communicationId || actor.knowledge.tasks[proposal.action.taskId]!=='proposed'))return {accepted:false,reason:'delivered-phone-offer-required',duplicate:false};
@@ -110,6 +121,11 @@ export class Neighbourhood {
     ensureSocialContext(state); enableEconomicContinuity(state); assertSnapshot(state);
     const world = new Neighbourhood(state.id); world.state = copy(state);
     // No in-flight response survives restoration; new request IDs continue monotonically.
+    // A delivered intention whose request is gone re-arms as pending: nothing was
+    // executed for it, and IDs continue monotonically, so no replay is possible.
+    for (const npc of Object.values(world.state.npcs)) for (const item of npc.intentions) {
+      if (item.status === 'delivered') { item.status = 'pending'; delete item.deliveredAt; }
+    }
     for (const id of world.residentIds) if (['idle', 'wait'].includes(world.state.npcs[id]!.activity.kind)) world.trigger(id, 'restored');
     return world;
   }
@@ -222,7 +238,7 @@ export class Neighbourhood {
       npc.skills ??= [...new Set(['general',plan.skill,...(npc.capabilities.includes('fulfil-transport') ? ['transport'] : [])])];
       npc.routine ??= {workplace:plan.workplace,leisure:plan.leisure,sociability:plan.sociability};
       npc.needs.rest ??= 'rest' in plan && typeof plan.rest==='number' ? plan.rest : .1;
-      npc.capabilities=[...new Set([...npc.capabilities,'buy','take-work','eat','rest'] as const)];
+      npc.capabilities=[...new Set([...npc.capabilities,'buy','take-work','eat','rest','adopt-goal','revise-goal','reprioritize-goal','set-goal-status','schedule-reconsideration','cancel-reconsideration'] as const)];
       npc.knowledge.places=[...new Set([...npc.knowledge.places,npc.home,npc.routine.workplace,npc.routine.leisure,'market'])];
       for (const place of npc.knowledge.places) if (!previousPlaces.has(place)) npc.knowledge.placeFacts={...npc.knowledge.placeFacts,...initialPlaceFacts([place])};
       npc.knowledge.businesses ??= Object.fromEntries(Object.values(businesses).filter(b=>npc.skills!.includes(b.skill)).map(b=>[b.id,{available:null,observedAt:null}]));
@@ -435,17 +451,22 @@ export class Neighbourhood {
     return this.requestDecision(id);
   }
 
-  requestDecision(id: NpcId): NpcDecisionRequest | null {
+  requestDecision(id: NpcId, options?: { holdIntentions?: boolean }): NpcDecisionRequest | null {
     if (!this.hasResident(id)) return null;
     if((this.state.decisionRecovery?.[id]?.blockedUntil ?? 0)>this.state.time)return null;
-    if (!this.state.triggers[id]?.length || [...this.pending.values()].some(request => request.actorId === id)) return null;
+    const npc = this.state.npcs[id]!;
+    const due = npc.intentions.some(item => item.status === 'pending' && item.dueAt <= this.state.time);
+    if ((!this.state.triggers[id]?.length && !due) || [...this.pending.values()].some(request => request.actorId === id)) return null;
     this.perceive(id);
+    if (!options?.holdIntentions) for (const item of npc.intentions) {
+      if (item.status === 'pending' && item.dueAt <= this.state.time) { item.status = 'delivered'; item.deliveredAt = this.state.time; npc.revision++; }
+    }
     const observation = this.observe(id);
     if (!observation.permittedActions.length) return null;
     const request: NpcDecisionRequest = {
       id: `${this.state.id}:decision-${this.state.nextRequest++}`, worldId: this.state.id,
       actorId: id, actorRevision: observation.actor.revision, worldRevision: this.state.revision,
-      observation, triggers: [...this.state.triggers[id]!],
+      observation, triggers: [...(this.state.triggers[id] ?? [])],
     };
     delete this.state.triggers[id]; this.pending.set(request.id, copy(request));
     return copy(request);
@@ -454,6 +475,12 @@ export class Neighbourhood {
   abandonDecision(requestId: string): void {
     const request = this.pending.get(requestId); if (!request) return;
     this.pending.delete(requestId);
+    const npc = this.state.npcs[request.actorId]!;
+    for (const item of request.observation.actor.intentions) {
+      if (item.status !== 'delivered') continue;
+      const live = npc.intentions.find(entry => entry.id === item.id);
+      if (live?.status === 'delivered') { live.status = 'pending'; npc.revision++; }
+    }
     this.record('inference-unavailable', request.actorId, [request.actorId], requestId, 'No inference result; no action executed');
     // No automatic retry loop. A subsequent meaningful event can trigger a new decision.
   }
@@ -471,7 +498,8 @@ export class Neighbourhood {
     const actor = this.state.npcs[request.actorId]!;
     const reason = actor.revision !== request.actorRevision ? 'stale-actor' :
       !isNpcDecision(proposal) ? 'invalid-schema' :
-      !actor.goals.some(goal => goal.id === proposal.goalId) ? 'unknown-goal' : this.validate(request.actorId, proposal.action);
+      !actor.goals.some(goal => goal.id === proposal.goalId) ? 'unknown-goal' :
+      !actor.goals.some(goal => goal.id === proposal.goalId && goal.status === 'active') ? 'inactive-goal' : this.validate(request.actorId, proposal.action);
     const proposalData: WorldEvent['data'] = { mode: provenance.mode, model: provenance.model };
     if (isNpcDecision(proposal)) {
       const { type, ...arguments_ } = proposal.action;
@@ -482,6 +510,11 @@ export class Neighbourhood {
     const outcome = { accepted: !reason, reason: reason || 'accepted', duplicate: false };
     this.processed.set(requestId, outcome);
     if (this.processed.size > 512) this.processed.delete(this.processed.keys().next().value!);
+    for (const item of request.observation.actor.intentions) {
+      if (item.status !== 'delivered') continue;
+      const live = actor.intentions.find(entry => entry.id === item.id);
+      if (live?.status === 'delivered') { live.status = 'addressed'; actor.revision++; }
+    }
     if (reason) {
       if(isNpcDecision(proposal)&&ordinaryRejection(reason))recordRejection(this.communicationHost(),actor.id,requestId,reason,proposal.action);
       if (reason === 'stale-actor') this.trigger(actor.id, 'state-changed');
@@ -579,8 +612,121 @@ export class Neighbourhood {
     } else if (action.type === 'share') {
       if (!npc.knowledge.people.includes(action.recipient) || !this.nearby(id, action.recipient)) return 'recipient-not-nearby';
       if (!npc.memories.some(memory => memory.id === action.memoryId)) return 'unknown-memory';
+    } else if (action.type === 'adopt-goal') {
+      if (npc.goals.length >= goalBounds.records && !evictableGoal(npc.goals)) return 'goal-capacity';
+      const description = action.description.trim().toLowerCase();
+      if (npc.goals.some(goal => goal.status === 'active' && goal.description.trim().toLowerCase() === description)) return 'duplicate-goal';
+    } else if (action.type === 'revise-goal') {
+      const goal = npc.goals.find(item => item.id === action.goalId);
+      if (!goal) return 'unknown-goal-record';
+      if (goal.status === 'abandoned' || goal.status === 'achieved') return 'terminal-goal';
+      if (goal.origin === 'seed' && action.description !== null) return 'seed-goal-immutable';
+      if (action.description === null && action.motivation === null) return 'empty-revision';
+      if (action.description !== null && npc.goals.some(other => other !== goal && other.status === 'active' && other.description.trim().toLowerCase() === action.description!.trim().toLowerCase())) return 'duplicate-goal';
+    } else if (action.type === 'reprioritize-goal') {
+      const goal = npc.goals.find(item => item.id === action.goalId);
+      if (!goal) return 'unknown-goal-record';
+      if (goal.status === 'abandoned' || goal.status === 'achieved') return 'terminal-goal';
+      if (goal.status !== 'active') return 'goal-not-active';
+      if (goal.priority === action.priority) return 'redundant-transition';
+    } else if (action.type === 'set-goal-status') {
+      const goal = npc.goals.find(item => item.id === action.goalId);
+      if (!goal) return 'unknown-goal-record';
+      if (goal.status === action.status) return 'redundant-transition';
+      const allowed: Record<string, string[]> = { active: ['suspended', 'abandoned', 'achieved'], suspended: ['active', 'abandoned'], abandoned: [], achieved: [] };
+      if (!allowed[goal.status]!.includes(action.status)) return 'invalid-goal-transition';
+      if (action.status !== 'active' && !npc.goals.some(other => other !== goal && other.status === 'active')) return 'last-active-goal';
+    } else if (action.type === 'schedule-reconsideration') {
+      const pending = npc.intentions.filter(item => item.status === 'pending');
+      if (pending.length >= intentionBounds.pending) return 'intention-capacity';
+      const note = action.note.trim().toLowerCase();
+      if (pending.some(item => item.note.trim().toLowerCase() === note)) return 'duplicate-intention';
+    } else if (action.type === 'cancel-reconsideration') {
+      const intention = npc.intentions.find(item => item.id === action.intentionId);
+      if (!intention) return 'unknown-intention';
+      if (intention.status !== 'pending') return 'intention-not-pending';
     }
     return null;
+  }
+
+  // Resident-authored goals and scheduled intentions. These transitions change
+  // inner life only: no movement, resources, property, or other residents.
+  // Transition memories stay observed/world (trimmable) because the bounded
+  // goal and intention records themselves always reach the model.
+  private applyInnerLife(id: NpcId, action: Action): void {
+    const npc = this.state.npcs[id]!;
+    if (action.type === 'adopt-goal') {
+      while (npc.goals.length >= goalBounds.records) {
+        const victim = evictableGoal(npc.goals);
+        if (!victim) break;
+        npc.goals.splice(npc.goals.findIndex(goal => goal.id === victim), 1);
+      }
+      const used = new Set(npc.goals.filter(goal => goal.status === 'active').map(goal => goal.priority));
+      let priority = goalBounds.priorityMinimum; while (used.has(priority)) priority++;
+      const goalId = `goal-${this.state.nextEvent}`;
+      npc.goals.push({ id: goalId, description: action.description, motivation: action.motivation, status: 'active', priority, origin: 'resident', createdAt: this.state.time, updatedAt: this.state.time });
+      npc.revision++;
+      this.record('goal-adopted', id, [id], goalId, `${action.description} — ${action.motivation}`, { goalId, priority }, 'observed', 'world');
+      this.trigger(id, 'goal-changed'); return;
+    }
+    if (action.type === 'revise-goal') {
+      const goal = npc.goals.find(item => item.id === action.goalId)!;
+      if (action.description !== null) goal.description = action.description;
+      if (action.motivation !== null) goal.motivation = action.motivation;
+      goal.updatedAt = this.state.time; npc.revision++;
+      this.record('goal-revised', id, [id], goal.id, `${goal.description} — ${goal.motivation}`, { goalId: goal.id }, 'observed', 'world');
+      this.trigger(id, 'goal-changed'); return;
+    }
+    if (action.type === 'reprioritize-goal') {
+      const goal = npc.goals.find(item => item.id === action.goalId)!;
+      const from = goal.priority;
+      const occupant = npc.goals.find(other => other !== goal && other.status === 'active' && other.priority === action.priority);
+      if (occupant) { occupant.priority = from; occupant.updatedAt = this.state.time; }
+      goal.priority = action.priority; goal.updatedAt = this.state.time; npc.revision++;
+      this.record('goal-reprioritized', id, [id], goal.id, `Priority ${from} to ${action.priority}: ${goal.description}`, { goalId: goal.id, from, to: action.priority, ...(occupant ? { swappedWith: occupant.id } : {}) }, 'observed', 'world');
+      this.trigger(id, 'goal-changed'); return;
+    }
+    if (action.type === 'set-goal-status') {
+      const goal = npc.goals.find(item => item.id === action.goalId)!;
+      const from = goal.status; goal.status = action.status; goal.updatedAt = this.state.time;
+      if (npc.intention?.goalId === goal.id && action.status !== 'active') npc.intention = null;
+      npc.revision++;
+      this.record('goal-status-changed', id, [id], goal.id, `${from} to ${action.status}: ${goal.description}`, { goalId: goal.id, from, to: action.status }, 'observed', 'world');
+      this.trigger(id, 'goal-changed'); return;
+    }
+    if (action.type === 'schedule-reconsideration') {
+      while (npc.intentions.length >= intentionBounds.records) {
+        const evicted = ['expired', 'cancelled', 'addressed', 'delivered'].map(status => npc.intentions.find(item => item.status === status)).find(item => item !== undefined);
+        if (!evicted) break;
+        npc.intentions.splice(npc.intentions.indexOf(evicted), 1);
+      }
+      const intentionId = `intent-${this.state.nextEvent}`;
+      const dueAt = this.state.time + action.inSeconds;
+      npc.intentions.push({ id: intentionId, note: action.note, dueAt, createdAt: this.state.time, status: 'pending' });
+      npc.revision++;
+      this.record('intention-scheduled', id, [id], intentionId, action.note, { intentionId, dueAt }, 'observed', 'world');
+      return;
+    }
+    if (action.type === 'cancel-reconsideration') {
+      const intention = npc.intentions.find(item => item.id === action.intentionId)!;
+      intention.status = 'cancelled'; npc.revision++;
+      this.record('intention-cancelled', id, [id], intention.id, intention.note, { intentionId: intention.id }, 'observed', 'world');
+      return;
+    }
+  }
+
+  private drainIntentions(elapsed: number, freezeExpiry: boolean): void {
+    for (const id of this.residentIds) {
+      const npc = this.state.npcs[id]!;
+      for (const intention of npc.intentions) {
+        if (intention.status !== 'pending') continue;
+        if (freezeExpiry) intention.frozenSeconds = (intention.frozenSeconds ?? 0) + elapsed;
+        if (this.state.time > intention.dueAt + intentionBounds.expirySeconds + (intention.frozenSeconds ?? 0)) {
+          intention.status = 'expired'; npc.revision++;
+          this.record('intention-expired', id, [id], intention.id, intention.note, { intentionId: intention.id }, 'observed', 'world');
+        } else if (this.state.time >= intention.dueAt) this.trigger(id, 'scheduled-intention-due');
+      }
+    }
   }
 
   private execute(id: NpcId, action: Action): void {
@@ -588,6 +734,7 @@ export class Neighbourhood {
     if(executeTrade(this.communicationHost(),id,action))return;
     if(executeSocialVisit(this.communicationHost(),id,action,destination=>this.travel(id,destination,null,null)))return;
     if(executeCommunication(this.communicationHost(),id,action))return;
+    if (action.type === 'adopt-goal' || action.type === 'revise-goal' || action.type === 'reprioritize-goal' || action.type === 'set-goal-status' || action.type === 'schedule-reconsideration' || action.type === 'cancel-reconsideration') { this.applyInnerLife(id, action); return; }
     if (action.type === 'encounter') { this.startEncounter(id, action); return; }
     if (action.type === 'respond-encounter') { this.respondEncounter(id, action); return; }
     if (action.type === 'take-work') {
@@ -742,7 +889,7 @@ export class Neighbourhood {
     return true;
   }
 
-  advance(seconds: number): void {
+  advance(seconds: number, options?: { freezeIntentionExpiry?: boolean }): void {
     if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 60) throw new Error('Advance must be between 0 and 60 simulation seconds');
     this.state.revision++;
     let remaining = seconds;
@@ -805,5 +952,6 @@ export class Neighbourhood {
       if(this.state.socialVisits)advanceSocialVisits(this.communicationHost());
       this.townNeeds();
     }
+    this.drainIntentions(seconds, options?.freezeIntentionExpiry === true);
   }
 }

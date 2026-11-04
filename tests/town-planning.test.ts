@@ -67,6 +67,7 @@ describe('Unity Gardens integrated planning', () => {
   it('migrates the old civic zero-length leg explicitly, retaining personal and economic history', () => {
     const state=createTown('layout-migration').snapshot;
     delete state.layoutRevision;
+    (state as unknown as {version:number}).version=4;
     state.npcs.chris!.node='north-office';
     state.npcs.chris!.activity={kind:'travel',path:{nodeIds:['north-office','community-office-entrance','community-office-work'],edgeIds:['north-office--community-office-entrance','community-office-entrance--community-office-work'],distance:10},step:0,progress:0,taskId:null,leg:null};
     const restored=Neighbourhood.restore(JSON.stringify(state)),after=restored.snapshot;

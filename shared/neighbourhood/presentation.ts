@@ -16,6 +16,8 @@ export interface ActorView {
   id: NpcId; name: string; occupation: string; node: string;
   pose: ActorPose;
   moving: boolean; activity: string; intention: string | null; goods: number; rewards: number;
+  goals: { id: string; description: string; motivation: string; status: string; priority: number; origin: string; updatedAt: number }[];
+  intentions: { id: string; note: string; dueAt: number; status: string }[];
   mobility: 'walk' | 'taxi';
   pathKind?: 'road' | 'walk' | 'indoor';
   coins?: number; food?: number;
@@ -73,6 +75,7 @@ const observableTypes = new Set([
   'contact-offered','communication-sent','text-delivered','phone-ringing','communication-response-chosen','communication-replied','communication-report','call-ended','communication-closed','remote-task-received','remote-task-response',
   'activity-started', 'activity-completed', 'arrived', 'transport-proposed', 'transport-accepted',
   'transport-declined', 'transport-collected', 'transport-delivered', 'delivery-observed', 'buy', 'transport-clarification-requested',
+  'goal-adopted', 'goal-revised', 'goal-reprioritized', 'goal-status-changed', 'intention-scheduled', 'intention-cancelled', 'intention-expired',
   'collect-self', 'stock-stall', 'sales-changed', 'action-failed', 'offer-expired', 'road-changed', 'road-observed', 'action-validated', 'action-proposed', 'intention-selected', 'inference-unavailable', 'inference-interrupted',
   'encounter-noticed', 'encounter-invited', 'encounter-accepted', 'encounter-declined', 'encounter-deferred', 'encounter-clarified', 'encounter-expired', 'resident-introduced', 'information-shared',
   'paid-work-started','paid-work-completed','purchase-paid','food-consumed','rest-started','rest-completed','transport-paid',
@@ -105,6 +108,8 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
       ...(motion.kind==='travel'?{pathKind:edges.find(edge=>edge.id===motion.path.edgeIds[motion.step])?.kind ?? 'road'}:{}),
       moving: motion.kind === 'travel', activity,
       intention: npc.goals.find(goal => goal.id === npc.intention?.goalId)?.description ?? null,
+      goals: npc.goals.map(goal => ({ id: goal.id, description: goal.description, motivation: goal.motivation, status: goal.status, priority: goal.priority, origin: goal.origin, updatedAt: goal.updatedAt })),
+      intentions: npc.intentions.filter(item => item.status === 'pending' || item.status === 'delivered').map(item => ({ id: item.id, note: item.note, dueAt: item.dueAt, status: item.status })),
       goods: npc.inventory.goods, rewards: npc.inventory.rewards,
       ...(state.town ? {coins:npc.inventory.coins!,food:npc.inventory.food!} : {}),
       ...(state.communication ? {contacts:[...npc.knowledge.contacts!]} : {}),

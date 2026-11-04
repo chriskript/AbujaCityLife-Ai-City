@@ -14,7 +14,7 @@ export class NeighbourhoodMockProvider implements NpcDecisionProvider {
     if (request.observation.town) return {mode:'mock',model:'town-offline-rules-v1',decision:townDecision(request,this.choices)};
     const { actor, tasks, resources, nearbyPeople, encounters, encounterOpportunities } = request.observation;
     let action: Action = { type: 'wait', seconds: 120 };
-    let goalId = actor.goals[0]!.id;
+    let goalId = (actor.goals.find(goal => goal.status === 'active') ?? actor.goals[0]!).id;
     const incoming = encounters.find(item => item.recipient === actor.id && item.status === 'pending');
     const committed = tasks.some(task => task.recipient === actor.id && ['accepted','collected'].includes(task.status));
     if (incoming && this.choices.encounterResponse !== 'ignore') {
@@ -39,7 +39,7 @@ export class NeighbourhoodMockProvider implements NpcDecisionProvider {
       const closed = tasks.find(task => task.status === 'declined' || task.status === 'expired');
       if (actor.intention === null) action = { type: 'work', seconds: 12 };
       else if (active) action = active.status === 'proposed' ? { type: 'wait', seconds: 20 } : actor.node !== 'market' ? { type: 'travel', destination: 'market' } : { type: 'work', seconds: 120 };
-      else if ((resources.marketGoods ?? 0) >= 2 || tasks.some(task => task.status === 'delivered')) { if (actor.goals.some(goal => goal.id === 'serve')) goalId = 'serve'; action = { type: 'work', seconds: 120 }; }
+      else if ((resources.marketGoods ?? 0) >= 2 || tasks.some(task => task.status === 'delivered')) { if (actor.goals.some(goal => goal.id === 'serve' && goal.status === 'active')) goalId = 'serve'; action = { type: 'work', seconds: 120 }; }
       else if (this.choices.trader === 'wait' || closed) action = { type: 'wait', seconds: 120 };
       else if (this.choices.trader === 'reduce-sales') action = actor.node === 'market' ? { type: 'set-sales', open: false } : { type: 'travel', destination: 'market' };
       else if (this.choices.trader === 'self-collect') {

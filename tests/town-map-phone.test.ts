@@ -29,7 +29,7 @@ function conserved(state:WorldState){
 }
 describe('one physical town catalogue',()=>{
  it('gives sixteen residents unique assigned homes, four vacant flats, eight distinct workplaces and reachable entrances',()=>{
-  const world=createTown('addresses'),state=world.snapshot;expect(state.version).toBe(4);expect(state.mapId).toBe('town-v1');
+  const world=createTown('addresses'),state=world.snapshot;expect(state.version).toBe(5);expect(state.mapId).toBe('town-v1');
   expect(townMap.buildings.filter(b=>b.kind==='flats')).toHaveLength(4);expect(townMap.buildings.filter(b=>b.kind==='house')).toHaveLength(4);
   expect(townMap.buildings.reduce((sum,b)=>sum+b.units.length,0)).toBe(20);expect(new Set(Object.values(state.npcs).map(npc=>npc.home)).size).toBe(16);
   expect(new Set(Object.values(state.town!.businesses).map(b=>b.node)).size).toBe(8);

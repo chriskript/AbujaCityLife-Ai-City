@@ -4,7 +4,7 @@ import type { SocialContextState, SocialObservation } from './social-context.js'
 export const legacyNpcIds = ['musa', 'amina', 'zainab'] as const;
 // Legacy fixture IDs are retained for compatibility; runtime membership is world-owned.
 export type NpcId = string;
-export const actionTypes = ['order-external', 'fund-business', 'travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat', 'offer-contact', 'communicate', 'respond-communication', 'end-call', 'invite-social', 'respond-social', 'join-social', 'socialise', 'leave-social'] as const;
+export const actionTypes = ['order-external', 'fund-business', 'travel', 'wait', 'work', 'propose-transport', 'respond-transport', 'fulfil-transport', 'collect-self', 'stock-stall', 'buy', 'set-sales', 'share', 'encounter', 'respond-encounter', 'take-work', 'rest', 'eat', 'offer-contact', 'communicate', 'respond-communication', 'end-call', 'invite-social', 'respond-social', 'join-social', 'socialise', 'leave-social', 'adopt-goal', 'revise-goal', 'reprioritize-goal', 'set-goal-status', 'schedule-reconsideration', 'cancel-reconsideration'] as const;
 export type MemoryKind = 'fact' | 'observed' | 'reported' | 'belief' | 'commitment' | 'outcome';
 export interface Memory {
   id: string; kind: MemoryKind; eventId: string; source: NpcId | 'world' | 'player';
@@ -15,11 +15,15 @@ export type Activity =
   | { kind: 'idle' }
   | { kind: 'wait' | 'work'; until: number; resting?: number; job?: WorkBooking }
   | { kind: 'travel'; path: Path; step: number; progress: number; taskId: string | null; leg: 'pickup' | 'delivery' | null };
+export type GoalStatus = 'active' | 'suspended' | 'abandoned' | 'achieved';
+export interface GoalRecord { id: string; description: string; motivation: string; status: GoalStatus; priority: number; origin: 'seed' | 'resident'; createdAt: number; updatedAt: number }
+export type IntentionStatus = 'pending' | 'delivered' | 'addressed' | 'expired' | 'cancelled';
+export interface ScheduledIntention { id: string; note: string; dueAt: number; createdAt: number; status: IntentionStatus; deliveredAt?: number; frozenSeconds?: number }
 export interface Inhabitant {
   id: NpcId; name: string; occupation: string; personality: string[];
   home?: string; circumstances?: string; mobility?: 'walk' | 'taxi';
   skills?: string[]; routine?: { workplace: string; leisure: string; sociability: number };
-  node: string; revision: number; goals: { id: string; description: string }[];
+  node: string; revision: number; goals: GoalRecord[]; intentions: ScheduledIntention[];
   intention: { goalId: string; reason: string } | null;
   needs: { food: number; stock: number; income: number; rest?: number };
   priorities: string[]; capabilities: Action['type'][];
@@ -52,7 +56,7 @@ export interface WorldEvent {
   data: Record<string, string | number | boolean | null>;
 }
 export interface WorldState {
-  version: 4; mapId:MapId; layoutRevision?:2; mapUpgradedAt?:number; id: string; revision: number; time: number;
+  version: 5; mapId:MapId; layoutRevision?:2; mapUpgradedAt?:number; id: string; revision: number; time: number;
   // The original residents remain required for the preserved supply scenario.
   npcs: Record<NpcId, Inhabitant> & { musa: Inhabitant; amina: Inhabitant; zainab: Inhabitant };
   initialGoods: number;
@@ -94,7 +98,13 @@ export type Action =
   | { type: 'fulfil-transport'; taskId: string }
   | { type: 'collect-self' | 'stock-stall' | 'buy'; quantity: number }
   | { type: 'set-sales'; open: boolean }
-  | { type: 'share'; recipient: NpcId; memoryId: string; asBelief: boolean };
+  | { type: 'share'; recipient: NpcId; memoryId: string; asBelief: boolean }
+  | { type:'adopt-goal'; description:string; motivation:string }
+  | { type:'revise-goal'; goalId:string; description:string|null; motivation:string|null }
+  | { type:'reprioritize-goal'; goalId:string; priority:number }
+  | { type:'set-goal-status'; goalId:string; status:'active'|'suspended'|'abandoned'|'achieved' }
+  | { type:'schedule-reconsideration'; note:string; inSeconds:number }
+  | { type:'cancel-reconsideration'; intentionId:string };
 export interface NpcDecision { goalId: string; reason: string; action: Action }
 export interface Encounter {
   id: string; initiator: NpcId; recipient: NpcId; purpose: 'introduce' | 'ask' | 'request-help';

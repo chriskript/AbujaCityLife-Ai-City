@@ -1,5 +1,5 @@
 import { type NpcDecision } from './types.js';
-import { quantityBounds } from './action-limits.js';
+import { goalBounds, intentionBounds, quantityBounds } from './action-limits.js';
 
 const text = (value: unknown, max = 120): value is string => typeof value === 'string' && value.trim().length > 0 && value.length <= max;
 const exact = (object: Record<string, unknown>, keys: string[]): boolean => Object.keys(object).length === keys.length && keys.every(key => Object.hasOwn(object, key));
@@ -36,6 +36,12 @@ export function isNpcDecision(value: unknown): value is NpcDecision {
     case 'share': return exact(action, ['type', 'recipient', 'memoryId', 'asBelief']) && isResidentId(action.recipient) && text(action.memoryId) && typeof action.asBelief === 'boolean';
     case 'encounter': return exact(action, ['type','recipient','purpose','message']) && isResidentId(action.recipient) && ['introduce','ask','request-help'].includes(String(action.purpose)) && text(action.message, 160);
     case 'respond-encounter': return exact(action, ['type','interactionId','response','message']) && text(action.interactionId) && ['accept','decline','defer','clarify'].includes(String(action.response)) && text(action.message, 160);
+    case 'adopt-goal': return exact(action,['type','description','motivation']) && text(action.description,goalBounds.description) && text(action.motivation,goalBounds.motivation);
+    case 'revise-goal': return exact(action,['type','goalId','description','motivation']) && text(action.goalId,120) && (action.description===null || text(action.description,goalBounds.description)) && (action.motivation===null || text(action.motivation,goalBounds.motivation));
+    case 'reprioritize-goal': return exact(action,['type','goalId','priority']) && text(action.goalId,120) && Number.isSafeInteger(action.priority) && Number(action.priority)>=goalBounds.priorityMinimum && Number(action.priority)<=goalBounds.priorityMaximum;
+    case 'set-goal-status': return exact(action,['type','goalId','status']) && text(action.goalId,120) && ['active','suspended','abandoned','achieved'].includes(String(action.status));
+    case 'schedule-reconsideration': return exact(action,['type','note','inSeconds']) && text(action.note,intentionBounds.note) && Number.isFinite(action.inSeconds) && Number(action.inSeconds)>=intentionBounds.leadMinimumSeconds && Number(action.inSeconds)<=intentionBounds.leadMaximumSeconds;
+    case 'cancel-reconsideration': return exact(action,['type','intentionId']) && text(action.intentionId,120);
     default: return false;
   }
 }
@@ -70,6 +76,12 @@ export const npcDecisionSchema = {
       ['share', { recipient: { type: 'string', pattern: '^[a-z][a-z0-9_-]{0,47}$' }, memoryId: { type: 'string' }, asBelief: { type: 'boolean' } }],
       ['encounter', { recipient: { type: 'string', pattern: '^[a-z][a-z0-9_-]{0,47}$' }, purpose: { type: 'string', enum: ['introduce','ask','request-help'] }, message: { type: 'string', minLength: 1, maxLength: 160 } }],
       ['respond-encounter', { interactionId: { type: 'string' }, response: { type: 'string', enum: ['accept','decline','defer','clarify'] }, message: { type: 'string', minLength: 1, maxLength: 160 } }],
+      ['adopt-goal', { description: { type: 'string', minLength: 1, maxLength: goalBounds.description }, motivation: { type: 'string', minLength: 1, maxLength: goalBounds.motivation } }],
+      ['revise-goal', { goalId: { type: 'string' }, description: { anyOf: [{ type: 'string', minLength: 1, maxLength: goalBounds.description }, { type: 'null' }] }, motivation: { anyOf: [{ type: 'string', minLength: 1, maxLength: goalBounds.motivation }, { type: 'null' }] } }],
+      ['reprioritize-goal', { goalId: { type: 'string' }, priority: { type: 'integer', minimum: goalBounds.priorityMinimum, maximum: goalBounds.priorityMaximum } }],
+      ['set-goal-status', { goalId: { type: 'string' }, status: { type: 'string', enum: ['active', 'suspended', 'abandoned', 'achieved'] } }],
+      ['schedule-reconsideration', { note: { type: 'string', minLength: 1, maxLength: intentionBounds.note }, inSeconds: { type: 'number', minimum: intentionBounds.leadMinimumSeconds, maximum: intentionBounds.leadMaximumSeconds } }],
+      ['cancel-reconsideration', { intentionId: { type: 'string' } }],
     ].map(([type, properties]) => ({
       type: 'object', additionalProperties: false,
       properties: { type: { type: 'string', enum: [type] }, ...properties as Record<string, unknown> },

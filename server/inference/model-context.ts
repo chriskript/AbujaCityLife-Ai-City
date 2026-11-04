@@ -62,12 +62,27 @@ export function selectModelObservation(source:NpcObservation, topic='', triggers
   return {observation:o,manifest};
 }
 
+function projectGoals(goals:NpcObservation['actor']['goals']){
+  goals ??= [];
+  const active=goals.filter(g=>g.status==='active');
+  const history=goals.filter(g=>g.status!=='active').sort((a,b)=>b.updatedAt-a.updatedAt);
+  const shown=history.slice(0,4).map(g=>({id:g.id,description:g.description,status:g.status,origin:g.origin,updatedAt:g.updatedAt}));
+  return {items:[...active,...shown],omitted:Math.max(0,history.length-shown.length)};
+}
+function projectIntentions(intentions:NpcObservation['actor']['intentions']){
+  intentions ??= [];
+  const current=intentions.filter(i=>i.status==='pending'||i.status==='delivered');
+  const past=intentions.filter(i=>i.status!=='pending'&&i.status!=='delivered').sort((a,b)=>b.dueAt-a.dueAt);
+  const shown=past.slice(0,2).map(i=>({id:i.id,note:i.note,status:i.status,dueAt:i.dueAt}));
+  return {items:[...current,...shown],omitted:Math.max(0,past.length-shown.length)};
+}
 function encodeObservation(o:NpcObservation,audit:ContextAudit){
-  const {knowledge,memories,capabilities,revision,...actor}=o.actor;
+  const {knowledge,memories,capabilities,revision,goals,intentions,...actor}=o.actor;
   const interpretations=new Map(o.memoryEvidence.map(e=>[e.id,e.interpretation]));
   const facts=new Map(o.placeKnowledge.map(p=>[p.placeId,p]));
+  const projectedGoals=projectGoals(goals),projectedIntentions=projectIntentions(intentions);
   return {
-    mapId:o.mapId,time:o.time,actor,decisionContext:decisionGrounding(o),
+    mapId:o.mapId,time:o.time,actor:{...actor,goals:projectedGoals.items,goalsOmitted:projectedGoals.omitted,intentions:projectedIntentions.items,intentionsOmitted:projectedIntentions.omitted},decisionContext:decisionGrounding(o),
     ...(o.decisionRecovery?{decisionRecovery:o.decisionRecovery}:{}),...(o.wholesale?{wholesale:o.wholesale}:{}),
     knownPeople:knowledge.people,knownTransporters:knowledge.transporters ?? [],capabilities,permittedActions:o.permittedActions,actionConstraints:o.actionConstraints,
     places:o.places.map(p=>{const k=facts.get(p.id);return{id:p.id,name:p.name,...(p.node!==p.id?{node:p.node}:{}),facts:k?.facts ?? null,...(k?.factEvidenceId?{factEvidenceId:k.factEvidenceId}:{}),...(k?.stock.value!==null&&k?.stock.value!==undefined?{stock:k.stock}:{}),...(k?.salesOpen.value!==null&&k?.salesOpen.value!==undefined?{salesOpen:k.salesOpen}:{})};}),

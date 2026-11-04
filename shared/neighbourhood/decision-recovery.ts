@@ -7,6 +7,7 @@ const ordinary=new Set(['not-at-workplace','not-at-rest-place','not-at-supplier'
 // This guard concerns only the initiator's own transport capability. It is
 // checked before effects; recovery reveals no recipient/private information.
 ordinary.add('missing-assistance-capability');
+for (const reason of ['inactive-goal','unknown-goal-record','duplicate-goal','goal-capacity','seed-goal-immutable','empty-revision','terminal-goal','goal-not-active','redundant-transition','invalid-goal-transition','last-active-goal','duplicate-intention','intention-capacity','intention-not-pending','unknown-intention']) ordinary.add(reason);
 export const ordinaryRejection=(reason:string):boolean=>ordinary.has(reason);
 export function recordRejection(host:CommunicationHost,id:string,requestId:string,reason:string,action:Action):void {
   const {state,record,trigger}=host;

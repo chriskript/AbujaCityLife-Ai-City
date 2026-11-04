@@ -117,6 +117,11 @@ export class NeighbourhoodServerSession {
         session.world.addResident(chrisResident());
         data.history.chris = [];
       }
+      if (JSON.parse(data.world).version !== 5) {
+        // Keep an exclusive rollback copy before the goals/intentions migration.
+        try { const backup = await open(options.checkpoint + '.pre-v5-backup', 'wx', 0o600); try { await backup.writeFile(savedText); await backup.sync(); } finally { await backup.close(); } }
+        catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+      }
       session.data = data;
       if(options.operating&&data.plan){
         if(data.legacyPlan)throw new Error('Legacy plan history already exists; reviewed recovery required');
@@ -338,7 +343,7 @@ export class NeighbourhoodServerSession {
       if (!this.data.paused) {
         const progression = this.data.progression!;
         const advance = this.boundedTown ? Math.min(seconds * this.data.speed, progression.limit - progression.used) : seconds * this.data.speed;
-        for (let remaining = advance; remaining > 0.000001;) { const step=Math.min(60,remaining); this.world.advance(step); remaining-=step; }
+        for (let remaining = advance; remaining > 0.000001;) { const step=Math.min(60,remaining); this.world.advance(step, this.data.continuityActive ? { freezeIntentionExpiry: true } : undefined); remaining-=step; }
         if (this.boundedTown) { progression.used += advance; if (progression.used >= progression.limit) this.data.paused = true; }
         await this.commit();
       }
@@ -396,7 +401,7 @@ export class NeighbourhoodServerSession {
         }
         const routine=!actorId && (source==='mock'||continuity);
         try { await this.reserveRequest(id, routine); } catch (error) { if (actorId) throw error; continue; }
-        request = actorId && !triggerOnly ? this.world.requestInteractionDecision(id) : this.world.requestDecision(id);
+        request = actorId && !triggerOnly ? this.world.requestInteractionDecision(id) : this.world.requestDecision(id, source==='live-meta' && !continuity ? undefined : { holdIntentions: true });
         if (!request) { this.busy = false; if (routine && this.world.hasTownEconomy) this.data.routineRequests!--; else this.data.requests--; if (routine) this.data.routineRecent!.pop(); else this.data.recent.pop(); if (previousLast) this.data.last[id] = previousLast; else delete this.data.last[id]; if (this.mode === 'live-meta' && !routine && !this.options.operating) { this.data.plan!.used--; this.data.plan!.reservedUsd -= this.reservationUsd; } continue; }
         if (!actorId && this.options.operating) {
           const counts=this.data.suppression?.[id] ?? {total:0,consecutive:0};

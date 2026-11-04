@@ -4,8 +4,15 @@ import type { GenerationMetrics } from '../../shared/neighbourhood/conversation.
 import { MockNeighbourhoodProvider, type NeighbourhoodProvider } from './neighbourhood-provider.js';
 
 // Eligibility for reasoning, not the action the resident must choose. Only scoped input is used.
+// A due intention counts whether still pending (fresh observation) or freshly
+// delivered (frozen request observation), so routing cannot disagree with itself.
+export function hasDueIntention(o: NpcObservation): boolean {
+  return o.actor.intentions.some(item => (item.status === 'pending' || item.status === 'delivered') && item.dueAt <= o.time);
+}
 export function reasoningOpportunity(o: NpcObservation, triggers: string[]): string | null {
-  if (!o.permittedActions.length || !triggers.some(t => !['restored','control-changed'].includes(t))) return null;
+  const dueIntention = hasDueIntention(o);
+  if (!o.permittedActions.length || (!dueIntention && !triggers.some(t => !['restored','control-changed'].includes(t)))) return null;
+  if (dueIntention || triggers.includes('scheduled-intention-due')) return 'scheduled-intention';
   const id=o.actor.id, threads=o.communication?.threads ?? [];
   if(o.socialVisits){
     if(o.socialVisits.invitations.some(i=>i.update.status==='pending'&&i.update.respondTo===id&&i.expiresAt>o.time))return 'social-invitation-response';
@@ -57,6 +64,7 @@ export function routineContinuationOnly(o: NpcObservation, triggers: string[]): 
   if (o.encounters.some(e => (e.initiator === id || e.recipient === id) && e.status === 'pending')) return false;
   if (o.tasks.some(t => (t.requester === id || t.recipient === id) && ['proposed', 'accepted', 'collected'].includes(t.status))) return false;
   if ((o.socialVisits?.invitations ?? []).some(i => i.expiresAt > o.time && (i.update.status === 'pending' || i.update.status === 'accepted'))) return false;
+  if (hasDueIntention(o)) return false;
   const n = o.actor.needs;
   if (n.food >= 0.85 || (n.rest ?? 0) >= 0.85 || n.income >= 0.85 || n.stock >= 0.5) return false;
   return true;
@@ -74,7 +82,7 @@ export class SelectiveNeighbourhoodProvider implements NeighbourhoodProvider {
     if(prioritiseResponses)this.priorityFor=(o,triggers)=>{
       if(this.sourceFor(o,triggers)!=='live-meta')return 0;
       const opportunity=reasoningOpportunity(o,triggers);
-      return ['social-invitation-response','incoming-communication','encounter-response','commitment-choice'].includes(opportunity ?? '')?2:['social-rendezvous-choice','follow-up-offer','reconsider-response'].includes(opportunity ?? '')?1:0;
+      return ['social-invitation-response','incoming-communication','encounter-response','commitment-choice'].includes(opportunity ?? '')?2:['social-rendezvous-choice','follow-up-offer','reconsider-response','scheduled-intention'].includes(opportunity ?? '')?1:0;
     };
   }
   sourceFor(o:NpcObservation,triggers:string[]):'mock'|'live-meta' {
@@ -86,7 +94,7 @@ export class SelectiveNeighbourhoodProvider implements NeighbourhoodProvider {
     if(provider===this.offline&&request.observation.socialVisits){
       const task=request.observation.tasks.find(t=>t.recipient===request.actorId&&['accepted','collected'].includes(t.status));
       if(!task)throw new Error('No deterministic continuation authorised; Muse decision required');
-      return {mode:'mock',model:'accepted-delivery-mechanics-v1',decision:{goalId:request.observation.actor.goals[0]!.id,reason:'Execute the already accepted delivery through deterministic navigation and payment.',action:{type:'fulfil-transport',taskId:task.id}}};
+      return {mode:'mock',model:'accepted-delivery-mechanics-v1',decision:{goalId:(request.observation.actor.goals.find(goal=>goal.status==='active') ?? request.observation.actor.goals[0]!).id,reason:'Execute the already accepted delivery through deterministic navigation and payment.',action:{type:'fulfil-transport',taskId:task.id}}};
     }
     // A failed/invalid Muse result never falls through to the offline policy.
     try{return await provider.decide(request);}finally{this.metrics=provider.metrics;}

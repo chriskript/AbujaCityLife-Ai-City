@@ -28,6 +28,7 @@ document.querySelector('#experience')!.innerHTML = `
     <p id="person-address" class="intention"></p><div class="resident-tools"><button id="open-phone">Open phone</button><button id="show-home">Show home</button></div>
     <details id="town-buildings" class="conversation"><summary>Town buildings</summary><label for="building-picker">Choose a place</label><select id="building-picker"><option value="">Choose…</option></select><section id="building-inspector" hidden><h3 id="building-name"></h3><p id="building-address" class="intention"></p><div id="building-residents"></div></section><p class="intention">Drag to pan · scroll or pinch to zoom</p><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button></details>
     <div class="recent-heading">RECENTLY OBSERVED</div><ul id="person-recent" class="person-recent"></ul><p id="person-social" class="intention"></p>
+    <details id="resident-goals" class="conversation"><summary>Personal goals &amp; intentions <span id="goals-count"></span></summary><ol id="goals-list" class="person-recent"></ol><ol id="intentions-list" class="person-recent"></ol><p class="intention">Ambitions are intentions, not accomplished outcomes. Past goals stay as history.</p></details>
     <details id="resident-communications" class="conversation"><summary>Calls &amp; messages <span id="communication-count"></span></summary><p id="resident-contacts" class="intention"></p><p class="intention">Observer history. Residents receive only their own delivered messages. Discussion is separate from a job commitment.</p><ol id="communication-history" class="person-recent"></ol></details>
     <details class="conversation"><summary>Talk to <span id="talk-name">Amina</span> <span id="conversation-mode" class="coming-soon">CONNECTING</span></summary><div id="transcript" aria-live="polite"></div><label for="conversation-input">Message</label><textarea id="conversation-input" maxlength="500" placeholder="Ask about their neighbourhood…"></textarea><button id="send-message">Send message</button><button id="confirm-proposal" hidden>Confirm proposed action</button><p id="conversation-status">Mock replies are labelled fixtures. Actions require separate validation.</p></details>
     <details id="muse-controls" class="conversation" hidden><summary>Muse operation</summary><p id="muse-status" role="status"></p><button id="stop-muse">Stop additional Muse inference</button><button id="review-muse">Acknowledge stopped decisions</button><p>Inspect recorded events in Activity before acknowledging. Pause and wait for pending inference first. Reauthorize with the local policy command to enable inference.</p></details><section id="backend-access" hidden><label for="demo-token">Local demo access token</label><input id="demo-token" type="password" autocomplete="off" /><button id="sign-in">Connect to backend</button><p id="connection-status" role="status"></p></section>
@@ -126,6 +127,13 @@ export function describeObservable(event: ObservableEvent): string {
     'arrived': `${name} arrived at ${locations[event.subject] ?? event.subject}.`,
     'activity-started': `${name} ${event.subject === 'wait' ? 'is waiting' : 'started a local activity'}.`,
     'activity-completed': `${name} finished an activity.`,
+    'goal-adopted': `${name} adopted a personal ambition: ${event.detail}`,
+    'goal-revised': `${name} reconsidered an ambition: ${event.detail}`,
+    'goal-reprioritized': `${name} reprioritized: ${event.detail}`,
+    'goal-status-changed': `${name}'s ambition changed: ${event.detail}.`,
+    'intention-scheduled': `${name} set a reminder: ${event.detail}`,
+    'intention-cancelled': `${name} cancelled a reminder: ${event.detail}`,
+    'intention-expired': `A reminder for ${name} lapsed: ${event.detail}`,
   };
   return descriptions[event.type] ?? `${name}: ${event.detail}`;
 }
@@ -222,6 +230,18 @@ function updateUi(force = false): void {
   if (!recent.children.length) { const item = document.createElement('li'); item.textContent = 'Their day is just beginning.'; recent.append(item); }
   const encounter = view.encounters.filter(item => item.initiator === selected || item.recipient === selected).at(-1);
   el('#person-social').textContent = encounter ? `Encounter with ${names[encounter.initiator === selected ? encounter.recipient : encounter.initiator]}: ${encounter.status}. Job commitments are recorded separately.` : 'Nearby encounters are optional.';
+  const activeGoals = actor.goals.filter(goal => goal.status === 'active').sort((a, b) => a.priority - b.priority);
+  const pastGoals = actor.goals.filter(goal => goal.status !== 'active');
+  const goalsList = el('#goals-list'); goalsList.replaceChildren();
+  for (const goal of activeGoals) { const item = document.createElement('li'); item.textContent = `#${goal.priority} ${goal.description}`; goalsList.append(item); }
+  for (const goal of pastGoals) { const item = document.createElement('li'); item.textContent = `${goal.description} — ${goal.status}`; goalsList.append(item); }
+  el('#goals-count').textContent = String(activeGoals.length);
+  const intentionsList = el('#intentions-list'); intentionsList.replaceChildren();
+  for (const item of actor.intentions) {
+    const dueIn = Math.max(0, item.dueAt - view.time);
+    const row = document.createElement('li'); row.textContent = `Reminder in ${Math.floor(dueIn / 60)}m ${Math.floor(dueIn % 60)}s: ${item.note}`; intentionsList.append(row);
+  }
+  if (!intentionsList.children.length) { const row = document.createElement('li'); row.textContent = 'No reminders scheduled.'; intentionsList.append(row); }
   const conversations=(view.communications ?? []).filter(item=>item.initiator===selected || item.recipient===selected).slice(-8);
   el('#resident-communications').hidden=view.communications===undefined;
   el('#communication-count').textContent=String(conversations.length);

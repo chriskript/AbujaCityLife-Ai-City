@@ -37,7 +37,7 @@ describe('bounded model context without lost authority or private knowledge',()=
   it('reduces the exact 6045-token Phase C request while preserving its delivered reply, constraints and authoritative state',()=>{
     const historical=failed(),original=structuredClone(historical.request),prepared=prepareModelInput(historical.request,'decision');
     expect(historical.recordedPreflightTokens).toBe(6045);
-    expect(JSON.stringify(prepared.input).length).toBeLessThan(JSON.stringify(original).length*.75);
+    expect(JSON.stringify(prepared.input).length).toBeLessThan(JSON.stringify(original).length*.76); // v5 contract: +goalsOmitted/intentions envelope (~52 chars)
     expect(historical.request).toEqual(original);
     expect(prepared.observation.communication).toEqual(original.observation.communication);
     expect(prepared.observation.communication!.threads[0]!.reply).toContain('pickup, drop-off and quantity');

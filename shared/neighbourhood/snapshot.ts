@@ -11,7 +11,10 @@ import { isResidentId } from './decision-schema.js';
 import { assertCommunication } from './communication-validation.js';
 import { neighbourhoodHistory, residentHistories } from './social-context.js';
 import { assertSocialVisits } from './social-visits-validation.js';
+import { goalBounds, intentionBounds } from './action-limits.js';
+import { townResidents } from './population.js';
 
+const seedIndex = new Map<string, { id: string; description: string }[]>(townResidents(16).map(npc => [npc.id, npc.goals.map(goal => ({ id: goal.id, description: goal.description }))]));
 function check(condition: unknown): asserts condition { if (!condition) throw new Error('Invalid neighbourhood snapshot'); }
 const object = (value: unknown): boolean => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const integer = (value: unknown): boolean => Number.isSafeInteger(value) && Number(value) >= 0;
@@ -19,7 +22,7 @@ const text = (value: unknown, limit = 500): boolean => typeof value === 'string'
 
 export function assertSnapshot(value: unknown): asserts value is WorldState {
   check(object(value)); const state = value as WorldState;
-  check(state.version === 4 && ['legacy-v1','town-v1'].includes(state.mapId) && text(state.id, 120) && integer(state.revision) && Number.isFinite(state.time) && state.time >= 0);
+  check(state.version === 5 && ['legacy-v1','town-v1'].includes(state.mapId) && text(state.id, 120) && integer(state.revision) && Number.isFinite(state.time) && state.time >= 0);
   check(state.layoutRevision === undefined || state.layoutRevision === 2);
   const {nodes,edges,places}=mapFor(state.mapId);
   check(state.mapUpgradedAt===undefined || state.mapId==='town-v1' && Number.isFinite(state.mapUpgradedAt) && state.mapUpgradedAt>=0 && state.mapUpgradedAt<=state.time);
@@ -55,11 +58,34 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
     check(object(npc));
     check(npc.id === id && text(npc.name,80) && text(npc.occupation,120));
     check(Array.isArray(npc.personality) && npc.personality.length <= 12 && npc.personality.every(item => text(item,160)));
-    check(Array.isArray(npc.goals) && npc.goals.length > 0 && npc.goals.length <= 12 && new Set(npc.goals.map(goal => goal.id)).size === npc.goals.length && npc.goals.every(goal => object(goal) && text(goal.id,120) && text(goal.description,240)));
+    check(Array.isArray(npc.goals) && npc.goals.length > 0 && npc.goals.length <= goalBounds.records && new Set(npc.goals.map(goal => goal.id)).size === npc.goals.length);
+    for (const goal of npc.goals) {
+      check(object(goal) && text(goal.id,120) && text(goal.description,goalBounds.description) && text(goal.motivation,goalBounds.motivation));
+      check(['active','suspended','abandoned','achieved'].includes(goal.status) && ['seed','resident'].includes(goal.origin));
+      check(Number.isSafeInteger(goal.priority) && goal.priority >= goalBounds.priorityMinimum && goal.priority <= goalBounds.priorityMaximum);
+      check(Number.isFinite(goal.createdAt) && goal.createdAt >= 0 && goal.createdAt <= state.time && Number.isFinite(goal.updatedAt) && goal.updatedAt >= goal.createdAt && goal.updatedAt <= state.time);
+      if (goal.origin === 'seed') {
+        const seed = seedIndex.get(id)?.find(item => item.id === goal.id);
+        check(seed !== undefined && goal.description === seed.description);
+      }
+    }
+    const activeGoals = npc.goals.filter(goal => goal.status === 'active');
+    check(activeGoals.length > 0 && new Set(activeGoals.map(goal => goal.priority)).size === activeGoals.length);
+    check(Array.isArray(npc.intentions) && npc.intentions.length <= intentionBounds.records && new Set(npc.intentions.map(item => item.id)).size === npc.intentions.length);
+    for (const item of npc.intentions) {
+      check(object(item) && text(item.id,120) && text(item.note,intentionBounds.note));
+      check(['pending','delivered','addressed','expired','cancelled'].includes(item.status));
+      check(Number.isFinite(item.createdAt) && item.createdAt >= 0 && item.createdAt <= state.time);
+      check(Number.isFinite(item.dueAt) && item.dueAt >= item.createdAt && item.dueAt <= item.createdAt + intentionBounds.leadMaximumSeconds);
+      check(item.deliveredAt === undefined || Number.isFinite(item.deliveredAt) && item.deliveredAt >= 0 && item.deliveredAt <= state.time);
+      check(item.frozenSeconds === undefined || Number.isFinite(item.frozenSeconds) && item.frozenSeconds >= 0);
+      check((item.status === 'delivered' || item.status === 'addressed') === (item.deliveredAt !== undefined));
+    }
+    check(npc.intentions.filter(item => item.status === 'pending').length <= intentionBounds.pending);
     check(Array.isArray(npc.priorities) && npc.priorities.length <= 12 && npc.priorities.every(item => text(item,160)));
     check(Array.isArray(npc.capabilities) && new Set(npc.capabilities).size === npc.capabilities.length && npc.capabilities.every(type => actionTypes.includes(type)));
     if (['musa','amina','zainab'].includes(id)) {
-      for (const key of ['id','name','occupation','personality','goals','priorities'] as const) check(JSON.stringify(npc[key]) === JSON.stringify(profile![key]));
+      for (const key of ['id','name','occupation','personality','priorities'] as const) check(JSON.stringify(npc[key]) === JSON.stringify(profile![key]));
       check(state.town ? profile.capabilities.every(type=>npc.capabilities.includes(type)) : JSON.stringify(npc.capabilities)===JSON.stringify(profile.capabilities));
     }
     check(npc.home === undefined || nodes.some(node => node.id === npc.home));
@@ -68,7 +94,7 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
     check(nodes.some(node => node.id === npc.node) && integer(npc.revision) && object(npc.inventory) && integer(npc.inventory.goods) && integer(npc.inventory.rewards));
     check(nodes.find(node=>node.id===npc.node)?.kind!=='home' || npc.node===npc.home);
     check(object(npc.needs) && Object.keys(npc.needs).sort().join(',') === (state.town ? 'food,income,rest,stock' : 'food,income,stock') && Object.values(npc.needs).every(need => Number.isFinite(need) && need >= 0 && need <= 1));
-    check(npc.intention === null || object(npc.intention) && npc.goals.some(goal => goal.id === npc.intention?.goalId) && text(npc.intention.reason, 400));
+    check(npc.intention === null || object(npc.intention) && npc.goals.some(goal => goal.id === npc.intention?.goalId && goal.status === 'active') && text(npc.intention.reason, 400));
     check(object(npc.knowledge) && Array.isArray(npc.knowledge.places) && npc.knowledge.places.every(place => places.some(item => item.id === place)));
     if (npc.knowledge.placeFacts !== undefined) {
       check(object(npc.knowledge.placeFacts));
@@ -176,7 +202,7 @@ export function assertSnapshot(value: unknown): asserts value is WorldState {
 // Explicit shape migration: identities, inventories, tasks, relationships, memories,
 // accounting IDs and historical evidence are retained. No new resident is invented here.
 export function migrateSnapshot(value: unknown): unknown {
-  if (object(value) && (value as WorldState).version===4 && (value as WorldState).mapId==='town-v1' && (value as WorldState).layoutRevision===undefined) {
+  if (object(value) && (value as {version:number}).version===4 && (value as WorldState).mapId==='town-v1' && (value as WorldState).layoutRevision===undefined) {
     const state=structuredClone(value) as WorldState;
     check(object(state.npcs));
     for(const npc of Object.values(state.npcs)) {
@@ -195,14 +221,26 @@ export function migrateSnapshot(value: unknown): unknown {
       }
     }
     state.layoutRevision=2;
+    return migrateSnapshot(state);
+  }
+  if (object(value) && (value as {version:number}).version === 4) {
+    const state=structuredClone(value) as WorldState;
+    check(object(state.npcs));
+    for (const npc of Object.values(state.npcs)) {
+      check(object(npc) && Array.isArray(npc.goals) && npc.goals.length > 0 && npc.goals.length <= goalBounds.records);
+      npc.goals = npc.goals.map((goal, index) => ({ id: goal.id, description: goal.description, motivation: 'Established starting ambition', status: 'active' as const, priority: index + 1, origin: 'seed' as const, createdAt: 0, updatedAt: 0 }));
+      npc.intentions = [];
+      if (state.town) for (const type of ['adopt-goal','revise-goal','reprioritize-goal','set-goal-status','schedule-reconsideration','cancel-reconsideration'] as const) { if (!npc.capabilities.includes(type)) npc.capabilities.push(type); }
+    }
+    state.version = 5;
     return state;
   }
   if (!object(value) || ![1,2,3].includes((value as {version:number}).version)) return value;
-  if ((value as {version:number}).version === 3) return {...structuredClone(value as Record<string,unknown>),version:4,mapId:'legacy-v1'};
+  if ((value as {version:number}).version === 3) return migrateSnapshot({...structuredClone(value as Record<string,unknown>),version:4,mapId:'legacy-v1'});
   if ((value as {version:number}).version === 2) return migrateSnapshot({...structuredClone(value as Record<string,unknown>),version:3});
   const state = structuredClone(value) as WorldState;
   check(object(state.npcs) && Object.keys(state.npcs).sort().join(',') === 'amina,musa,zainab');
-  state.version = 4; state.mapId='legacy-v1';state.initialGoods = 9;
+  (state as unknown as {version:number}).version = 4; state.mapId='legacy-v1';state.initialGoods = 9;
   state.social = { nextInteraction: 1, interactions: {}, noticed: {}, cooldowns: {} };
   for (const npc of Object.values(state.npcs)) {
     check(object(npc) && Array.isArray(npc.capabilities));
@@ -210,5 +248,5 @@ export function migrateSnapshot(value: unknown): unknown {
     npc.mobility = npc.id === 'musa' ? 'taxi' : 'walk';
     if (npc.knowledge.transporters === undefined) npc.knowledge.transporters = npc.knowledge.people.includes('musa') ? ['musa'] : [];
   }
-  return state;
+  return migrateSnapshot(state);
 }
