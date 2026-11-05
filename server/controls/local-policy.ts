@@ -28,7 +28,7 @@ export function validateLocalPolicy(p: LocalPolicy): void {
       p.migrationCheckpointHash!=null&&!/^[a-f0-9]{64}$/.test(p.migrationCheckpointHash) ||
       ![p.dailyUsd,p.totalUsd].every(n=>Number.isFinite(n)&&n>0&&n<=150) ||
       ![p.maximumRequests,p.maximumTokens].every(n=>Number.isSafeInteger(n)&&n>0) ||
-      ![6000,8000].includes(p.inputTokenLimit) || p.outputTokenLimit!==2048 || p.concurrency!==1 ||
+      ![6000,8000,12000].includes(p.inputTokenLimit) || p.outputTokenLimit!==2048 || p.concurrency!==1 ||
       !Number.isInteger(p.requestsPerMinute)||p.requestsPerMinute<1||p.requestsPerMinute>6 ||
       p.runRequests!==null&&(!Number.isSafeInteger(p.runRequests)||p.runRequests<1) ||
       p.runUsd!==null&&(!Number.isFinite(p.runUsd)||p.runUsd<=0||p.runUsd>150) ||

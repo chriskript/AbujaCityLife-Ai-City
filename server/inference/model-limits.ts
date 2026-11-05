@@ -1,9 +1,9 @@
 import { inferenceCost } from './model-pricing.js';
 
-export type InputTokenLimit = 6000 | 8000;
+export type InputTokenLimit = 6000 | 8000 | 12000;
 export const defaultInputTokenLimit:InputTokenLimit=6000;
 export function generationReservation(input:InputTokenLimit=defaultInputTokenLimit):number {
-  if(input!==6000&&input!==8000)throw new Error('Unsupported reviewed input ceiling');
+  if(input!==6000&&input!==8000&&input!==12000)throw new Error('Unsupported reviewed input ceiling');
   return inferenceCost('muse-spark-1.3',input,2048);
 }
 

@@ -17,6 +17,8 @@ it('keeps legacy deadlines, explicitly bounds the opt-in increase and leaves res
   expect(()=>validateLivePlan(plan(30000))).not.toThrow();expect(()=>validateLivePlan({...plan(30000),inferenceTimeoutMs:30001})).toThrow();
   expect(()=>validateLivePlan({...plan(30000),phase:'7g-c-unity',maxGenerations:36,maxEstimatedUsd:.60,inputTokenLimit:6000})).toThrow();
   expect(generationReservation(8000)*200).toBeCloseTo(3.7408,9);
+  expect(generationReservation(12000)).toBeCloseTo(0.023704,9);
+  expect(()=>generationReservation(10000 as 8000)).toThrow('Unsupported reviewed input ceiling');
 });
 it('shares one deadline across count and generation, with no retry or refund on a synthetic generation timeout',async()=>{
   const dir=await mkdtemp(join(tmpdir(),'deadline-contract-')),ledger=join(dir,'ledger.json');
