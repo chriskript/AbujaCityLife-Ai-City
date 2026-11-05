@@ -3,7 +3,7 @@ import type { ConversationInput, ConversationResult, ConversationTurn } from '..
 import type { NpcId } from '../../../shared/neighbourhood/types.js';
 import type { PhoneView,PhoneLease,PhoneControlInput,PhoneActionInput } from '../../../shared/neighbourhood/phone.js';
 
-export type Connection = 'connecting' | 'ready' | 'unauthorized' | 'offline' | 'incompatible';
+export type Connection = 'connecting' | 'reconnecting' | 'ready' | 'unauthorized' | 'offline' | 'incompatible';
 export class RemoteNeighbourhoodSession implements NeighbourhoodSession {
   private listeners = new Set<(frame: NeighbourhoodFrame) => void>();
   private connections = new Set<(state: Connection) => void>();
@@ -25,13 +25,14 @@ export class RemoteNeighbourhoodSession implements NeighbourhoodSession {
   }
   private async connect(): Promise<void> {
     if (this.disposed || !this.visible) return; this.source?.close(); this.source = null;
+    this.status(this.latest ? 'reconnecting' : 'connecting');
     try {
       const frame = await this.request<NeighbourhoodFrame>('session');
       if (this.disposed || !this.visible) return;
       if(!this.publish(frame))return; this.status('ready');
       this.source = new EventSource('/api/events');
       this.source.onmessage = event => { try { if(this.publish(JSON.parse(event.data)))this.status('ready'); } catch { this.status('offline'); } };
-      this.source.onerror = () => { this.status('offline'); };
+      this.source.onerror = () => { this.status(this.source?.readyState === EventSource.CONNECTING ? 'reconnecting' : 'offline'); };
     } catch { if (this.state !== 'unauthorized') this.status('offline'); }
   }
   subscribe(listener: (frame: NeighbourhoodFrame) => void): () => void { this.listeners.add(listener); if (this.latest) listener(structuredClone(this.latest)); return () => this.listeners.delete(listener); }

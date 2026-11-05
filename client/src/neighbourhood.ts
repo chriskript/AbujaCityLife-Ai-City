@@ -1,4 +1,6 @@
 import './neighbourhood.css';
+import { societyStatus, townPulse } from './simulation/town-status.js';
+import type { Connection } from './simulation/remote-neighbourhood-session.js';
 import { NeighbourhoodScene } from './rendering/scene.js';
 import { LocalNeighbourhoodSession } from './simulation/local-neighbourhood-session.js';
 import { RemoteNeighbourhoodSession } from './simulation/remote-neighbourhood-session.js';
@@ -38,7 +40,7 @@ document.querySelector('#experience')!.innerHTML = `
   <div class="view-controls" role="group" aria-label="Neighbourhood controls"><button id="overview">Town overview</button><button id="focus" aria-pressed="false">◎ Focus Amina</button></div>
   <div class="compass" aria-hidden="true"><span>↑</span>N</div>
   <section id="activity-panel" class="activity-feed" aria-label="Neighbourhood activity" hidden><div class="panel-title"><h2>Around the gardens</h2><button data-close-panel aria-label="Close activity">×</button></div><div class="feed-heading"><label for="activity-filter">Show</label><select id="activity-filter"><option value="all">All activity</option><option value="selected">Selected resident</option><option value="work">Work &amp; deliveries</option><option value="social">Social &amp; phone</option></select><span id="feed-mode">MOCK</span></div><ol id="activity-feed" aria-live="off"></ol><details id="event-inspection"><summary>Inspect recorded events</summary><pre id="event-details"></pre></details></section>
-  <section class="neighbourhood-bar" aria-label="Shared world status"><div><span class="eyebrow">AT THE MARKET</span><strong id="market-stock">—</strong></div><div><span class="eyebrow">SUPPLY DESK</span><strong id="supplier-stock">—</strong></div><div class="cooperation-status"><span class="eyebrow">NEIGHBOURS HELPING NEIGHBOURS</span><strong id="task-status" role="status">—</strong></div><div class="clock-controls"><button id="pause" aria-pressed="false">Ⅱ Pause</button><span id="world-clock">—</span><span id="world-paused" hidden>paused</span><label class="sr-only" for="speed">Simulation speed</label><select id="speed"><option value="1">1× time</option><option value="2" selected>2× time</option><option value="4">4× time</option></select><button id="reset">↻ Reset neighbourhood</button></div></section>
+  <section class="neighbourhood-bar" aria-label="Town Pulse"><div><span class="eyebrow">AT THE MARKET</span><strong id="market-stock">—</strong></div><div><span class="eyebrow">SUPPLY DESK</span><strong id="supplier-stock">—</strong></div><div class="population-status"><span class="eyebrow">OUR TOWN</span><strong id="town-population">&mdash;</strong></div><div class="cooperation-status"><span class="eyebrow">TOWN PULSE &middot; LAST RECORDED EVENT</span><strong id="task-status">&mdash;</strong><small id="pulse-time"></small></div><div class="clock-controls"><button id="pause" aria-pressed="false">Ⅱ Pause</button><span id="world-clock">—</span><span id="world-paused" hidden>paused</span><label class="sr-only" for="speed">Simulation speed</label><select id="speed"><option value="1">1× time</option><option value="2" selected>2× time</option><option value="4">4× time</option></select><button id="reset">↻ Reset neighbourhood</button></div></section>
   <div id="notice" role="status">Loading the neighbourhood…</div>`;
 
 // Reuse the existing inspector as an independent contextual places panel.
@@ -71,6 +73,7 @@ let elapsedSeconds = 0;
 let fps = 0;
 let previousWorld = '';
 let uiKey = '';
+let connection: Connection | 'local' = local ? 'local' : 'connecting';
 let scene: NeighbourhoodScene;
 function openPanel(name:string|null):void {
   for(const id of ['residents','places','activity']) {
@@ -160,7 +163,7 @@ function updateUi(force = false): void {
   el('#world-clock').replaceChildren(dayNode, weekdayNode, timeNode);
   el('#world-clock').title = 'Simulation time';
   el('#world-paused').hidden = !frame.paused;
-  const key = `${view.worldId}:${frame.eventCursor}:${selected}:${frame.paused}:${frame.speed}:${focused}:${JSON.stringify(frame.muse)}`;
+  const key = `${view.worldId}:${JSON.stringify(view.resources)}:${view.actors.length}:${frame.pulseEvent?.id}:${frame.eventCursor}:${selected}:${frame.paused}:${frame.speed}:${focused}:${JSON.stringify(frame.muse)}:${JSON.stringify(frame.inference)}:${connection}`;
   if (!force && key === uiKey) return; uiKey = key;
   if (!view.actors.some(actor => actor.id === selected)) selected = view.actors[0]!.id;
   for (const person of view.actors) names[person.id] = person.name;
@@ -226,12 +229,12 @@ function updateUi(force = false): void {
   el('#progression-status').textContent = frame.progression ? `Server advances without an observer: ${Math.floor(frame.progression.used)} / ${frame.progression.limit} simulated seconds used. Pause stops the clock; restart and reset preserve this allowance.` : '';
   const focus = el<HTMLButtonElement>('#focus'); focus.setAttribute('aria-pressed', String(focused)); focus.textContent = focused ? '◎ Stop following' : `◎ Focus ${actor.name}`;
   el<HTMLSelectElement>('#speed').value = String(frame.speed);
-  el('#market-stock').textContent = `${view.resources.marketGoods} ${view.resources.marketGoods === 1 ? 'portion' : 'portions'}${view.resources.salesOpen ? ' available' : ' · sales paused'}`;
-  el('#supplier-stock').textContent = `${view.resources.supplierGoods} goods`;
-  const task = view.tasks.at(-1);
-  const requester = task ? names[task.requester] ?? `resident ${task.requester}` : '', recipient = task ? names[task.recipient] ?? `resident ${task.recipient}` : '';
-  const statuses = { proposed: `Transport requested: ${requester} → ${recipient} ×${task?.quantity ?? '?'}`, accepted: `${recipient} agreed to help ${requester} ×${task?.quantity ?? '?'}`, declined: `${recipient} declined ${requester}'s request`, collected: `Supplies on board ×${task?.quantity ?? '?'}`, delivered: `Delivery completed ×${task?.quantity ?? '?'}`, expired: 'Transport request expired' };
-  el('#task-status').textContent = task ? statuses[task.status] : 'No transport task open';
+  const pulse = townPulse(frame);
+  el('#market-stock').textContent = pulse.market;
+  el('#supplier-stock').textContent = pulse.supply;
+  el('#town-population').textContent = pulse.population;
+  el('#task-status').textContent = pulse.event ? describeObservable(pulse.event) : 'No interaction or world event recorded yet.';
+  el('#pulse-time').textContent = pulse.event ? timeLabel(pulse.event.time) + ' - recorded history' : '';
   const events = frame.events.filter(event => !['action-validated', 'action-proposed', 'intention-selected'].includes(event.type));
   const filter=el<HTMLSelectElement>('#activity-filter').value;
   const filteredEvents=events.filter(event=>filter==='selected'?event.actor===selected:filter==='work'?/work|transport|delivery|stock|purchase/.test(event.type):filter==='social'?/communication|call|contact|encounter|social|visit|introduced/.test(event.type):true);
@@ -283,23 +286,31 @@ function updateUi(force = false): void {
   el('#muse-status').textContent = frame.muse ? `${frame.muse.status} · ${frame.muse.inFlight ? 'request in flight' : 'idle'} · ${view.actors.length} residents · ${view.actors.filter(a=>!a.activity.endsWith('no timed activity')).length} active · ${frame.decisionBudget.used} session requests · ${frame.muse.requests} policy requests · $${frame.muse.reservedUsd.toFixed(4)} reserved · remaining $${frame.muse.remainingDailyUsd.toFixed(4)} today / $${frame.muse.remainingTotalUsd.toFixed(4)} total · ${frame.muse.remainingRequests} requests / ${frame.muse.remainingTokens} tokens · upstream remaining $${frame.muse.upstreamRemainingDailyUsd?.toFixed(4) ?? "?"} today / $${frame.muse.upstreamRemainingTotalUsd?.toFixed(4) ?? "?"} total · known estimate this run $${frame.muse.estimatedUsd.toFixed(4)} · ${frame.stoppedDecisions?.length ?? 0} stopped decisions` : '';
   el<HTMLButtonElement>('#reset').disabled = !!frame.muse;
   el('#event-details').textContent = JSON.stringify({ muse:frame.muse,suspendedReason:frame.suspendedReason,continuityActive:frame.continuityActive,stoppedDecisions:frame.stoppedDecisions, mode: frame.mode, time: view.time, revision: view.revision, economy:view.economy,tasks: view.tasks, encounters: view.encounters, communications:view.communications,events: frame.events }, null, 2);
-  const mode = el('.mode-pill'); mode.replaceChildren(); const dot = document.createElement('i');
-  const suspended = !!frame.suspendedReason, continuity = !!frame.continuityActive;
-  mode.title = suspended ? (continuity ? 'Muse suspended. Deterministic continuity routines only; no live AI decisions.' : 'Muse suspended. Simulation paused; re-authorize to resume.') : frame.mode === 'mock' ? 'Deterministic mock decisions. No model API calls.' : 'Decisions supplied by the live Meta provider.';
-  mode.append(dot, document.createTextNode(suspended ? (continuity ? 'Continuity routines / backend' : 'Muse suspended') : frame.mode === 'mock' ? local ? 'Mock / local test' : 'Mock / backend' : 'Live Muse / backend'));
-  el('#feed-mode').textContent = suspended ? (continuity ? 'CONTINUITY' : 'SUSPENDED') : frame.mode === 'mock' ? 'MOCK' : 'LIVE MUSE';
-  document.body.dataset.worldId = view.worldId; document.body.dataset.task = task?.status ?? 'none';
+  document.body.dataset.worldId = view.worldId; document.body.dataset.task = view.tasks.at(-1)?.status ?? 'none';
   document.body.dataset.selected = selected; document.body.dataset.paused = String(frame.paused);
   document.body.dataset.marketGoods = String(view.resources.marketGoods);
   el('#conversation-mode').textContent = frame.mode === 'live-meta' ? 'LIVE META' : 'MOCK FIXTURE';
   el<HTMLButtonElement>('#send-message').disabled = !remote || conversationBusy || !!frame.muse && (frame.paused || !frame.muse.available);
   el<HTMLTextAreaElement>('#conversation-input').disabled = !remote;
-  if (frame.decisionBudget.used >= frame.decisionBudget.limit) el('#notice').textContent = 'Session decision limit reached. Reset preserves request and spending limits.';
-  if (frame.progression?.stopped) el('#notice').textContent = 'Controlled server advancement limit reached. The town is paused; reset and restart preserve this allowance.';
-  else if(frame.suspendedReason&&frame.continuityActive)el('#notice').textContent = `Continuity routines while Muse is suspended (${frame.suspendedReason}). Deterministic maintenance only; no live AI decisions.`;
-  else if(frame.suspendedReason)el('#notice').textContent = `Muse suspended (${frame.suspendedReason}). Simulation paused; re-authorize to resume.`;
-  else if(frame.muse)el('#notice').textContent = `Live Muse · ${frame.muse.status}. Actions are validated by the authoritative backend.`;
-  else el('#notice').textContent = frame.mode === 'live-meta' ? 'Live Meta decisions. Actions are validated by the authoritative backend.' : local ? 'Local mock test mode. No backend or Meta requests.' : 'Authoritative backend · mock activities and labelled conversation fixtures · no Meta requests.';
+  updateRuntimeStatus();
+}
+
+function updateRuntimeStatus(): void {
+  const status = societyStatus(frame, connection);
+  const mode = el('.mode-pill'); mode.dataset.tone = status.tone;
+  mode.replaceChildren(document.createElement('i'), document.createTextNode(status.label));
+  mode.title = status.detail + ' Click for connection details.';
+  el('#feed-mode').textContent = status.label;
+  el('#notice').textContent = status.label + ' - ' + status.detail;
+  el('#runtime-details-text').textContent = [status.detail, 'Connection: ' + connection,
+    'Simulation: ' + (frame ? frame.paused ? 'paused' : 'running' : 'awaiting snapshot'),
+    'Muse policy: ' + (frame?.muse?.status ?? 'not reported'),
+    'Inference: ' + (frame?.inference?.pending ? 'request pending' : 'idle'),
+    'Last successful inference: ' + (frame?.inference?.lastSuccess ? new Date(frame.inference.lastSuccess.wallTime).toLocaleString() + ' - ' + timeLabel(frame.inference.lastSuccess.simulationTime) : 'none recorded'),
+    frame?.inference?.error, frame?.suspendedReason].filter(Boolean).join('\n');
+  el<HTMLButtonElement>('#pause').disabled = !frame || !['ready','local'].includes(connection);
+  el<HTMLSelectElement>('#speed').disabled = !frame || frame.mode === 'live-meta' || !['ready','local'].includes(connection);
+  el<HTMLButtonElement>('#send-message').disabled = !remote || connection !== 'ready' || conversationBusy || !frame || frame.paused || !!frame.muse && !frame.muse.available;
 }
 
 async function command(payload: {type:'inference-stop'|'review-inference'} | Omit<Extract<SessionCommand, { type: 'pause' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'speed' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'reset' }>, 'id' | 'worldId'> | Omit<Extract<SessionCommand, { type: 'road' }>, 'id' | 'worldId'>): Promise<void> {
@@ -331,12 +342,19 @@ try {
     else updateUi(true);
   });
   scene.enableInhabitants(select,selectBuilding,()=>{focused=false;updateUi(true);});
-  unsubscribe = session.subscribe(next => {
+  const subscribeToSession = () => session.subscribe(next => {
     if (!store.accept(next)) return; frame = store.frame!;
     if (previousWorld !== frame.snapshot.worldId) { scene.resetPresentation(); previousWorld = frame.snapshot.worldId; proposalId = null; el('#confirm-proposal').hidden = true; void loadHistory(); }
     updateUi();
   });
   const options = { signal: listeners.signal };
+  const statusButton = document.createElement('button'); statusButton.className = 'mode-pill'; statusButton.type = 'button'; statusButton.setAttribute('aria-expanded','false'); statusButton.setAttribute('aria-controls','runtime-details');
+  el('.mode-pill').replaceWith(statusButton);
+  const details = document.createElement('section'); details.id = 'runtime-details'; details.className = 'connection-card runtime-details'; details.hidden = true; details.setAttribute('aria-label','Society connection details');
+  const detailsText = document.createElement('p'); detailsText.id = 'runtime-details-text'; details.append(detailsText); el('#experience').append(details);
+  statusButton.addEventListener('click',()=>{details.hidden=!details.hidden;statusButton.setAttribute('aria-expanded',String(!details.hidden));},options);
+  updateRuntimeStatus();
+  unsubscribe = subscribeToSession();
   for(const button of document.querySelectorAll<HTMLButtonElement>('[data-panel]'))button.addEventListener('click',()=>openPanel(button.getAttribute('aria-expanded')==='true'?null:button.dataset.panel!),options);
   for(const button of document.querySelectorAll<HTMLButtonElement>('[data-close-panel]'))button.addEventListener('click',()=>{openPanel(null);el<HTMLButtonElement>(`[data-panel="${button.closest('section')!.id.replace('-panel','')}"]`).focus();},options);
   el('#resident-search').addEventListener('input',()=>{const query=el<HTMLInputElement>('#resident-search').value.trim().toLowerCase();for(const button of document.querySelectorAll<HTMLButtonElement>('[data-person]'))button.hidden=!button.textContent!.toLowerCase().includes(query);},options);
@@ -347,10 +365,10 @@ try {
   el('#building-picker').addEventListener('change',()=>{const id=el<HTMLSelectElement>('#building-picker').value;if(id)selectBuilding(id);},options);
   el('#zoom-in').addEventListener('click',()=>scene.zoom(.8),options);el('#zoom-out').addEventListener('click',()=>scene.zoom(1.25),options);
   remote?.onConnection(state => {
-    el('#backend-access').hidden = state === 'ready';
+    connection = state; updateRuntimeStatus();
+    el('#backend-access').hidden = state === 'ready' || state === 'reconnecting';
     el('#demo-token').hidden = state !== 'unauthorized'; el('#sign-in').hidden = state !== 'unauthorized';
-    el('#connection-status').textContent = state === 'incompatible' ? 'A town update is ready. Restart the backend to load the new layout and migrate your saved town, then reload.' : state === 'unauthorized' ? 'Controlled local demonstration. Use the token from runtime/demo-access.json.' : state === 'offline' ? 'Backend unavailable. Start npm run dev:live (Muse) or npm run backend (mock), then reload. The visible snapshot is frozen.' : state === 'connecting' ? 'Connecting to authoritative backend…' : '';
-    if (state !== 'ready') el('#notice').textContent = `Backend ${state} · ${frame ? `snapshot frozen at ${timeLabel(frame.snapshot.time)}` : 'no snapshot yet'}. No local fallback or inference is running.`;
+    el('#connection-status').textContent = state === 'incompatible' ? 'A town update is ready. Restart the backend to load the new layout and migrate your saved town, then reload.' : state === 'unauthorized' ? 'Controlled local demonstration. Use the token from runtime/demo-access.json.' : state === 'offline' ? 'Backend unavailable. Start npm run dev:live (Muse) or npm run backend (mock), then reload. The visible snapshot is frozen.' : (state === 'connecting' || state === 'reconnecting') ? 'Connecting to authoritative backend…' : '';
   });
   el('#sign-in').addEventListener('click', () => {
     const input = el<HTMLInputElement>('#demo-token'); const token = input.value; input.value = '';

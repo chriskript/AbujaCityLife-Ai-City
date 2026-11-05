@@ -39,6 +39,7 @@ export interface NeighbourhoodView {
 }
 // Observer transport contract, deliberately distinct from persistence and NPC observations.
 export interface NeighbourhoodFrame {
+  inference?: { pending: boolean; lastSuccess: { wallTime: number; simulationTime: number } | null; error: string | null };
   version: 2; sessionId: string; sequence: number; mode: 'mock' | 'live-meta';
   paused: boolean; speed: 1 | 2 | 4; conversationAvailable: boolean;
   decisionBudget: { used: number; limit: number };
@@ -48,6 +49,7 @@ export interface NeighbourhoodFrame {
   stoppedDecisions?: {actorId:string;requestId:string;reason:string;recordedAt:number}[];
   progression?: { used: number; limit: number; stopped: boolean };
   snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null;
+  pulseEvent?: ObservableEvent | null;
 }
 export type Experiment = 'cooperate' | 'decline' | 'wait' | 'self-collect' | 'reduce-sales';
 export type SessionCommand = { id: string; worldId: string } & (
@@ -84,7 +86,16 @@ const observableTypes = new Set([
   'external-order-placed','external-order-delivered','business-funded','action-rejected','repeated-rejection-paused','inference-interrupted',
 ]);
 
-export function projectNeighbourhood(state: WorldState): { snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null } {
+// Outcomes and interactions, excluding internal decisions and routine wait cycles.
+export const pulseEventTypes = new Set([
+  'transport-proposed','transport-accepted','transport-declined','transport-collected','transport-delivered',
+  'buy','collect-self','stock-stall','sales-changed','road-changed','paid-work-completed','food-consumed',
+  'communication-sent','communication-replied','encounter-invited','encounter-accepted','encounter-declined',
+  'resident-introduced','information-shared','social-met','social-conversation','social-time-completed',
+  'external-order-placed','external-order-delivered','business-funded','action-failed',
+]);
+
+export function projectNeighbourhood(state: WorldState): { snapshot: NeighbourhoodView; events: ObservableEvent[]; eventCursor: string | null; pulseEvent: ObservableEvent | null } {
   const map=mapFor(state.mapId),{nodes,edges,places}=map;
   const actors = Object.keys(state.npcs).map(id => {
     const npc = state.npcs[id]!; const node = nodes.find(item => item.id === npc.node)!;
@@ -131,6 +142,15 @@ export function projectNeighbourhood(state: WorldState): { snapshot: Neighbourho
     },
     events: state.events.filter(event => observableTypes.has(event.type)).slice(-64).map(({ id, time, type, actor, subject, detail, data }) => ({ id, time, type, actor, subject, detail, data: { ...data } })),
     eventCursor: state.events.at(-1)?.id ?? null,
+    pulseEvent: (() => {
+      let event: WorldEvent | undefined;
+      for (let index = state.events.length - 1; index >= 0; index--) {
+        if (pulseEventTypes.has(state.events[index]!.type)) { event = state.events[index]; break; }
+      }
+      if (!event) return null;
+      const { id, time, type, actor, subject, detail, data } = event;
+      return { id, time, type, actor, subject, detail, data: { ...data } };
+    })(),
   };
 }
 

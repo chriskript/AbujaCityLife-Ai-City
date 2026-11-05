@@ -22,6 +22,7 @@ import { legacyOperatingMigrationAuthorized, terminalMuseUnavailable, type Local
 export class SessionError extends Error { constructor(readonly status: number, message: string) { super(message); } }
 interface Receipt { hash: string; status: 'pending' | 'done' | 'failed'; value: unknown }
 interface Checkpoint {
+  inference?: { lastSuccess: { wallTime: number; simulationTime: number } | null; error: string | null };
   operating?: true;
   legacyPlan?: NonNullable<Checkpoint['plan']>;
   interruptedDecisions?:Record<NpcId,{request:NpcDecisionRequest;reason:string;recordedAt:number}>;
@@ -60,6 +61,7 @@ export class NeighbourhoodServerSession {
   private committedHistory: Record<NpcId, ConversationTurn[]> = {};
   private tail: Promise<unknown> = Promise.resolve();
   private busy = false; private failed = false; private closed = false; private cursor = 0; private epoch = 0;
+  private inferencePending = false;
   private proposals = new Map<string, { request: NpcDecisionRequest; decision: unknown; expires: number }>();
   private listeners = new Set<(frame: NeighbourhoodFrame) => void>();
   private provider: NeighbourhoodProvider;
@@ -236,6 +238,11 @@ export class NeighbourhoodServerSession {
     if(this.options.operating){this.current.muse={...this.options.operating.status,suppressedDecisions:Object.values(this.data.suppression ?? {}).reduce((n,c)=>n+c.total,0)};this.current.stoppedDecisions=this.interruptions;}
     this.current.suspendedReason=this.data.suspendedReason ?? null;
     this.current.continuityActive=!!this.data.continuityActive;
+    if(this.mode==='live-meta'){
+      const plan=this.options.plan,used=this.data.plan;
+      const allowanceError=!this.inferencePending && plan && used ? Date.parse(plan.expiresAt)<=Date.now() ? 'Muse evaluation authorization expired.' : used.used>=plan.maxGenerations || used.reservedUsd+this.reservationUsd>plan.maxEstimatedUsd ? 'Muse evaluation allowance exhausted.' : null : null;
+      this.current.inference={pending:this.inferencePending,lastSuccess:this.data.inference?.lastSuccess ?? null,error:this.data.inference?.error ?? allowanceError};
+    }
     for (const listener of this.listeners) listener(this.frame);
   }
   private receipt(id: string, payload: unknown): Receipt | null {
@@ -410,6 +417,7 @@ export class NeighbourhoodServerSession {
         }
         expectedMuse=source==='live-meta'&&!continuity;useContinuity=continuity;
         if(expectedMuse&&this.options.operating){this.data.interruptedDecisions??={};this.data.interruptedDecisions[id]={request:structuredClone(request),reason:'Inference pending at checkpoint; interrupted results are never replayed.',recordedAt:this.now()};}
+        this.inferencePending=expectedMuse;
         origin = this.world; epoch = this.epoch;controlGeneration=this.phoneControl.generation(id); await this.commit(); return;
       }
     });
@@ -419,6 +427,7 @@ export class NeighbourhoodServerSession {
       const result = useContinuity ? { mode: 'continuity' as const, model: 'town-continuity-v1', decision: continuityDecision(pending) } : await this.provider.decide(pending);
       if(expectedMuse&&result.mode!=='meta')throw new Error('Muse decision expected; offline substitution refused');
       await this.transaction(async () => {
+        if(expectedMuse){this.inferencePending=false;this.data.inference={lastSuccess:{wallTime:this.now(),simulationTime:this.world.time},error:null};}
         if(this.options.operating){await this.options.operating.refresh();delete this.data.interruptedDecisions?.[pending.actorId];}
         if (origin! !== this.world || this.data.paused || epoch !== this.epoch || controlGeneration!==this.phoneControl.generation(pending.actorId) || expectedMuse && this.options.operating && !this.options.operating.status.enabled) origin!.abandonDecision(pending.id);
         else {
@@ -432,6 +441,7 @@ export class NeighbourhoodServerSession {
     } catch (error) {
       if(this.failed)throw error;
       await this.transaction(async () => {
+        if(expectedMuse){this.inferencePending=false;this.data.inference={lastSuccess:this.data.inference?.lastSuccess ?? null,error:'Muse inference failed; no autonomous decision returned.'};}
         if (origin! === this.world){
           if(expectedMuse&&(this.options.operating||this.options.plan?.phase==='7g-d-society')){
             if(this.options.operating){await this.suspendInference('Muse inference failed; inspect stopped decisions and credentials/ledger before reauthorizing');this.data.paused=true;this.epoch++;}
@@ -457,6 +467,7 @@ export class NeighbourhoodServerSession {
       this.data.history[input.actorId]!.push({ speaker: 'player', text: input.message, mode: this.mode });
       this.data.history[input.actorId]! = this.data.history[input.actorId]!.slice(-12);
       context = { observation: this.world.observe(input.actorId, input.message), message: input.message, history: structuredClone(this.data.history[input.actorId]!.slice(-6)) };
+      this.inferencePending=this.mode==='live-meta';
       revision = context.observation.actor.revision; origin = this.world; epoch = this.epoch; await this.commit();
     });
     if (oldResult) return oldResult;
@@ -464,6 +475,7 @@ export class NeighbourhoodServerSession {
       const response = await this.provider.converse(context); validateConversation(response, context);
       await this.options.operating?.refresh();
       return await this.transaction(async () => {
+        if(this.mode==='live-meta'){this.inferencePending=false;this.data.inference={lastSuccess:{wallTime:this.now(),simulationTime:this.world.time},error:null};}
         if (origin !== this.world || this.options.operating && (this.data.paused || !this.options.operating.status.enabled) || epoch !== this.epoch || this.world.observe(input.actorId).actor.revision !== revision) throw new SessionError(409, 'Character state changed during conversation');
         this.world.recordConversation(input.actorId, 'npc', response.reply);
         this.data.history[input.actorId]!.push({ speaker: 'npc', text: response.reply, mode: this.mode }); this.data.history[input.actorId]! = this.data.history[input.actorId]!.slice(-12);
@@ -477,7 +489,7 @@ export class NeighbourhoodServerSession {
       });
     } catch (error) {
       if(this.failed)throw error;
-      await this.transaction(async () => { if(this.options.operating){await this.suspendInference('Muse conversation failed; inspect credentials and spending ledgers before reauthorizing');this.data.paused=true;this.epoch++;} Object.assign(this.data.receipts[input.id]!, { status: 'failed', value: 'Inference unavailable; no action executed' }); this.captureMetrics(input.id, input.actorId); await this.commit(); });
+      await this.transaction(async () => { if(this.mode==='live-meta'){this.inferencePending=false;this.data.inference={lastSuccess:this.data.inference?.lastSuccess ?? null,error:'Muse conversation failed; no action executed.'};} if(this.options.operating){await this.suspendInference('Muse conversation failed; inspect credentials and spending ledgers before reauthorizing');this.data.paused=true;this.epoch++;} Object.assign(this.data.receipts[input.id]!, { status: 'failed', value: 'Inference unavailable; no action executed' }); this.captureMetrics(input.id, input.actorId); await this.commit(); });
       throw error instanceof SessionError ? error : new SessionError(502, 'Inference unavailable; no mock substitution or retry');
     } finally { this.busy = false; }
   }
